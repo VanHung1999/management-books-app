@@ -1,0 +1,65 @@
+.loginForm {
+  max-width: 400px;
+  margin: 50px auto;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: white;
+}
+
+.header {
+  max-width: 400px;
+  margin: 24px auto 0;
+  text-align: center;
+}
+
+.title {
+  margin: 0 0 8px;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.input {
+  border-radius: 6px;
+}
+
+.inputIcon {
+  color: #999;
+}
+
+.loginButton {
+  width: 100%;
+  height: 40px;
+  border-radius: 6px;
+}
+
+.forgotPasswordLink {
+  color: #1890ff;
+  font-size: 14px;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.forgotPasswordLink:hover {
+  color: #1677ff;
+  text-decoration: underline;
+}
+
+.actionsContainer {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.link {
+  color: #1890ff;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.link:hover {
+  color: #1677ff;
+  text-decoration: underline;
+}
