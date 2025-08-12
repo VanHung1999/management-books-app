@@ -1,9 +1,9 @@
 export const categories = [
-    'fiction',
-    'science',
-    'technology',
-    'business',
-    'psychology',
-    'philosophy',
-    'history'
+    'Fiction',
+    'Science',
+    'Technology',
+    'Business',
+    'Psychology',
+    'Philosophy',
+    'History'
   ];
