@@ -1,0 +1,30 @@
+{
+  "name": "management-books",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@refinedev/antd": "^5.46.3",
+    "@refinedev/core": "^4.57.11",
+    "@refinedev/nextjs-router": "^6.2.3",
+    "antd": "^5.26.7",
+    "dayjs": "^1.11.13",
+    "next": "15.4.6"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@types/node": "^20",
+    "@types/react": "^18.3.23",
+    "@types/react-dom": "^18.3.7",
+    "eslint": "^9",
+    "eslint-config-next": "15.4.6",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "typescript": "^5"
+  }
+}
