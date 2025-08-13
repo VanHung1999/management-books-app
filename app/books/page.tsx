@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { useList } from "@refinedev/core";
-import { Card, List, Skeleton, Pagination, Select, Space } from "antd";
+import { Link, useList } from "@refinedev/core";
+import { Card, List, Skeleton, Pagination, Select, Button } from "antd";
 import { getCategories } from "../database/categoryDatabase";
 
 export default function Books() {
@@ -400,15 +400,22 @@ export default function Books() {
               <List.Item key={book.id} style={{ padding: '8px' }}>
                 <Card 
                   title={
-                    <div style={{ 
-                      fontSize: '16px', 
-                      fontWeight: '600', 
-                      color: '#1f1f1f',
-                      textAlign: 'center',
-                      lineHeight: '1.4'
-                    }}>
-                      {book.name}
-                    </div>
+                    <Link to={`/books/${book.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                      <div style={{ 
+                        fontSize: '16px', 
+                        fontWeight: '600', 
+                        color: '#1f1f1f',
+                        textAlign: 'center',
+                        lineHeight: '1.4',
+                        cursor: 'pointer',
+                        transition: 'color 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.color = '#1890ff'}
+                      onMouseLeave={(e) => e.currentTarget.style.color = '#1f1f1f'}
+                      >
+                        {book.name}
+                      </div>
+                    </Link>
                   }
                   style={{ 
                     width: '100%',
@@ -440,17 +447,29 @@ export default function Books() {
                     marginBottom: '16px',
                     padding: '8px'
                   }}>
-                    <img 
-                      src={book.coverImage} 
-                      alt={book.name} 
-                      style={{ 
-                        width: '140px', 
-                        height: '180px', 
-                        objectFit: 'cover',
-                        borderRadius: '8px',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-                      }} 
-                    />
+                    <Link to={`/books/${book.id}`}>
+                      <img 
+                        src={book.coverImage} 
+                        alt={book.name} 
+                        style={{ 
+                          width: '140px', 
+                          height: '180px', 
+                          objectFit: 'cover',
+                          borderRadius: '8px',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                          cursor: 'pointer',
+                          transition: 'all 0.3s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = 'scale(1.05)';
+                          e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.25)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = 'scale(1)';
+                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                        }}
+                      />
+                    </Link>
                   </div>
                   
                   <div style={{ 
