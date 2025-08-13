@@ -1,4 +1,4 @@
-export const categories = [
+export const categoriesInitial  = [
     'Fiction',
     'Science',
     'Technology',

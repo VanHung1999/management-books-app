@@ -1,5 +1,5 @@
 import { Book } from "@/app/interface/book";
-import { categories } from "./category-book";
+import { categoriesInitial } from "./category-book";
 
 // Helper function to generate random status
 const generateRandomStatus = (maxCopies: number) => {
@@ -33,7 +33,7 @@ const transformGoogleBook = (item: any): Book => {
 
 // Main function to fetch books
 export async function fetchRealBooks(): Promise<Book[]> {
-  const bookCategories = categories;
+  const bookCategories = categoriesInitial;
   
   const books: Book[] = [];
   const maxBooksPerCategory = 20;
