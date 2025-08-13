@@ -1,7 +1,7 @@
 "use client";
 
 import { Refine } from "@refinedev/core";
-import { ConfigProvider } from "antd";
+import { ConfigProvider, App } from "antd";
 import routerBindings from "@refinedev/nextjs-router";
 import { dataProvider } from "../providers/data-provider";
 import { authProvider } from "../providers/auth-provider";
@@ -16,36 +16,38 @@ export default function RefineWrapper({ children }: { children: React.ReactNode 
         },
       }}
     >
-      <DatabaseInitializer />
-      <Refine
-        dataProvider={dataProvider}
-        authProvider={authProvider}
-        routerProvider={routerBindings}
-        resources={[
-          {
-            name: "users",
-            list: "/users",
-            create: "/users/create",
-            edit: "/users/edit/:id",
-            show: "/users/show/:id",
-          },
-          {
-            name: "books",
-            list: "/books",
-            create: "/books/create",
-            edit: "/books/edit/:id",
-            show: "/books/:id",
-          },
-        ]}
-        options={{
-          syncWithLocation: true,
-          warnWhenUnsavedChanges: true,
-          useNewQueryKeys: true,
-          projectId: "management-books",
-        }}
-      >
-        {children}
-      </Refine>
+      <App>
+        <DatabaseInitializer />
+        <Refine
+          dataProvider={dataProvider}
+          authProvider={authProvider}
+          routerProvider={routerBindings}
+          resources={[
+            {
+              name: "users",
+              list: "/users",
+              create: "/users/create",
+              edit: "/users/edit/:id",
+              show: "/users/show/:id",
+            },
+            {
+              name: "books",
+              list: "/books",
+              create: "/books/create",
+              edit: "/books/edit/:id",
+              show: "/books/:id",
+            },
+          ]}
+          options={{
+            syncWithLocation: true,
+            warnWhenUnsavedChanges: true,
+            useNewQueryKeys: true,
+            projectId: "management-books",
+          }}
+        >
+          {children}
+        </Refine>
+      </App>
     </ConfigProvider>
   );
 }
