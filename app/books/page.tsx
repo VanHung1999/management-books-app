@@ -6,6 +6,7 @@ import { Card, List, Skeleton, Pagination, Select, Button } from "antd";
 import { getCategories } from "../database/categoryDatabase";
 
 export default function Books() {
+
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -99,9 +100,9 @@ export default function Books() {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "16px" }}>
           {[...Array(12)].map((_, index) => (
             <Skeleton key={index} active>
-              <div style={{ height: "420px", padding: "16px" }}>
+                             <div style={{ height: "480px", padding: "16px" }}>
                 <Skeleton.Input active size="large" style={{ width: "80%", height: "24px", marginBottom: "16px" }} />
-                <Skeleton.Image active style={{ width: "140px", height: "180px", margin: "0 auto 16px" }} />
+                                 <Skeleton.Image active style={{ width: "120px", height: "160px", margin: "0 auto 12px" }} />
                 <div style={{ padding: '0 8px' }}>
                   <Skeleton.Input active size="small" style={{ width: "70%", height: "12px", marginBottom: "4px" }} />
                   <Skeleton.Input active size="small" style={{ width: "65%", height: "12px", marginBottom: "8px" }} />
@@ -419,7 +420,8 @@ export default function Books() {
                   }
                   style={{ 
                     width: '100%',
-                    height: '420px',
+                    minHeight: '480px',
+                    height: 'auto',
                     display: 'flex',
                     flexDirection: 'column',
                     borderRadius: '12px',
@@ -444,16 +446,16 @@ export default function Books() {
                 >
                   <div style={{ 
                     textAlign: 'center', 
-                    marginBottom: '16px',
-                    padding: '8px'
+                    marginBottom: '12px',
+                    padding: '6px'
                   }}>
                     <Link to={`/books/${book.id}`}>
                       <img 
                         src={book.coverImage} 
                         alt={book.name} 
                         style={{ 
-                          width: '140px', 
-                          height: '180px', 
+                          width: '120px', 
+                          height: '160px', 
                           objectFit: 'cover',
                           borderRadius: '8px',
                           boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
@@ -471,41 +473,78 @@ export default function Books() {
                       />
                     </Link>
                   </div>
-                  
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '0 6px' }}>
+                    <div style={{ 
+                      flex: 1, 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      gap: '6px',
+                      padding: '0 6px',
+                      marginBottom: '4px'
+                    }}>
+                      <div style={{ 
+                          textAlign: 'center', 
+                          fontSize: '12px', 
+                          color: '#666',
+                          padding: '6px',
+                          backgroundColor: '#f8f9fa',
+                          borderRadius: '6px'
+                      }}>
+                        <div style={{ marginBottom: '3px' }}>
+                          <strong style={{ color: '#1890ff' }}>Category:</strong> {book.category}
+                        </div>
+                        <div>
+                          <strong style={{ color: '#1890ff' }}>Author:</strong> {book.author}
+                        </div>
+                      </div>
+                      <div style={{ 
+                          textAlign: 'center',
+                          padding: '6px',
+                          backgroundColor: '#e6f7ff',
+                          borderRadius: '6px',
+                          border: '1px solid #91d5ff'
+                      }}>
+                        <strong style={{ color: '#1890ff', fontSize: '13px' }}>
+                          Available: {book.status.available} (Total: {book.num})
+                        </strong>
+                      </div>
+                    </div>
+                  </div>
                   <div style={{ 
-                    flex: 1, 
-                    display: 'flex', 
-                    flexDirection: 'column', 
-                    gap: '12px',
-                    padding: '0 8px'
+                      padding: '4px 6px 6px 6px',
+                      borderTop: '1px solid #f0f0f0'
                   }}>
-                    <div style={{ 
-                      textAlign: 'center', 
-                      fontSize: '13px', 
-                      color: '#666',
-                      padding: '8px',
-                      backgroundColor: '#f8f9fa',
-                      borderRadius: '6px'
-                    }}>
-                      <div style={{ marginBottom: '4px' }}>
-                        <strong style={{ color: '#1890ff' }}>Category:</strong> {book.category}
-                      </div>
-                      <div>
-                        <strong style={{ color: '#1890ff' }}>Author:</strong> {book.author}
-                      </div>
-                    </div>
-                    
-                    <div style={{ 
-                      textAlign: 'center',
-                      padding: '8px',
-                      backgroundColor: '#e6f7ff',
-                      borderRadius: '6px',
-                      border: '1px solid #91d5ff'
-                    }}>
-                      <strong style={{ color: '#1890ff', fontSize: '14px' }}>
-                        Available: {book.status.available} (Total: {book.num})
-                      </strong>
-                    </div>
+                    <Link to={`/books/${book.id}/loans`} style={{ textDecoration: 'none' }}>
+                      <Button 
+                        type="primary"
+                        size="middle"
+                        style={{
+                          width: '100%',
+                          height: '36px',
+                          borderRadius: '8px',
+                          fontSize: '13px',
+                          fontWeight: '600',
+                          background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
+                          border: 'none',
+                          boxShadow: '0 4px 12px rgba(24, 144, 255, 0.3)',
+                          transition: 'all 0.3s ease',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '6px'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = 'translateY(-2px)';
+                          e.currentTarget.style.boxShadow = '0 6px 20px rgba(24, 144, 255, 0.4)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(24, 144, 255, 0.3)';
+                        }}
+                      >
+                        📚 Loans
+                      </Button>
+                    </Link>
                   </div>
                 </Card>
               </List.Item>

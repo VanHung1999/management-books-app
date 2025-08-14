@@ -198,7 +198,7 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
                 border: '1px solid rgba(255,255,255,0.2)'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Badge count={user.booksLoaned.length} size="small" style={{ 
+                  <Badge size="small" style={{ 
                     '--antd-badge-color': '#52c41a',
                     '--antd-badge-size': '20px'
                   } as any}>
@@ -216,7 +216,7 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
                 }} />
                 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Badge count={user.booksDonated.length} size="small" style={{ 
+                  <Badge size="small" style={{ 
                     '--antd-badge-color': '#fa8c16',
                     '--antd-badge-size': '20px'
                   } as any}>
