@@ -1,6 +1,6 @@
 "use client";
 
-import { Layout, Button, Badge, Avatar, Dropdown, Space, Typography } from "antd";
+import { Layout, Button, Badge, Avatar, Dropdown, Typography } from "antd";
 import { usePathname } from "next/navigation";
 import { useLogout } from "@refinedev/core";
 import { 
@@ -11,7 +11,6 @@ import {
   UserOutlined,
   FileTextOutlined,
   HeartOutlined,
-  MenuOutlined
 } from "@ant-design/icons";
 import { useState, useEffect } from "react";
 
@@ -59,7 +58,7 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
     { key: '/', label: 'Home', icon: <HomeOutlined /> },
     { key: '/books', label: 'Books', icon: <BookOutlined /> },
     { key: '/users', label: 'Users', icon: <UserOutlined /> },
-    { key: '/loans', label: 'Loans', icon: <FileTextOutlined /> },
+    { key: '/loanRecords', label: 'Loan Records', icon: <FileTextOutlined /> },
     { key: '/donations', label: 'Donations', icon: <HeartOutlined /> },
   ];
 

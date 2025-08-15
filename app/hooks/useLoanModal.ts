@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { message } from 'antd';
 import { Book } from '../interface/book';
-import { useUpdate, BaseRecord } from '@refinedev/core';
+import { useUpdate, BaseRecord, useCreate } from '@refinedev/core';
 
 export function useLoanModal() {
   const [isLoansModalVisible, setIsLoansModalVisible] = useState(false);
@@ -9,6 +9,7 @@ export function useLoanModal() {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const {mutate: updateBook} = useUpdate();
+  const {mutate: createLoanRecord} = useCreate();
 
   // Function to open loans popup
   const handleOpenLoansModal = (book: Book | BaseRecord) => {
@@ -46,10 +47,20 @@ export function useLoanModal() {
     }
 
     setIsSubmitting(true);
+    const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
     
     try {
       // TODO: Add book borrowing logic here
       // Example: call API to create loan record
+      createLoanRecord({
+        resource: "loanRecords",
+        values: {
+          bookTitle: selectedBook.name,
+          borrowerName: currentUser.email,
+          quantity: loanQuantity
+        }
+      });
+
       updateBook({
         resource: "books",
         id: selectedBook.id,
@@ -61,7 +72,7 @@ export function useLoanModal() {
           }
         }
       });
-
+      message.success(`Successfully borrowed ${loanQuantity} copies of "${selectedBook.name}"!`);
       handleCloseLoansModal();
       
       // Refresh data if needed
