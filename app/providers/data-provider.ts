@@ -3,6 +3,8 @@ import { Book } from "@/app/interface/book";
 import { User } from "@/app/interface/user";
 import { createUser, getUsers, getUserByEmail, updateUser, deleteUser } from "@/app/database/userDatabase";
 import { getBooks, getBookById, createBook, updateBook, deleteBook } from "@/app/database/bookDatabase";
+import { createLoanRecord, deleteLoanRecord, getLoanRecordById, getLoanRecords, updateLoanRecord } from "@/app/database/loanRecorDatabase";
+import { LoanRecord } from "../interface/loanrecord";
 
 export const dataProvider: DataProvider = {
   
@@ -19,6 +21,13 @@ export const dataProvider: DataProvider = {
       return {
         data: books as any,
         total: books.length,
+      };
+    }
+    if (resource === "loanRecords") {
+      const loanRecords = getLoanRecords();
+      return {
+        data: loanRecords as any,
+        total: loanRecords.length,
       };
     }
     return { data: [], total: 0 };
@@ -40,7 +49,14 @@ export const dataProvider: DataProvider = {
       }
       throw new Error("Book not found");
     }
-    throw new Error("Resource not found");
+    if (resource === "loanRecords") {
+      const loanRecord = getLoanRecordById(id as string);
+      if (loanRecord) {
+        return { data: loanRecord as any };
+      }
+      throw new Error("Loan record not found");
+    }
+      throw new Error("Resource not found");
   },
 
   // POST /:resource - Create
@@ -52,6 +68,10 @@ export const dataProvider: DataProvider = {
     if (resource === "books") {
       const newBook = createBook(variables as Omit<Book, "id" | "createdAt" | "updatedAt">);
       return { data: newBook as any };
+    }
+    if (resource === "loanRecords") {
+      const newLoanRecord = createLoanRecord(variables as Omit<LoanRecord, "id" | "delivererName" | "returnConfirmerName" | "borrowedAt" | "deliveredAt" | "receivedAt" | "returnedAt" | "returnConfirmedAt" | "status">);
+      return { data: newLoanRecord as any };
     }
     throw new Error("Invalid resource");
   },
@@ -66,6 +86,10 @@ export const dataProvider: DataProvider = {
       const updatedBook = updateBook(id as string, variables as Partial<Book>);
       return { data: updatedBook as any };
     }
+    if (resource === "loanRecords") {
+      const updatedLoanRecord = updateLoanRecord(id as string, variables as Partial<LoanRecord>);
+      return { data: updatedLoanRecord as any };
+    }
     throw new Error("Resource not found");
   },
 
@@ -78,6 +102,10 @@ export const dataProvider: DataProvider = {
     if (resource === "books") {
       const deletedBook = deleteBook(id as string);
       return { data: deletedBook as any };
+    }
+    if (resource === "loanRecords") {
+      const deletedLoanRecord = deleteLoanRecord(id as string);
+      return { data: deletedLoanRecord as any };
     }
     throw new Error("Resource not found");
   },
