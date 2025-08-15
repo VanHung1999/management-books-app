@@ -2,10 +2,12 @@
 
 import { useOne } from "@refinedev/core";
 import { useParams } from "next/navigation";
-import { Card, Row, Col, Tag, Divider, Skeleton, Button, Space, Typography, Badge, Avatar, Modal, InputNumber, message } from "antd";
+import { Card, Row, Col, Tag, Divider, Skeleton, Button, Space, Typography, Badge, Avatar, } from "antd";
 import { ArrowLeftOutlined, BookOutlined, UserOutlined, CalendarOutlined, TagOutlined, BarcodeOutlined, FileTextOutlined, ClockCircleOutlined, EditOutlined, HomeOutlined } from '@ant-design/icons';
 import Link from "next/link";
-import { useState } from "react";
+import LoanModal from "../../components/LoanModal";
+import { Book } from "../../interface/book";
+import { useLoanModal } from "../../hooks/useLoanModal";
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -16,54 +18,16 @@ export default function BookDetail() {
     id: id as string,
   });
 
-  // State for loans popup
-  const [isLoansModalVisible, setIsLoansModalVisible] = useState(false);
-  const [loanQuantity, setLoanQuantity] = useState(1);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Function to open loans popup
-  const handleOpenLoansModal = () => {
-    setLoanQuantity(1);
-    setIsLoansModalVisible(true);
-  };
-
-  // Function to close popup
-  const handleCloseLoansModal = () => {
-    setIsLoansModalVisible(false);
-    setLoanQuantity(1);
-  };
-
-  // Function to confirm book borrowing
-  const handleConfirmLoan = async () => {
-    if (loanQuantity <= 0) {
-      message.error('Loan quantity must be greater than 0!');
-      return;
-    }
-    
-    if (loanQuantity > book.status.available) {
-      message.error(`Loan quantity cannot exceed ${book.status.available} available copies!`);
-      return;
-    }
-
-    setIsSubmitting(true);
-    
-    try {
-      // TODO: Add book borrowing logic here
-      // Example: call API to create loan record
-      
-      message.success(`Successfully borrowed ${loanQuantity} copies of "${book.name}"!`);
-      setIsLoansModalVisible(false);
-      setLoanQuantity(1);
-      
-      // Refresh data if needed
-      // window.location.reload();
-      
-    } catch (error) {
-      message.error('An error occurred while borrowing the book. Please try again!');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  // Use custom hook for loan modal
+  const {
+    isLoansModalVisible,
+    loanQuantity,
+    isSubmitting,
+    handleOpenLoansModalForDetail,
+    handleCloseLoansModal,
+    handleConfirmLoan,
+    setLoanQuantity
+  } = useLoanModal();
 
   if (isLoading) {
     return (
@@ -105,7 +69,7 @@ export default function BookDetail() {
     );
   }
 
-  const book = data.data;
+  const book = data.data as Book;
 
   return (
     <div style={{ 
@@ -568,25 +532,25 @@ export default function BookDetail() {
             Manage This Book
           </Title>
           <Space size="large" wrap>
-            <Button 
-              type="primary" 
-              size="large"
-              onClick={handleOpenLoansModal}
-              style={{ 
-                height: '52px',
-                padding: '0 36px',
-                fontSize: '16px',
-                borderRadius: '12px',
-                fontWeight: '600',
-                background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
-                border: 'none',
-                boxShadow: '0 4px 12px rgba(82, 196, 26, 0.3)',
-                transition: 'all 0.3s ease'
-              }}
-              className="action-button-hover"
-            >
-              📚 Loans
-            </Button>
+              <Button 
+               type="primary" 
+               size="large"
+               onClick={() => handleOpenLoansModalForDetail(book)}
+               style={{ 
+                 height: '52px',
+                 padding: '0 36px',
+                 fontSize: '16px',
+                 borderRadius: '12px',
+                 fontWeight: '600',
+                 background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
+                 border: 'none',
+                 boxShadow: '0 4px 12px rgba(82, 196, 26, 0.3)',
+                 transition: 'all 0.3s ease'
+               }}
+               className="action-button-hover"
+             >
+               📚 Loans
+             </Button>
             <Link href={`/books/${book.id}/edit`}>
               <Button 
                 type="primary" 
@@ -628,209 +592,16 @@ export default function BookDetail() {
         </div>
       </div>
 
-             {/* Loans Modal Popup */}
-      <Modal
-                 title={
-           <div style={{ 
-             display: 'flex', 
-             alignItems: 'center', 
-             gap: '12px',
-             fontSize: '18px',
-             fontWeight: '600',
-             color: '#1f1f1f'
-           }}>
-             <span style={{ fontSize: '24px' }}>📚</span>
-             Borrow Book: {book.name}
-           </div>
-         }
-        open={isLoansModalVisible}
-        onCancel={handleCloseLoansModal}
-                 footer={[
-           <Button key="cancel" onClick={handleCloseLoansModal} size="large">
-             Cancel
-           </Button>,
-           <Button 
-             key="confirm" 
-             type="primary" 
-             onClick={handleConfirmLoan}
-             loading={isSubmitting}
-             size="large"
-             style={{
-               background: 'linear-gradient(135deg, #52c41a 0%, #389e0d 100%)',
-               border: 'none',
-               borderRadius: '8px',
-               fontWeight: '600'
-             }}
-           >
-             {isSubmitting ? 'Processing...' : 'Confirm Borrow'}
-           </Button>
-         ]}
-        width={500}
-        centered
-        destroyOnClose
-      >
-        <div style={{ padding: '20px 0' }}>
-          {/* Book Information */}
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '16px',
-            padding: '20px',
-            backgroundColor: '#f8f9fa',
-            borderRadius: '12px',
-            border: '1px solid #e9ecef',
-            marginBottom: '24px'
-          }}>
-            <img 
-              src={book.coverImage} 
-              alt={book.name}
-              style={{
-                width: '80px',
-                height: '100px',
-                objectFit: 'cover',
-                borderRadius: '8px',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-              }}
-            />
-            <div>
-              <div style={{ 
-                fontSize: '16px', 
-                fontWeight: '600', 
-                color: '#1f1f1f',
-                marginBottom: '8px'
-              }}>
-                {book.name}
-              </div>
-                             <div style={{ 
-                 fontSize: '14px', 
-                 color: '#666',
-                 marginBottom: '4px'
-               }}>
-                 Author: {book.author}
-               </div>
-               <div style={{ 
-                 fontSize: '14px', 
-                 color: '#666'
-               }}>
-                 Category: {book.category}
-               </div>
-            </div>
-          </div>
-
-          {/* Book Statistics */}
-          <div style={{ 
-            display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: '16px',
-            marginBottom: '24px'
-          }}>
-            <div style={{ 
-              textAlign: 'center',
-              padding: '16px',
-              backgroundColor: '#f6ffed',
-              borderRadius: '8px',
-              border: '1px solid #b7eb8f'
-            }}>
-              <div style={{ 
-                fontSize: '24px', 
-                fontWeight: 'bold', 
-                color: '#52c41a',
-                marginBottom: '4px'
-              }}>
-                {book.status.available}
-              </div>
-                             <div style={{ fontSize: '14px', color: '#52c41a' }}>Available</div>
-            </div>
-            <div style={{ 
-              textAlign: 'center',
-              padding: '16px',
-              backgroundColor: '#fff7e6',
-              borderRadius: '8px',
-              border: '1px solid #ffd591'
-            }}>
-              <div style={{ 
-                fontSize: '24px', 
-                fontWeight: 'bold', 
-                color: '#fa8c16',
-                marginBottom: '4px'
-              }}>
-                {book.status.loaned}
-              </div>
-                             <div style={{ fontSize: '14px', color: '#fa8c16' }}>Loaned</div>
-            </div>
-          </div>
-
-          {/* Select Loan Quantity */}
-          <div style={{ 
-            padding: '20px',
-            backgroundColor: '#f0f8ff',
-            borderRadius: '12px',
-            border: '1px solid #d6e4ff'
-          }}>
-            <div style={{ 
-              fontSize: '16px', 
-              fontWeight: '600', 
-              color: '#1890ff',
-              marginBottom: '16px',
-              textAlign: 'center'
-            }}>
-              Select quantity to borrow:
-            </div>
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              gap: '16px'
-            }}>
-              <InputNumber
-                min={1}
-                max={book.status.available}
-                value={loanQuantity}
-                onChange={(value) => setLoanQuantity(value || 1)}
-                size="large"
-                style={{
-                  width: '120px',
-                  fontSize: '16px',
-                  fontWeight: '600'
-                }}
-                addonAfter={
-                  <span style={{ fontSize: '14px', color: '#666' }}>
-                                         copies
-                  </span>
-                }
-              />
-            </div>
-            <div style={{ 
-              textAlign: 'center',
-              marginTop: '12px',
-              fontSize: '14px',
-              color: '#666'
-            }}>
-                             Maximum: <strong style={{ color: '#1890ff' }}>{book.status.available}</strong> copies
-            </div>
-          </div>
-
-          {/* Notification */}
-          <div style={{ 
-            padding: '16px',
-            backgroundColor: '#fff2e8',
-            borderRadius: '8px',
-            border: '1px solid #ffd591',
-            marginTop: '16px'
-          }}>
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '8px',
-              fontSize: '14px',
-              color: '#d46b08'
-            }}>
-              <span>ℹ️</span>
-                             <strong>Note:</strong> Loan quantity cannot exceed the number of available books.
-            </div>
-          </div>
-        </div>
-      </Modal>
+      {/* Loan Modal Component */}
+      <LoanModal
+        isVisible={isLoansModalVisible}
+        book={book}
+        loanQuantity={loanQuantity}
+        isSubmitting={isSubmitting}
+        onClose={handleCloseLoansModal}
+        onConfirm={handleConfirmLoan}
+        onQuantityChange={(value) => setLoanQuantity(value || 1)}
+      />
 
       <style jsx>{`
         .book-cover-hover:hover {

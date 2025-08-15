@@ -2,8 +2,10 @@
 
 import React, { useState } from "react";
 import { Link, useList } from "@refinedev/core";
-import { Card, List, Skeleton, Pagination, Select, Button } from "antd";
+import { Card, List, Skeleton, Pagination, Select, Button, message } from "antd";
 import { getCategories } from "../database/categoryDatabase";
+import LoanModal from "../components/LoanModal";
+import { useLoanModal } from "../hooks/useLoanModal";
 
 export default function Books() {
 
@@ -13,11 +15,23 @@ export default function Books() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [searchType, setSearchType] = useState<string>("none");
   const [sortOrder, setSortOrder] = useState<string>("asc");
+  
   const categories = getCategories();
   const { data, isLoading } = useList({
     resource: "books",
   });
 
+  // Use custom hook for loan modal
+  const {
+    isLoansModalVisible,
+    loanQuantity,
+    selectedBook,
+    isSubmitting,
+    handleOpenLoansModal,
+    handleCloseLoansModal,
+    handleConfirmLoan,
+    setLoanQuantity
+  } = useLoanModal();
 
   // Filter books by category and search query
   const filteredBooks = data?.data?.filter(book => {
@@ -100,9 +114,9 @@ export default function Books() {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "16px" }}>
           {[...Array(12)].map((_, index) => (
             <Skeleton key={index} active>
-                             <div style={{ height: "480px", padding: "16px" }}>
+              <div style={{ height: "480px", padding: "16px" }}>
                 <Skeleton.Input active size="large" style={{ width: "80%", height: "24px", marginBottom: "16px" }} />
-                                 <Skeleton.Image active style={{ width: "120px", height: "160px", margin: "0 auto 12px" }} />
+                <Skeleton.Image active style={{ width: "120px", height: "160px", margin: "0 auto 12px" }} />
                 <div style={{ padding: '0 8px' }}>
                   <Skeleton.Input active size="small" style={{ width: "70%", height: "12px", marginBottom: "4px" }} />
                   <Skeleton.Input active size="small" style={{ width: "65%", height: "12px", marginBottom: "8px" }} />
@@ -514,37 +528,46 @@ export default function Books() {
                       padding: '4px 6px 6px 6px',
                       borderTop: '1px solid #f0f0f0'
                   }}>
-                    <Link to={`/books/${book.id}/loans`} style={{ textDecoration: 'none' }}>
                       <Button 
-                        type="primary"
-                        size="middle"
-                        style={{
-                          width: '100%',
-                          height: '36px',
-                          borderRadius: '8px',
-                          fontSize: '13px',
-                          fontWeight: '600',
-                          background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
-                          border: 'none',
-                          boxShadow: '0 4px 12px rgba(24, 144, 255, 0.3)',
-                          transition: 'all 0.3s ease',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '6px'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.transform = 'translateY(-2px)';
-                          e.currentTarget.style.boxShadow = '0 6px 20px rgba(24, 144, 255, 0.4)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = 'translateY(0)';
-                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(24, 144, 255, 0.3)';
-                        }}
+                       type="primary"
+                       size="middle"
+                       style={{
+                         width: '100%',
+                         height: '36px',
+                         borderRadius: '8px',
+                         fontSize: '13px',
+                         fontWeight: '600',
+                         background: book.status.available > 0 
+                           ? 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)'
+                           : 'linear-gradient(135deg, #d9d9d9 0%, #bfbfbf 100%)',
+                         border: 'none',
+                         boxShadow: book.status.available > 0 
+                           ? '0 4px 12px rgba(24, 144, 255, 0.3)'
+                           : '0 4px 12px rgba(0, 0, 0, 0.1)',
+                         transition: 'all 0.3s ease',
+                         display: 'flex',
+                         alignItems: 'center',
+                         justifyContent: 'center',
+                         gap: '6px',
+                         cursor: book.status.available > 0 ? 'pointer' : 'not-allowed'
+                       }}
+                       onClick={() => book.status.available > 0 && handleOpenLoansModal(book)}
+                       disabled={isSubmitting || book.status.available <= 0}
+                       onMouseEnter={(e) => {
+                         if (book.status.available > 0) {
+                           e.currentTarget.style.transform = 'translateY(-2px)';
+                           e.currentTarget.style.boxShadow = '0 6px 20px rgba(24, 144, 255, 0.4)';
+                         }
+                       }}
+                       onMouseLeave={(e) => {
+                         if (book.status.available > 0) {
+                           e.currentTarget.style.transform = 'translateY(0)';
+                           e.currentTarget.style.boxShadow = '0 4px 12px rgba(24, 144, 255, 0.3)';
+                         }
+                       }}
                       >
-                        📚 Loans
+                       {book.status.available > 0 ? '📚 Loan' : '📚 No Copies'}
                       </Button>
-                    </Link>
                   </div>
                 </Card>
               </List.Item>
@@ -587,6 +610,17 @@ export default function Books() {
           <p>No books available</p>
         </div>
       )}
+
+      {/* Loan Modal Component */}
+      <LoanModal
+        isVisible={isLoansModalVisible}
+        book={selectedBook}
+        loanQuantity={loanQuantity}
+        isSubmitting={isSubmitting}
+        onClose={handleCloseLoansModal}
+        onConfirm={handleConfirmLoan}
+        onQuantityChange={(value) => setLoanQuantity(value || 1)}
+      />
     </div>
   );
 }
