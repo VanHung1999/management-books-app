@@ -62,7 +62,7 @@ export default function LoanModal({
         ]}
         width={500}
         centered
-        destroyOnClose
+        destroyOnHidden
     >
         <div style={{ padding: '20px 0' }}>
             {/* Book Information */}
