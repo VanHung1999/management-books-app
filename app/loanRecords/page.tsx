@@ -1,110 +1,177 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Card, List, Skeleton, Pagination, Tag, Button, Space, Typography, Avatar, message } from "antd";
-import { BookOutlined, UserOutlined, CalendarOutlined, ClockCircleOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
-import { useGetIdentity } from "@refinedev/core";
-import { getLoanRecords } from "../database/loanRecorDatabase";
-import { LoanRecord } from "../interface/loanrecord";
+import { useList } from "@refinedev/core";
+import { Skeleton, Table, Tag, Space, Typography, Card, Tooltip } from "antd";
+import { BookOutlined, UserOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, TeamOutlined } from "@ant-design/icons";
+import type { ColumnsType } from "antd/es/table";
 
 const { Title, Text } = Typography;
 
 export default function LoanRecords() {
-  const [loanRecords, setLoanRecords] = useState<LoanRecord[]>([]);
-  const [filteredRecords, setFilteredRecords] = useState<LoanRecord[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [selectedStatus, setSelectedStatus] = useState<string>("all");
-  
-  const { data: user } = useGetIdentity<{ name?: string; email?: string }>();
+  const { data, isLoading } = useList({
+    resource: "loanRecords",
+  });
 
-  // Load loan records
-  useEffect(() => {
-    if (user) {
-      loadUserLoanRecords();
-    }
-  }, [user]);
+  const currentUser = localStorage.getItem("currentUser");
+  const userData = JSON.parse(currentUser as string);
 
-  const loadUserLoanRecords = () => {
-    try {
-      const allRecords = getLoanRecords();
-      const userRecords = allRecords.filter(record => 
-        record.borrowerName === (user?.name || user?.email)
-      );
-      setLoanRecords(userRecords);
-      setFilteredRecords(userRecords);
-      setIsLoading(false);
-    } catch (error) {
-      message.error('Failed to load loan records');
-      setIsLoading(false);
+  // Filter data based on user role
+  const filteredData = !isLoading && userData?.role === "user" 
+    ? data?.data?.filter(item => item.borrowerName === userData.email) 
+    : data?.data;
+
+  // Calculate statistics
+  const totalRecords = filteredData?.length || 0;
+  const pendingRecords = filteredData?.filter(item => item.status === "pending").length || 0;
+  const deliveredRecords = filteredData?.filter(item => item.status === "delivered").length || 0;
+  const receivedRecords = filteredData?.filter(item => item.status === "received").length || 0;
+  const returnedRecords = filteredData?.filter(item => item.status === "returned").length || 0;
+  const completedRecords = filteredData?.filter(item => item.status === "completed").length || 0;
+  const canceledRecords = filteredData?.filter(item => item.status === "canceled").length || 0;
+  const processingRecords = pendingRecords + deliveredRecords + receivedRecords + returnedRecords;
+
+  const getStatusColor = (status: string) => {
+    switch (status) { 
+      case "pending": return "orange";
+      case "delivered": return "blue";
+      case "received": return "cyan";
+      case "returned": return "purple";
+      case "returnedConfirmed": return "green";
+      case "canceled": return "red";
+      default: return "default";
     }
   };
 
-  // Filter records by status
-  const filterByStatus = (status: string) => {
-    setSelectedStatus(status);
-    if (status === "all") {
-      setFilteredRecords(loanRecords);
-    } else {
-      setFilteredRecords(loanRecords.filter(record => record.status === status));
-    }
-    setCurrentPage(1);
-  };
-
-  // Get status color and icon
-  const getStatusInfo = (status: string) => {
+  const getStatusIcon = (status: string) => { 
     switch (status) {
-      case "pending":
-        return { color: "#fa8c16", icon: <ClockCircleOutlined />, text: "Pending" };
-      case "delivered":
-        return { color: "#1890ff", icon: <BookOutlined />, text: "Delivered" };
-      case "received":
-        return { color: "#52c41a", icon: <CheckCircleOutlined />, text: "Received" };
-      case "returned":
-        return { color: "#722ed1", icon: <CheckCircleOutlined />, text: "Returned" };
-      case "canceled":
-        return { color: "#ff4d4f", icon: <CloseCircleOutlined />, text: "Canceled" };
-      default:
-        return { color: "#8c8c8c", icon: <ClockCircleOutlined />, text: status };
+      case "pending": return <ClockCircleOutlined />;
+      case "delivered": return <BookOutlined />;
+      case "received": return <BookOutlined />;
+      case "returned": return <BookOutlined />;
+      case "returnedConfirmed": return <CheckCircleOutlined />;
+      case "canceled": return <ClockCircleOutlined />;
+      default: return <ClockCircleOutlined />;
     }
   };
 
-  // Format date
-  const formatDate = (dateValue: Date | string | null) => {
-    if (!dateValue) return "N/A";
-    const date = typeof dateValue === 'string' ? new Date(dateValue) : dateValue;
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+  const formatDate = (date: Date | undefined) => {
+    if (!date) return "-";
+    return new Date(date).toLocaleDateString("vi-VN", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
     });
   };
 
-  // Calculate pagination
-  const totalRecords = filteredRecords.length;
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-  const currentRecords = filteredRecords.slice(startIndex, endIndex);
-
-  if (!user) {
-    return (
-      <div style={{ 
-        padding: '48px', 
-        textAlign: 'center',
-        maxWidth: '1200px', 
-        margin: '0 auto',
-        backgroundColor: '#fafafa',
-        minHeight: '100vh'
-      }}>
-        <UserOutlined style={{ fontSize: '64px', color: '#d9d9d9', marginBottom: '16px' }} />
-        <Title level={2} style={{ color: '#8c8c8c', margin: '16px 0' }}>Please Login</Title>
-        <Text style={{ color: '#8c8c8c', fontSize: '16px' }}>You need to be logged in to view your loan records.</Text>
-      </div>
-    );
-  }
+  const columns: ColumnsType<any> = [
+    {
+      title: "Borrower",
+      dataIndex: "borrowerName",
+      key: "borrowerName",
+      render: (text) => (
+        <Space>
+          <UserOutlined style={{ color: "#1890ff" }} />
+          <Text strong>{text}</Text>
+        </Space>
+      ),
+    },
+    {
+      title: "Book",
+      dataIndex: "bookTitle",
+      key: "bookTitle",
+      render: (text) => (
+        <Space>
+          <BookOutlined style={{ color: "#52c41a" }} />
+          <Text>{text}</Text>
+        </Space>
+      ),
+    },
+    {
+      title: "Quantity",
+      dataIndex: "quantity",
+      key: "quantity",
+      align: "center",
+      render: (quantity) => (
+        <Tag color="blue" style={{ borderRadius: "6px" }}>
+          {quantity}
+        </Tag>
+      ),
+    },
+    // Only show these columns for admin users
+    ...(userData?.role === "admin" ? [
+      {
+        title: "Deliverer",
+        dataIndex: "delivererName",
+        key: "delivererName",
+        render: (text: string) => text || "-",
+      },
+      {
+        title: "Return Confirmer",
+        dataIndex: "returnConfirmerName",
+        key: "returnConfirmerName",
+        render: (text: string) => text || "-",
+      }
+    ] : []),
+    {
+      title: "Borrowed At",
+      dataIndex: "borrowedAt",
+      key: "borrowedAt",
+      render: (date) => (
+        <Space>
+          <CalendarOutlined style={{ color: "#722ed1" }} />
+          <Text>{formatDate(date)}</Text>
+        </Space>
+      ),
+    },
+    {
+      title: "Delivered At",
+      dataIndex: "deliveredAt",
+      key: "deliveredAt",
+      render: (date) => formatDate(date),
+    },
+    {
+      title: "Received At",
+      dataIndex: "receivedAt",
+      key: "receivedAt",
+      render: (date) => formatDate(date),
+    },
+    {
+      title: "Returned At",
+      dataIndex: "returnedAt",
+      key: "returnedAt",
+      render: (date) => formatDate(date),
+    },
+    {
+      title: "Return Confirmed At",
+      dataIndex: "returnConfirmedAt",
+      key: "returnConfirmedAt",
+      render: (date) => formatDate(date),
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      render: (status) => (
+        <Tag 
+          color={getStatusColor(status)} 
+          icon={getStatusIcon(status)}
+          style={{ 
+            borderRadius: "6px",
+            fontWeight: "500"
+          }}
+        >
+          {status === "pending" && "Pending"}
+          {status === "delivered" && "Delivered"}
+          {status === "received" && "Received"}
+          {status === "returned" && "Returned"}
+          {status === "completed" && "Completed"}
+          {status === "canceled" && "Canceled"}
+        </Tag>
+      ),
+    },
+  ];
 
   if (isLoading) {
     return (
@@ -116,10 +183,10 @@ export default function LoanRecords() {
         gap: "16px"
       }}>
         <Skeleton.Input active size="large" style={{ width: "200px", height: "32px" }} />
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(400px, 1fr))", gap: "16px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "16px" }}>
           {[...Array(8)].map((_, index) => (
             <Skeleton key={index} active>
-              <div style={{ height: "200px", padding: "16px" }} />
+              <div style={{ height: "120px", padding: "16px" }} />
             </Skeleton>
           ))}
         </div>
@@ -129,278 +196,272 @@ export default function LoanRecords() {
 
   return (
     <div style={{ padding: '24px' }}>
-      {/* Header Section */}
+      {/* Enhanced Header Section */}
       <div style={{ 
         marginBottom: '32px',
         padding: '24px',
-        backgroundColor: 'white',
+        backgroundColor: '#fafafa',
         borderRadius: '16px',
         border: '1px solid #e8e8e8',
         boxShadow: '0 2px 12px rgba(0,0,0,0.08)'
       }}>
+        {/* Header */}
         <div style={{ 
           marginBottom: '24px',
           textAlign: 'center'
         }}>
-          <Title level={2} style={{ 
+          <h2 style={{ 
             margin: '0 0 8px 0',
-            fontSize: '28px',
+            fontSize: '24px',
             fontWeight: '700',
-            color: '#262626'
+            color: '#262626',
+            letterSpacing: '0.5px'
           }}>
-            📚 My Loan Records
-          </Title>
-          <Text style={{ 
-            fontSize: '16px',
-            color: '#8c8c8c'
+            📚 Loan Records Management
+          </h2>
+          <p style={{ 
+            margin: '0',
+            fontSize: '14px',
+            color: '#8c8c8c',
+            fontStyle: 'italic'
           }}>
-            Welcome back, <strong>{user.name || user.email}</strong>! Here are your book borrowing history.
-          </Text>
+            Track and manage all book loan transactions efficiently
+          </p>
         </div>
 
-        {/* Status Filter Buttons */}
+        {/* Statistics Cards Grid */}
         <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          gap: '12px',
-          flexWrap: 'wrap'
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: '20px',
+          marginBottom: '24px'
         }}>
-          {["all", "pending", "delivered", "received", "returned", "returnedConfirmed", "canceled"].map(status => (
-            <Button
-              key={status}
-              type={selectedStatus === status ? "primary" : "default"}
-              size="middle"
-              onClick={() => filterByStatus(status)}
-              style={{
-                borderRadius: '20px',
-                textTransform: 'capitalize'
+          {/* Total Transactions */}
+          <div style={{ 
+            padding: '20px',
+            background: 'linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%)',
+            borderRadius: '12px',
+            border: '2px solid #b7eb8f',
+            boxShadow: '0 4px 16px rgba(82, 196, 26, 0.15)',
+            transition: 'all 0.3s ease',
+            textAlign: 'center'
+          }}>
+            <div style={{ 
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '16px',
+              gap: '8px'
+            }}>
+              <span style={{ fontSize: '20px' }}>📊</span>
+              <h3 style={{ 
+                margin: '0',
+                fontSize: '16px',
+                fontWeight: '600',
+                color: '#52c41a'
+              }}>
+                Total Transactions
+              </h3>
+            </div>
+            <div style={{ 
+              fontSize: '32px',
+              fontWeight: '700',
+              color: '#52c41a'
+            }}>
+              {totalRecords}
+            </div>
+          </div>
+
+          {/* Processing Records */}
+          <Tooltip
+            title={
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>Processing Records Breakdown:</div>
+                <div>• Pending: {pendingRecords}</div>
+                <div>• Delivered: {deliveredRecords}</div>
+                <div>• Received: {receivedRecords}</div>
+                <div>• Returned: {returnedRecords}</div>
+              </div>
+            }
+            placement="top"
+            color="#fa8c16"
+          >
+            <div 
+              style={{ 
+                padding: '20px',
+                background: 'linear-gradient(135deg, #fff7e6 0%, #ffe7ba 100%)',
+                borderRadius: '12px',
+                border: '2px solid #ffd591',
+                boxShadow: '0 4px 16px rgba(250, 140, 22, 0.15)',
+                transition: 'all 0.3s ease',
+                textAlign: 'center',
+                cursor: 'help',
+                position: 'relative'
               }}
             >
-              {getStatusInfo(status).icon} {getStatusInfo(status).text}
-              {status !== "all" && (
-                <span style={{ 
-                  marginLeft: '8px',
-                  backgroundColor: selectedStatus === status ? 'rgba(255,255,255,0.2)' : '#f0f0f0',
-                  padding: '2px 8px',
-                  borderRadius: '10px',
-                  fontSize: '12px'
+              <div style={{ 
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '16px',
+                gap: '8px'
+              }}>
+                <span style={{ fontSize: '20px' }}>⚡</span>
+                <h3 style={{ 
+                  margin: '0',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  color: '#fa8c16'
                 }}>
-                  {loanRecords.filter(r => r.status === status).length}
-                </span>
-              )}
-            </Button>
-          ))}
-        </div>
+                  Processing Records
+                </h3>
+              </div>
+              <div style={{ 
+                fontSize: '32px',
+                fontWeight: '700',
+                color: '#fa8c16'
+              }}>
+                {processingRecords}
+              </div>
+              <div style={{ 
+                fontSize: '12px',
+                color: '#d48806',
+                marginTop: '4px',
+                fontStyle: 'italic'
+              }}>
+                Hover for details
+              </div>
+            </div>
+          </Tooltip>
 
-        {/* Summary Stats */}
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          gap: '24px',
-          marginTop: '24px',
-          flexWrap: 'wrap'
-        }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#1890ff' }}>
-              {loanRecords.length}
+          {/* Completed */}
+          <div style={{ 
+            padding: '20px',
+            background: 'linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%)',
+            borderRadius: '12px',
+            border: '2px solid #b7eb8f',
+            boxShadow: '0 4px 16px rgba(82, 196, 26, 0.15)',
+            transition: 'all 0.3s ease',
+            textAlign: 'center'
+          }}>
+            <div style={{ 
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '16px',
+              gap: '8px'
+            }}>
+              <span style={{ fontSize: '20px' }}>✅</span>
+              <h3 style={{ 
+                margin: '0',
+                fontSize: '16px',
+                fontWeight: '600',
+                color: '#52c41a'
+              }}>
+                Completed
+              </h3>
             </div>
-            <div style={{ fontSize: '14px', color: '#8c8c8c' }}>Total Records</div>
+            <div style={{ 
+              fontSize: '32px',
+              fontWeight: '700',
+              color: '#52c41a'
+            }}>
+              {completedRecords}
+            </div>
           </div>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#52c41a' }}>
-              {loanRecords.filter(r => r.status === "returned").length}
+
+          {/* Canceled */}
+          <div style={{ 
+            padding: '20px',
+            background: 'linear-gradient(135deg, #fff2f0 0%, #ffccc7 100%)',
+            borderRadius: '12px',
+            border: '2px solid #ffbb96',
+            boxShadow: '0 4px 16px rgba(255, 77, 79, 0.15)',
+            transition: 'all 0.3s ease',
+            textAlign: 'center'
+          }}>
+            <div style={{ 
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '16px',
+              gap: '8px'
+            }}>
+              <span style={{ fontSize: '20px' }}>❌</span>
+              <h3 style={{ 
+                margin: '0',
+                fontSize: '16px',
+                fontWeight: '600',
+                color: '#ff4d4f'
+              }}>
+                Canceled
+              </h3>
             </div>
-            <div style={{ fontSize: '14px', color: '#8c8c8c' }}>Returned</div>
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#fa8c16' }}>
-              {loanRecords.filter(r => r.status === "pending" || r.status === "delivered").length}
+            <div style={{ 
+              fontSize: '32px',
+              fontWeight: '700',
+              color: '#ff4d4f'
+            }}>
+              {canceledRecords}
             </div>
-            <div style={{ fontSize: '14px', color: '#8c8c8c' }}>Active</div>
           </div>
         </div>
       </div>
 
-      {/* Loan Records List */}
-      {currentRecords.length > 0 ? (
-        <>
-          <List
-            grid={{
-              gutter: 24,
-              xs: 1,
-              sm: 1,
-              md: 2,
-              lg: 2,
-              xl: 3,
-            }}
-            dataSource={currentRecords}
-            renderItem={(record) => {
-              const statusInfo = getStatusInfo(record.status);
-              return (
-                <List.Item key={record.id} style={{ padding: '8px' }}>
-                  <Card 
-                    style={{ 
-                      width: '100%',
-                      borderRadius: '12px',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                      transition: 'all 0.3s ease',
-                      border: `2px solid ${statusInfo.color}20`
-                    }}
-                    hoverable
-                  >
-                    {/* Header with Status */}
-                    <div style={{ 
-                      display: 'flex', 
-                      justifyContent: 'space-between', 
-                      alignItems: 'center',
-                      marginBottom: '16px'
-                    }}>
-                      <div style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        gap: '8px'
-                      }}>
-                        <Avatar 
-                          icon={<BookOutlined />} 
-                          style={{ backgroundColor: statusInfo.color }}
-                        />
-                        <div>
-                          <Text strong style={{ fontSize: '16px' }}>
-                            {record.bookTitle}
-                          </Text>
-                          <br />
-                          <Text type="secondary" style={{ fontSize: '12px' }}>
-                            ID: {record.id}
-                          </Text>
-                        </div>
-                      </div>
-                      <Tag 
-                        color={statusInfo.color}
-                        icon={statusInfo.icon}
-                        style={{ 
-                          borderRadius: '12px',
-                          padding: '4px 12px',
-                          fontSize: '12px',
-                          fontWeight: '600'
-                        }}
-                      >
-                        {statusInfo.text}
-                      </Tag>
-                    </div>
-
-                    {/* Record Details */}
-                    <div style={{ marginBottom: '16px' }}>
-                      <div style={{ 
-                        display: 'flex', 
-                        justifyContent: 'space-between', 
-                        marginBottom: '8px'
-                      }}>
-                        <Text type="secondary">Quantity:</Text>
-                        <Text strong>{record.quantity} copies</Text>
-                      </div>
-                      <div style={{ 
-                        display: 'flex', 
-                        justifyContent: 'space-between', 
-                        marginBottom: '8px'
-                      }}>
-                        <Text type="secondary">Borrowed:</Text>
-                        <Text>{formatDate(record.borrowedAt)}</Text>
-                      </div>
-                      {record.deliveredAt && (
-                        <div style={{ 
-                          display: 'flex', 
-                          justifyContent: 'space-between', 
-                          marginBottom: '8px'
-                        }}>
-                          <Text type="secondary">Delivered:</Text>
-                          <Text>{formatDate(record.deliveredAt)}</Text>
-                        </div>
-                      )}
-                      {record.returnedAt && (
-                        <div style={{ 
-                          display: 'flex', 
-                          justifyContent: 'space-between', 
-                          marginBottom: '8px'
-                        }}>
-                          <Text type="secondary">Returned:</Text>
-                          <Text>{formatDate(record.returnedAt)}</Text>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div style={{ 
-                      display: 'flex', 
-                      gap: '8px',
-                      justifyContent: 'flex-end'
-                    }}>
-                      {record.status === "pending" && (
-                        <Button size="small" type="primary">
-                          Track Delivery
-                        </Button>
-                      )}
-                      {record.status === "delivered" && (
-                        <Button size="small" type="primary">
-                          Confirm Received
-                        </Button>
-                      )}
-                      {record.status === "received" && (
-                        <Button size="small" type="primary">
-                          Return Book
-                        </Button>
-                      )}
-                    </div>
-                  </Card>
-                </List.Item>
-              );
-            }}
-          />
-          
-          {/* Pagination */}
-          <div style={{ 
-            marginTop: '32px', 
-            display: 'flex', 
-            justifyContent: 'center',
-            padding: '16px'
-          }}>
-            <Pagination
-              current={currentPage}
-              total={totalRecords}
-              pageSize={pageSize}
-              showSizeChanger={false}
-              showQuickJumper
-              showTotal={(total, range) => 
-                `${range[0]}-${range[1]} of ${total} records`
-              }
-              onChange={setCurrentPage}
-              style={{ 
-                backgroundColor: 'white',
-                padding: '16px',
-                borderRadius: '8px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-              }}
-            />
-          </div>
-        </>
-      ) : (
-        <div style={{ 
-          textAlign: 'center', 
-          padding: '100px 50px',
-          color: '#666',
-          fontSize: '16px'
-        }}>
-          <BookOutlined style={{ fontSize: '64px', color: '#d9d9d9', marginBottom: '16px' }} />
-          <Title level={3} style={{ color: '#8c8c8c', margin: '16px 0' }}>
-            No Loan Records Found
-          </Title>
-          <Text style={{ color: '#8c8c8c' }}>
-            {selectedStatus === "all" 
-              ? "You haven't borrowed any books yet. Start exploring our collection!"
-              : `No ${selectedStatus} records found.`
-            }
-          </Text>
-        </div>
-      )}
+      {/* Main Table */}
+      <Card 
+        title={
+          <Space size="large">
+            <div style={{ 
+              background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
+              borderRadius: '50%',
+              width: '40px',
+              height: '40px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white'
+            }}>
+              <TeamOutlined style={{ fontSize: '20px' }} />
+            </div>
+            <div>
+              <Title level={4} style={{ margin: 0, color: '#262626' }}>
+                Loan Records Details
+              </Title>
+              <Text style={{ color: '#8c8c8c', fontSize: '14px' }}>
+                Detailed view of all book loan transactions with status tracking
+              </Text>
+            </div>
+          </Space>
+        }
+        style={{ 
+          borderRadius: '12px', 
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          border: '1px solid #e8e8e8'
+        }}
+        headStyle={{
+          background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
+          borderBottom: '2px solid #e8e8e8'
+        }}
+      >
+        <Table
+          columns={columns}
+          dataSource={filteredData}
+          rowKey="id"
+          pagination={{
+            pageSize: 10,
+            showSizeChanger: true,
+            showQuickJumper: true,
+            showTotal: (total, range) => 
+              `${range[0]}-${range[1]} of ${total} transactions`,
+            style: { marginTop: '16px' }
+          }}
+          scroll={{ x: 1200 }}
+          size="middle"
+          bordered
+          style={{ borderRadius: '8px' }}
+        />
+      </Card>
     </div>
   );
 }

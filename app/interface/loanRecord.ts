@@ -10,5 +10,5 @@ export interface LoanRecord {
     receivedAt?: Date;        
     returnedAt?: Date;         
     returnConfirmedAt?: Date;  
-    status: "pending" | "delivered" | "received" | "returned" | "returnedConfirmed" | "canceled";
+    status: "pending" | "delivered" | "received" | "returned" | "completed" | "canceled";
 }
