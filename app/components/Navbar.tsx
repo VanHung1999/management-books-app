@@ -1,6 +1,7 @@
 "use client";
 
-import { Layout, Button, Badge, Avatar, Dropdown, Typography } from "antd";
+import React from "react";
+import { Layout, Button, Badge, Avatar, Dropdown, Typography, Tooltip } from "antd";
 import { usePathname } from "next/navigation";
 import { useLogout } from "@refinedev/core";
 import { 
@@ -11,8 +12,10 @@ import {
   UserOutlined,
   FileTextOutlined,
   HeartOutlined,
+  BellOutlined
 } from "@ant-design/icons";
 import { useState, useEffect } from "react";
+import { useNotifications } from "../hooks/useNotifications";
 
 const { Header } = Layout;
 const { Text, Title } = Typography;
@@ -20,16 +23,30 @@ const { Text, Title } = Typography;
 interface User {
   id: string;
   email: string;
+  password: string;
   name: string;
-  role: string;
+  role: 'admin' | 'user';
+  createdAt: string;
   booksLoaned: any[];
   booksDonated: any[];
+  status: 'active' | 'inactive';
 }
 
 export default function Navbar({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { mutate: logout } = useLogout();
   const [user, setUser] = useState<User | null>(null);
+  const { 
+    notifications, 
+    unreadCount, 
+    markAsRead, 
+    markAllAsRead, 
+    markAllAsReadByCategory,
+    clearNotification,
+    addNotification,
+    getNotificationsByCategory,
+    getNotificationsByPriority
+  } = useNotifications(user);
 
   // Load user from localStorage
   useEffect(() => {
@@ -46,6 +63,13 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
       }
     }
   }, []);
+
+  // Auto mark all loan notifications as read when user visits /loanRecords page
+  useEffect(() => {
+    if (user && markAllAsReadByCategory && pathname === '/loanRecords') {
+      markAllAsReadByCategory('loan');
+    }
+  }, [user, markAllAsReadByCategory, pathname]);
 
   const hideOnPaths = ["/login", "/register", "/forgot-password"];
   const shouldHideNavbar = hideOnPaths.includes(pathname);
@@ -101,36 +125,39 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
           alignItems: 'center', 
           justifyContent: 'space-between',
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          padding: '0 32px',
+          padding: '0 24px',
           borderBottom: 'none',
           boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
           position: 'sticky',
           top: 0,
           zIndex: 1000,
-          height: '72px'
+          height: '72px',
+          overflow: 'hidden'
         }}>
           {/* Logo and Brand */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '24px', minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <div style={{
-                width: '48px',
-                height: '48px',
-                borderRadius: '12px',
+                width: '40px',
+                height: '40px',
+                borderRadius: '10px',
                 background: 'rgba(255,255,255,0.2)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.3)'
+                border: '1px solid rgba(255,255,255,0.3)',
+                flexShrink: 0
               }}>
-                <BookOutlined style={{ fontSize: '24px', color: 'white' }} />
+                <BookOutlined style={{ fontSize: '20px', color: 'white' }} />
               </div>
-              <Title level={3} style={{ 
+              <Title level={4} style={{ 
                 margin: 0, 
                 color: 'black', 
-                fontSize: '22px',
+                fontSize: '18px',
                 fontWeight: '700',
-                textShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                textShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                whiteSpace: 'nowrap'
               }}>
                 Management Books System
               </Title>
@@ -139,12 +166,13 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
             {/* Navigation Menu */}
             <nav style={{ 
               display: 'flex', 
-              gap: '8px',
+              gap: '6px',
               background: 'rgba(255,255,255,0.1)',
-              padding: '8px 16px',
-              borderRadius: '16px',
+              padding: '6px 12px',
+              borderRadius: '12px',
               backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255,255,255,0.2)'
+              border: '1px solid rgba(255,255,255,0.2)',
+              flexShrink: 0
             }}>
               {navItems.map((item) => (
                 <Button
@@ -156,14 +184,15 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
                     color: pathname === item.key ? 'white' : 'rgba(255,255,255,0.8)',
                     background: pathname === item.key ? 'rgba(255,255,255,0.2)' : 'transparent',
                     border: 'none',
-                    borderRadius: '12px',
-                    height: '40px',
-                    padding: '0 16px',
+                    borderRadius: '8px',
+                    height: '32px',
+                    padding: '0 12px',
                     fontWeight: pathname === item.key ? '600' : '400',
                     transition: 'all 0.3s ease',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '8px'
+                    gap: '6px',
+                    fontSize: '13px'
                   }}
                   onMouseEnter={(e) => {
                     if (pathname !== item.key) {
@@ -184,49 +213,347 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
 
           {/* User Profile Section */}
           {user && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-              {/* User Stats */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', minWidth: 0 }}>
+              {/* Donation Books Achievement */}
               <div style={{ 
                 display: 'flex', 
                 alignItems: 'center', 
-                gap: '16px',
-                background: 'rgba(255,255,255,0.1)',
-                padding: '12px 20px',
+                justifyContent: 'center',
+                background: 'linear-gradient(135deg, #fa8c16 0%, #ff9a56 100%)',
+                padding: '8px 16px',
                 borderRadius: '16px',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)'
+                boxShadow: '0 4px 16px rgba(250, 140, 22, 0.3)',
+                border: '2px solid rgba(255, 255, 255, 0.3)',
+                position: 'relative',
+                overflow: 'hidden',
+                flexShrink: 0,
+                minHeight: '48px'
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Badge size="small" style={{ 
-                    '--antd-badge-color': '#52c41a',
-                    '--antd-badge-size': '20px'
-                  } as any}>
-                    <BookOutlined style={{ color: 'rgba(255,255,255,0.9)', fontSize: '16px' }} />
-                  </Badge>
-                  <Text style={{ color: 'rgba(255,255,255,0.9)', fontSize: '13px', fontWeight: '500' }}>
-                    {user.booksLoaned.length}
-                  </Text>
+                {/* Achievement Badge */}
+                <div style={{
+                  width: '28px',
+                  height: '28px',
+                  borderRadius: '50%',
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginRight: '12px',
+                  border: '2px solid rgba(255, 255, 255, 0.4)',
+                  flexShrink: 0
+                }}>
+                  <GiftOutlined style={{ 
+                    color: 'white', 
+                    fontSize: '16px',
+                    filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))'
+                  }} />
                 </div>
                 
+                {/* Achievement Content */}
                 <div style={{ 
-                  width: '1px', 
-                  height: '20px', 
-                  background: 'rgba(255,255,255,0.3)' 
-                }} />
-                
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Badge size="small" style={{ 
-                    '--antd-badge-color': '#fa8c16',
-                    '--antd-badge-size': '20px'
-                  } as any}>
-                    <GiftOutlined style={{ color: 'rgba(255,255,255,0.9)', fontSize: '16px' }} />
-                  </Badge>
-                  <Text style={{ color: 'rgba(255,255,255,0.9)', fontSize: '13px', fontWeight: '500' }}>
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  minWidth: 0 
+                }}>
+                  <div style={{ 
+                    fontSize: '18px', 
+                    fontWeight: '700', 
+                    color: 'white',
+                    lineHeight: '1',
+                    textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+                    marginBottom: '2px'
+                  }}>
                     {user.booksDonated.length}
-                  </Text>
+                  </div>
+                  <div style={{ 
+                    fontSize: '10px', 
+                    color: 'rgba(255, 255, 255, 0.9)',
+                    fontWeight: '500',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.3px',
+                    whiteSpace: 'nowrap',
+                    lineHeight: '1'
+                  }}>
+                    Books Donated
+                  </div>
                 </div>
+                
+                {/* Achievement Sparkle Effect */}
+                <div style={{
+                  position: 'absolute',
+                  top: '-1px',
+                  right: '-1px',
+                  width: '12px',
+                  height: '12px',
+                  background: 'linear-gradient(45deg, #fff, #ffd700)',
+                  borderRadius: '50%',
+                  animation: 'sparkle 2s infinite',
+                  boxShadow: '0 0 8px rgba(255, 215, 0, 0.6)'
+                }} />
               </div>
 
+              {/* Notification Bell */}
+              <Dropdown
+                menu={{
+                  items: [{
+                    key: 'notifications',
+                    label: (
+                      <div style={{
+                       minWidth: '320px',
+                       maxHeight: '400px',
+                       overflow: 'auto',
+                       background: 'white',
+                       borderRadius: '8px',
+                       boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                       padding: '16px'
+                      }}>
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          marginBottom: '16px',
+                          borderBottom: '1px solid #f0f0f0',
+                          paddingBottom: '12px'
+                        }}>
+                          <Text strong style={{ fontSize: '16px' }}>🔔 Notifications</Text>
+                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            {unreadCount > 0 && (
+                              <Button 
+                                type="link" 
+                                size="small"
+                                onClick={markAllAsRead}
+                                style={{ padding: '0', height: 'auto' }}
+                              >
+                                Mark all as read
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {notifications.length === 0 ? (
+                          <div style={{
+                            textAlign: 'center',
+                            padding: '20px',
+                            color: '#8c8c8c'
+                          }}>
+                            <BellOutlined style={{ fontSize: '24px', marginBottom: '8px' }} />
+                            <div>No notifications</div>
+                          </div>
+                        ) : (
+                          <div>
+                            {notifications.slice(0, 5).map((notification) => {
+                              const getCategoryColor = (category: string) => {
+                                switch (category) {
+                                  case 'loan': return '#1890ff';
+                                  case 'book': return '#52c41a';
+                                  case 'user': return '#722ed1';
+                                  case 'donation': return '#fa8c16';
+                                  case 'system': return '#13c2c2';
+                                  case 'general': return '#8c8c8c';
+                                  default: return '#1890ff';
+                                }
+                              };
+
+                              const getPriorityColor = (priority: string) => {
+                                switch (priority) {
+                                  case 'urgent': return '#ff4d4f';
+                                  case 'high': return '#fa8c16';
+                                  case 'medium': return '#1890ff';
+                                  case 'low': return '#52c41a';
+                                  default: return '#1890ff';
+                                }
+                              };
+
+                              const categoryColor = getCategoryColor(notification.category);
+                              const priorityColor = getPriorityColor(notification.priority);
+
+                              return (
+                                <div
+                                  key={notification.id}
+                                  style={{
+                                    padding: '12px',
+                                    border: `1px solid ${categoryColor}20`,
+                                    borderRadius: '6px',
+                                    marginBottom: '8px',
+                                    background: notification.isRead ? '#fafafa' : '#fff',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease',
+                                    position: 'relative'
+                                  }}
+                                  onClick={() => {
+                                    markAsRead(notification.id);
+                                    if (notification.actionUrl) {
+                                      window.location.href = notification.actionUrl;
+                                    }
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.style.background = notification.isRead ? '#f5f5f5' : `${categoryColor}08`;
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = notification.isRead ? '#fafafa' : '#fff';
+                                  }}
+                                >
+                                  {/* Priority indicator */}
+                                  <div style={{
+                                    position: 'absolute',
+                                    left: '0',
+                                    top: '0',
+                                    bottom: '0',
+                                    width: '4px',
+                                    background: priorityColor,
+                                    borderTopLeftRadius: '6px',
+                                    borderBottomLeftRadius: '6px'
+                                  }} />
+
+                                  <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'flex-start',
+                                    marginBottom: '4px',
+                                    marginLeft: '8px'
+                                  }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                      <div style={{
+                                        width: '20px',
+                                        height: '20px',
+                                        borderRadius: '50%',
+                                        background: `${categoryColor}20`,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontSize: '12px',
+                                        color: categoryColor
+                                      }}>
+                                        {notification.category.charAt(0).toUpperCase()}
+                                      </div>
+                                      <Text strong style={{ 
+                                        fontSize: '13px',
+                                        color: notification.isRead ? '#8c8c8c' : '#262626'
+                                      }}>
+                                        {notification.title}
+                                      </Text>
+                                    </div>
+                                    {!notification.isRead && (
+                                      <div style={{
+                                        width: '8px',
+                                        height: '8px',
+                                        borderRadius: '50%',
+                                        background: priorityColor,
+                                        flexShrink: 0
+                                      }} />
+                                    )}
+                                  </div>
+                                  
+                                  <Text style={{ 
+                                    fontSize: '12px',
+                                    color: notification.isRead ? '#8c8c8c' : '#595959',
+                                    lineHeight: '1.4',
+                                    marginLeft: '28px'
+                                  }}>
+                                    {notification.message}
+                                  </Text>
+
+                                  <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    marginTop: '8px',
+                                    marginLeft: '28px'
+                                  }}>
+                                    <Text style={{ 
+                                      fontSize: '11px',
+                                      color: '#bfbfbf'
+                                    }}>
+                                      {new Date(notification.timestamp).toLocaleString('vi-VN', {
+                                        month: 'short',
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                      })}
+                                    </Text>
+                                    <div style={{ display: 'flex', gap: '4px' }}>
+                                      <Button
+                                        type="text"
+                                        size="small"
+                                        danger
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          clearNotification(notification.id);
+                                        }}
+                                        style={{ 
+                                          padding: '0', 
+                                          height: 'auto',
+                                          fontSize: '11px'
+                                        }}
+                                      >
+                                        Clear
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                            
+                            {notifications.length > 5 && (
+                              <div style={{
+                                textAlign: 'center',
+                                padding: '12px',
+                                borderTop: '1px solid #f0f0f0',
+                                marginTop: '12px'
+                              }}>
+                                <Text style={{ color: '#8c8c8c', fontSize: '12px' }}>
+                                  +{notifications.length - 5} more notifications
+                                </Text>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  }]
+                }}
+                placement="bottomRight"
+                trigger={['click']}
+                overlayStyle={{ minWidth: '320px' }}
+              >
+                <Tooltip title="Notifications" placement="bottom">
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    cursor: 'pointer',
+                    padding: '6px',
+                    borderRadius: '6px',
+                    transition: 'all 0.3s ease',
+                    flexShrink: 0
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }}
+                  >
+                    <Badge 
+                       count={unreadCount} 
+                       size="default" 
+                       style={{ 
+                         '--antd-badge-color': '#ff4d4f',
+                         '--antd-badge-size': '20px'
+                       } as any}
+                     >
+                       <BellOutlined 
+                         style={{ 
+                           color: 'rgba(255,255,255,0.9)', 
+                           fontSize: '20px' 
+                         }} 
+                       />
+                     </Badge>
+                  </div>
+                </Tooltip>
+              </Dropdown>
+               
               {/* User Avatar and Dropdown */}
               <Dropdown
                 menu={{ items: userMenuItems }}
@@ -237,14 +564,15 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '12px',
-                  padding: '8px 16px',
+                  gap: '10px',
+                  padding: '6px 12px',
                   background: 'rgba(255,255,255,0.15)',
-                  borderRadius: '20px',
+                  borderRadius: '16px',
                   cursor: 'pointer',
                   transition: 'all 0.3s ease',
                   border: '1px solid rgba(255,255,255,0.2)',
-                  backdropFilter: 'blur(10px)'
+                  backdropFilter: 'blur(10px)',
+                  flexShrink: 0
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.background = 'rgba(255,255,255,0.25)';
@@ -254,26 +582,29 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
                 }}
                 >
                   <Avatar 
-                    size={36} 
+                    size={32} 
                     icon={<UserOutlined />}
                     style={{ 
                       background: 'rgba(255,255,255,0.2)',
-                      border: '2px solid rgba(255,255,255,0.3)'
+                      border: '2px solid rgba(255,255,255,0.3)',
+                      flexShrink: 0
                     }}
                   />
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', minWidth: 0 }}>
                     <Text style={{ 
                       color: 'white', 
-                      fontSize: '14px', 
+                      fontSize: '13px', 
                       fontWeight: '600',
-                      lineHeight: '1.2'
+                      lineHeight: '1.2',
+                      whiteSpace: 'nowrap'
                     }}>
                       {user.name}
                     </Text>
                     <Text style={{ 
                       color: 'rgba(255,255,255,0.8)', 
-                      fontSize: '12px',
-                      lineHeight: '1.2'
+                      fontSize: '11px',
+                      lineHeight: '1.2',
+                      whiteSpace: 'nowrap'
                     }}>
                       {user.role}
                     </Text>
@@ -292,6 +623,20 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
           {children}
         </div>
       </Layout>
+      
+      {/* CSS Animation for Sparkle Effect */}
+      <style jsx global>{`
+        @keyframes sparkle {
+          0%, 100% { 
+            transform: scale(1) rotate(0deg); 
+            opacity: 1; 
+          }
+          50% { 
+            transform: scale(1.2) rotate(180deg); 
+            opacity: 0.8; 
+          }
+        }
+      `}</style>
     </>
   );
 }

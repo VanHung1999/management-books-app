@@ -4,7 +4,7 @@ import { User } from "@/app/interface/user";
 import { createUser, getUsers, getUserByEmail, updateUser, deleteUser } from "@/app/database/userDatabase";
 import { getBooks, getBookById, createBook, updateBook, deleteBook } from "@/app/database/bookDatabase";
 import { createLoanRecord, deleteLoanRecord, getLoanRecordById, getLoanRecords, updateLoanRecord } from "@/app/database/loanRecorDatabase";
-import { LoanRecord } from "../interface/loanrecord";
+import { LoanRecord } from "../interface/loanRecord";
 
 export const dataProvider: DataProvider = {
   

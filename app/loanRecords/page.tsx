@@ -4,6 +4,7 @@ import { useList } from "@refinedev/core";
 import { Skeleton, Table, Tag, Space, Typography, Card, Tooltip } from "antd";
 import { BookOutlined, UserOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, TeamOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
+import { useEffect, useState } from "react";
 
 const { Title, Text } = Typography;
 
@@ -12,8 +13,22 @@ export default function LoanRecords() {
     resource: "loanRecords",
   });
 
-  const currentUser = localStorage.getItem("currentUser");
-  const userData = JSON.parse(currentUser as string);
+
+
+  const [userData, setUserData] = useState<any>(null);
+
+  // Load user from localStorage on client-side
+  useEffect(() => {
+    const currentUser = localStorage.getItem("currentUser");
+    if (currentUser) {
+      try {
+        const parsedUser = JSON.parse(currentUser);
+        setUserData(parsedUser);
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+      }
+    }
+  }, []);
 
   // Filter data based on user role
   const filteredData = !isLoading && userData?.role === "user" 
@@ -439,10 +454,12 @@ export default function LoanRecords() {
           boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
           border: '1px solid #e8e8e8'
         }}
-        headStyle={{
-          background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
-          borderBottom: '2px solid #e8e8e8'
-        }}
+          styles={{
+           header: {
+             background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
+             borderBottom: '2px solid #e8e8e8'
+           }
+         }}
       >
         <Table
           columns={columns}
