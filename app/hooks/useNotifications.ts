@@ -19,6 +19,7 @@ export interface Notification {
 const getLoanNotifications = (currentUser: User): Notification[] => {
     const notificationsLoanRecords: Notification[] = [];
     const loanRecords = getLoanRecords();
+    console.log(loanRecords);
     
     loanRecords.forEach((record: LoanRecord) => {
         let notificationsLoanRecord: Notification | null = null;
@@ -66,7 +67,7 @@ const getLoanNotifications = (currentUser: User): Notification[] => {
             }
         } else {
             // User notifications (người mượn sách)
-            if (record.status === 'delivered' && record.borrowerName === currentUser.name) {
+            if (record.status === 'delivered' && record.borrowerName === currentUser.email) {
                 notificationsLoanRecord = {
                     id: `loan-delivered-${record.id}`,
                     title: '🚚 Book has been delivered',
