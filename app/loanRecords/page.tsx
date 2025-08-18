@@ -7,7 +7,6 @@ import type { ColumnsType } from "antd/es/table";
 import { useEffect, useState } from "react";
 import { LoanRecord } from "../interface/loanRecord";
 import { Book } from "../interface/book";
-import { updateBook } from "../database/bookDatabase";
 
 const { Title, Text } = Typography;
 
@@ -261,7 +260,7 @@ export default function LoanRecords() {
       render: (_, record) => {
         const { status } = record;
         
-                 // Admin actions
+         // Admin actions
          if (userData?.role === "admin") {
            if (status === "pending") {
              return (
@@ -322,6 +321,80 @@ export default function LoanRecords() {
                  </Text>
                </div>
              );
+          } else if (status === "delivered" && userData?.email === record.borrowerName) {
+            return (
+              <div style={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                justifyContent: 'center', 
+                alignItems: 'center', 
+                height: '100%',
+                gap: '4px'
+              }}>
+                <Button
+                  type="primary"
+                  size="small"
+                  onClick={() => handleStatusChange(record.id, "received")}
+                  style={{
+                    background: "linear-gradient(135deg, #1890ff 0%, #40a9ff 100%)",
+                    border: "none",
+                    borderRadius: "8px",
+                    fontWeight: "600",
+                    boxShadow: "0 2px 8px rgba(24, 144, 255, 0.3)",
+                    minWidth: "100px",
+                    height: "32px"
+                  }}
+                >
+                  📦 Received
+                </Button>
+                <Text style={{ 
+                  color: "#1890ff", 
+                  fontSize: '11px',
+                  fontWeight: '500',
+                  textAlign: 'center',
+                  lineHeight: '1.2'
+                }}>
+                  Received the book from the library
+                </Text>
+              </div>
+            );
+          }  else if (status === "received" && userData?.email === record.borrowerName) {
+            return (
+              <div style={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                justifyContent: 'center', 
+                alignItems: 'center', 
+                height: '100%',
+                gap: '4px'
+              }}>
+                <Button
+                  type="primary"
+                  size="small"
+                  onClick={() => handleStatusChange(record.id, "returned")}
+                  style={{
+                    background: "linear-gradient(135deg, #fa8c16 0%, #ffa940 100%)",
+                    border: "none",
+                    borderRadius: "8px",
+                    fontWeight: "600",
+                    boxShadow: "0 2px 8px rgba(250, 140, 22, 0.3)",
+                    minWidth: "100px",
+                    height: "32px"
+                  }}
+                >
+                  🔄 Returned
+                </Button>
+                <Text style={{ 
+                  color: "#fa8c16", 
+                  fontSize: '11px',
+                  fontWeight: '500',
+                  textAlign: 'center',
+                  lineHeight: '1.2'
+                }}>
+                  Returned the book to the library
+                </Text>
+              </div>
+            );
           } else if (status === "returned") {
             return (
               <div style={{ 

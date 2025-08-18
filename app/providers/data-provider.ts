@@ -5,6 +5,8 @@ import { createUser, getUsers, getUserByEmail, updateUser, deleteUser } from "@/
 import { getBooks, getBookById, createBook, updateBook, deleteBook } from "@/app/database/bookDatabase";
 import { createLoanRecord, deleteLoanRecord, getLoanRecordById, getLoanRecords, updateLoanRecord } from "@/app/database/loanRecorDatabase";
 import { LoanRecord } from "../interface/loanRecord";
+import { createDonationRecord, deleteDonationRecord, getDonationRecordById, getDonationRecords, updateDonationRecord } from "@/app/database/donationRecordDatabase";
+import { DonationRecord } from "../interface/donationRecord";
 
 export const dataProvider: DataProvider = {
   
@@ -28,6 +30,13 @@ export const dataProvider: DataProvider = {
       return {
         data: loanRecords as any,
         total: loanRecords.length,
+      };
+    }
+    if (resource === "donationRecords") {
+      const donationRecords = getDonationRecords();
+      return {
+        data: donationRecords as any,
+        total: donationRecords.length,
       };
     }
     return { data: [], total: 0 };
@@ -56,6 +65,13 @@ export const dataProvider: DataProvider = {
       }
       throw new Error("Loan record not found");
     }
+    if (resource === "donationRecords") {
+      const donationRecord = getDonationRecordById(id as string);
+      if (donationRecord) {
+        return { data: donationRecord as any };
+      }
+      throw new Error("Donation record not found");
+    }
       throw new Error("Resource not found");
   },
 
@@ -72,6 +88,10 @@ export const dataProvider: DataProvider = {
     if (resource === "loanRecords") {
       const newLoanRecord = createLoanRecord(variables as Omit<LoanRecord, "id" | "delivererName" | "returnConfirmerName" | "borrowedAt" | "deliveredAt" | "receivedAt" | "returnedAt" | "returnConfirmedAt" | "status">);
       return { data: newLoanRecord as any };
+    }
+    if (resource === "donationRecords") {
+      const newDonationRecord = createDonationRecord(variables as Omit<DonationRecord, "id" | "donationDate" | "status">);
+      return { data: newDonationRecord as any };
     }
     throw new Error("Invalid resource");
   },
@@ -90,6 +110,10 @@ export const dataProvider: DataProvider = {
       const updatedLoanRecord = updateLoanRecord(id as string, variables as Partial<LoanRecord>);
       return { data: updatedLoanRecord as any };
     }
+    if (resource === "donationRecords") {
+      const updatedDonationRecord = updateDonationRecord(id as string, variables as Partial<DonationRecord>);
+      return { data: updatedDonationRecord as any };
+    }
     throw new Error("Resource not found");
   },
 
@@ -106,6 +130,10 @@ export const dataProvider: DataProvider = {
     if (resource === "loanRecords") {
       const deletedLoanRecord = deleteLoanRecord(id as string);
       return { data: deletedLoanRecord as any };
+    }
+    if (resource === "donationRecords") {
+      const deletedDonationRecord = deleteDonationRecord(id as string);
+      return { data: deletedDonationRecord as any };
     }
     throw new Error("Resource not found");
   },
