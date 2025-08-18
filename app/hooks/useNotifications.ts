@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getLoanRecords } from '../database/loanRecorDatabase';
 import { LoanRecord } from '../interface/loanRecord';
 import { User } from '../interface/user';
+import { useList } from '@refinedev/core';
 
 export interface Notification {
   id: string;
@@ -16,12 +16,10 @@ export interface Notification {
   metadata?: Record<string, any>;
 }
 
-const getLoanNotifications = (currentUser: User): Notification[] => {
+const getLoanNotifications = (currentUser: User, loanRecords: LoanRecord[]): Notification[] => {
     const notificationsLoanRecords: Notification[] = [];
-    const loanRecords = getLoanRecords();
-    console.log(loanRecords);
-    
-    loanRecords.forEach((record: LoanRecord) => {
+
+    loanRecords?.forEach((record: LoanRecord) => {
         let notificationsLoanRecord: Notification | null = null;
 
         if (currentUser.role === 'admin') {
@@ -109,6 +107,10 @@ export const useNotifications = (currentUser: User | null): {
 } => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const { data: loanRecords, isLoading } = useList<LoanRecord>({
+    resource: 'loanRecords',
+});
+  
 
   useEffect(() => {
     if (!currentUser) {
@@ -122,7 +124,7 @@ export const useNotifications = (currentUser: User | null): {
         const allNotifications: Notification[] = [];
 
         // Get loan notifications
-        const loanNotifications = getLoanNotifications(currentUser);
+        const loanNotifications = getLoanNotifications(currentUser, loanRecords?.data || []);
         allNotifications.push(...loanNotifications);
          
         // Sort by priority first, then by timestamp (newest first)
@@ -136,7 +138,7 @@ export const useNotifications = (currentUser: User | null): {
         setNotifications(allNotifications);
         setUnreadCount(allNotifications.filter(n => !n.isRead).length);
       } catch (error) {
-        console.error('Error loading notifications:', error);
+
       }
     };
 
@@ -146,7 +148,7 @@ export const useNotifications = (currentUser: User | null): {
     const interval = setInterval(loadNotifications, 30000);
 
     return () => clearInterval(interval);
-  }, [currentUser]);
+  }, [currentUser, loanRecords]);
 
   const addNotification = (notification: Omit<Notification, 'id' | 'timestamp' | 'isRead'>) => {
     const newNotification: Notification = {
@@ -195,7 +197,7 @@ export const useNotifications = (currentUser: User | null): {
       
       return updatedNotifications;
     });
-  }, []);
+  }, [isLoading]);
 
   const clearNotification = (notificationId: string) => {
     setNotifications((prev: Notification[]) => prev.filter(n => n.id !== notificationId));
