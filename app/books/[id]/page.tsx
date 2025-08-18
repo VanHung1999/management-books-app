@@ -542,12 +542,13 @@ export default function BookDetail() {
                  fontSize: '16px',
                  borderRadius: '12px',
                  fontWeight: '600',
-                 background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
+                 background: book.status.available === 0 ? '#d9d9d9' : 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
                  border: 'none',
                  boxShadow: '0 4px 12px rgba(82, 196, 26, 0.3)',
                  transition: 'all 0.3s ease'
                }}
                className="action-button-hover"
+               disabled={book.status.available === 0}
              >
                📚 Loans
              </Button>

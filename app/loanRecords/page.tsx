@@ -1,19 +1,17 @@
 "use client";
 
-import { useList } from "@refinedev/core";
+import { useList, useUpdate } from "@refinedev/core";
 import { Skeleton, Table, Tag, Space, Typography, Card, Tooltip, Button } from "antd";
 import { BookOutlined, UserOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, TeamOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { useEffect, useState } from "react";
-import { getLoanRecordById , updateLoanRecord } from "../database/loanRecorDatabase";
+import { LoanRecord } from "../interface/loanRecord";
+import { Book } from "../interface/book";
+import { updateBook } from "../database/bookDatabase";
 
 const { Title, Text } = Typography;
 
 export default function LoanRecords() {
-  const { data, isLoading } = useList({
-    resource: "loanRecords",
-  });
-
 
 
   const [userData, setUserData] = useState<any>(null);
@@ -31,10 +29,26 @@ export default function LoanRecords() {
     }
   }, []);
 
+  const { data: loanRecords, isLoading } = useList<LoanRecord>({
+    resource: "loanRecords",
+  });
+
+  const { mutate: updateLoanRecord } = useUpdate<LoanRecord>({
+    resource: "loanRecords",
+  });
+
+  const { data: books, isLoading: bookLoading } = useList<Book>({
+    resource: "books",
+  });
+
+  const { mutate: updateBook } = useUpdate<Book>({
+    resource: "books",
+  });
+
   // Filter data based on user role
   const filteredData = !isLoading && userData?.role === "user" 
-    ? data?.data?.filter(item => item.borrowerName === userData.email) 
-    : data?.data;
+    ? loanRecords?.data?.filter(item => item.borrowerName === userData.email) 
+    : loanRecords?.data;
 
   // Calculate statistics
   const totalRecords = filteredData?.length || 0;
@@ -84,7 +98,8 @@ export default function LoanRecords() {
   // Handle status change
   const handleStatusChange = (recordId: string, newStatus: "delivered" | "received" | "returned" | "completed" | "pending" | "canceled") => {
 
-    const record = getLoanRecordById(recordId);
+    //update the loan record
+    const record = loanRecords?.data?.find(item => item.id === recordId);
     if (record) {
       const updatedRecord = { ...record, status: newStatus };
       // Add timestamp based on new status
@@ -105,7 +120,29 @@ export default function LoanRecords() {
           updatedRecord.returnConfirmerName = userData?.name || 'Unknown';
           break;
       }
-      updateLoanRecord(recordId, updatedRecord);
+      updateLoanRecord({
+        id: recordId,
+        values: {
+          ...updatedRecord
+        }
+      });
+
+      if(newStatus === "completed" || newStatus === "canceled"){
+        const book = books?.data?.find(item => item.name === record.bookTitle);
+        if(book){
+          updateBook({
+            id: book.id,
+            values: {
+              status: {
+                ...book.status,
+                available: book.status.available + record.quantity,
+                loaned: book.status.loaned - record.quantity
+              }
+            }
+          });
+        }
+      }
+      //reload the page
       window.location.reload();
     }
   };
@@ -224,45 +261,67 @@ export default function LoanRecords() {
       render: (_, record) => {
         const { status } = record;
         
-        // Admin actions
-        if (userData?.role === "admin") {
-          if (status === "pending") {
-            return (
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
-                height: '100%',
-                gap: '4px'
-              }}>
-                <Button
-                  type="primary"
-                  size="small"
-                  onClick={() => handleStatusChange(record.id, "delivered")}
-                  style={{
-                    background: "linear-gradient(135deg, #52c41a 0%, #73d13d 100%)",
-                    border: "none",
-                    borderRadius: "8px",
-                    fontWeight: "600",
-                    boxShadow: "0 2px 8px rgba(82, 196, 26, 0.3)",
-                    minWidth: "100px",
-                    height: "32px"
-                  }}
-                >
-                  ✨ Delivered
-                </Button>
-                <Text style={{ 
-                  color: "#52c41a", 
-                  fontSize: '11px',
-                  fontWeight: '500',
-                  textAlign: 'center',
-                  lineHeight: '1.2'
-                }}>
-                  Delivered the book to the customer
-                </Text>
-              </div>
-            );
+                 // Admin actions
+         if (userData?.role === "admin") {
+           if (status === "pending") {
+             return (
+               <div style={{ 
+                 display: 'flex', 
+                 flexDirection: 'column', 
+                 justifyContent: 'center', 
+                 alignItems: 'center', 
+                 height: '100%',
+                 gap: '8px'
+               }}>
+                 <div style={{
+                   display: 'flex',
+                   gap: '8px',
+                   justifyContent: 'center'
+                 }}>
+                   <Button
+                     type="primary"
+                     size="small"
+                     onClick={() => handleStatusChange(record.id, "delivered")}
+                     style={{
+                       background: "linear-gradient(135deg, #52c41a 0%, #73d13d 100%)",
+                       border: "none",
+                       borderRadius: "8px",
+                       fontWeight: "600",
+                       boxShadow: "0 2px 8px rgba(82, 196, 26, 0.3)",
+                       minWidth: "80px",
+                       height: "32px"
+                     }}
+                   >
+                     ✨ Delivered
+                   </Button>
+                   <Button
+                     type="primary"
+                     size="small"
+                     onClick={() => handleStatusChange(record.id, "canceled")}
+                     style={{
+                       background: "linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%)",
+                       border: "none",
+                       borderRadius: "8px",
+                       fontWeight: "600",
+                       boxShadow: "0 2px 8px rgba(255, 77, 79, 0.3)",
+                       minWidth: "80px",
+                       height: "32px"
+                     }}
+                   >
+                     ❌ Canceled
+                   </Button>
+                 </div>
+                 <Text style={{ 
+                   color: "#52c41a", 
+                   fontSize: '11px',
+                   fontWeight: '500',
+                   textAlign: 'center',
+                   lineHeight: '1.2'
+                 }}>
+                   Choose action: Deliver or Cancel
+                 </Text>
+               </div>
+             );
           } else if (status === "returned") {
             return (
               <div style={{ 
@@ -297,6 +356,78 @@ export default function LoanRecords() {
                   lineHeight: '1.2'
                 }}>
                   Complete the loan
+                </Text>
+              </div>
+            );
+          } else if (status === "completed") {
+            return (
+              <div style={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                justifyContent: 'center', 
+                alignItems: 'center', 
+                height: '100%',
+                gap: '4px'
+              }}>
+                <div style={{
+                  padding: '8px 16px',
+                  background: 'linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%)',
+                  borderRadius: '8px',
+                  border: '2px solid #b7eb8f'
+                }}>
+                  <Text style={{ 
+                    color: "#52c41a", 
+                    fontStyle: "italic",
+                    fontSize: '13px',
+                    fontWeight: '600'
+                  }}>
+                    🎉 Completed
+                  </Text>
+                </div>
+                <Text style={{ 
+                  color: "#52c41a", 
+                  fontSize: '11px',
+                  fontWeight: '500',
+                  textAlign: 'center',
+                  lineHeight: '1.2'
+                }}>
+                  The loan record book has complete
+                </Text>
+              </div>
+            );
+          } else if (status === "canceled") {
+            return (
+              <div style={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                justifyContent: 'center', 
+                alignItems: 'center', 
+                height: '100%',
+                gap: '4px'
+              }}>
+                <div style={{
+                  padding: '8px 16px',
+                  background: 'linear-gradient(135deg, #fff2f0 0%, #ffccc7 100%)',
+                  borderRadius: '8px',
+                  border: '2px solid #ffbb96'
+                }}>
+                  <Text style={{ 
+                    color: "#ff4d4f", 
+                    fontStyle: "italic",
+                    fontSize: '13px',
+                    fontWeight: '600'
+                  }}>
+                    ❌ Canceled
+                  </Text>
+                </div>
+                <Text style={{ 
+                  color: "#ff4d4f", 
+                  fontSize: '11px',
+                  fontWeight: '500',
+                  textAlign: 'center',
+                  lineHeight: '1.2'
+                }}>
+                  The loan request has been canceled
                 </Text>
               </div>
             );
@@ -412,6 +543,78 @@ export default function LoanRecords() {
                   lineHeight: '1.2'
                 }}>
                   Returned the book to the library
+                </Text>
+              </div>
+            );
+          } else if (status === "completed") {
+            return (
+              <div style={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                justifyContent: 'center', 
+                alignItems: 'center', 
+                height: '100%',
+                gap: '4px'
+              }}>
+                <div style={{
+                  padding: '8px 16px',
+                  background: 'linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%)',
+                  borderRadius: '8px',
+                  border: '2px solid #b7eb8f'
+                }}>
+                  <Text style={{ 
+                    color: "#52c41a", 
+                    fontStyle: "italic",
+                    fontSize: '13px',
+                    fontWeight: '600'
+                  }}>
+                    🎉 Completed
+                  </Text>
+                </div>
+                <Text style={{ 
+                  color: "#52c41a", 
+                  fontSize: '11px',
+                  fontWeight: '500',
+                  textAlign: 'center',
+                  lineHeight: '1.2'
+                }}>
+                  The loan record book has complete
+                </Text>
+              </div>
+            );
+          } else if (status === "canceled") {
+            return (
+              <div style={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                justifyContent: 'center', 
+                alignItems: 'center', 
+                height: '100%',
+                gap: '4px'
+              }}>
+                <div style={{
+                  padding: '8px 16px',
+                  background: 'linear-gradient(135deg, #fff2f0 0%, #ffccc7 100%)',
+                  borderRadius: '8px',
+                  border: '2px solid #ffbb96'
+                }}>
+                  <Text style={{ 
+                    color: "#ff4d4f", 
+                    fontStyle: "italic",
+                    fontSize: '13px',
+                    fontWeight: '600'
+                  }}>
+                    ❌ Canceled
+                  </Text>
+                </div>
+                <Text style={{ 
+                  color: "#ff4d4f", 
+                  fontSize: '11px',
+                  fontWeight: '500',
+                  textAlign: 'center',
+                  lineHeight: '1.2'
+                }}>
+                  The loan request has been canceled
                 </Text>
               </div>
             );
