@@ -1,8 +1,7 @@
 "use client";
 
 import { Form, Input, Button, Alert, Card} from "antd";
-import styles from "./login.module.css";
-import { ConsoleSqlOutlined, EyeInvisibleOutlined, EyeTwoTone, LockOutlined, UserOutlined } from "@ant-design/icons";
+import { EyeInvisibleOutlined, EyeTwoTone, LockOutlined, UserOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import Link from "next/link";
 import { useLogin } from "@refinedev/core";
@@ -35,8 +34,17 @@ export default function Login() {
 
   return (
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, flexDirection: "column" }}>
-      <div className={styles.header}>
-        <h1 className={styles.title}>Management Books System</h1>
+      <div style={{
+        textAlign: 'center',
+        marginBottom: '20px'
+      }}>
+        <h1 style={{
+          fontSize: '2.5rem',
+          fontWeight: '700',
+          color: '#1890ff',
+          margin: '0',
+          textShadow: '2px 2px 4px rgba(24, 144, 255, 0.3)'
+        }}>Management Books System</h1>
       </div>
       {errorMessage && (
         <Alert
@@ -73,7 +81,9 @@ export default function Login() {
           layout="vertical"
           onFinish={onFinish}
           autoComplete="off"
-          className={styles.loginForm}
+          style={{
+            padding: '20px 0'
+          }}
           disabled={isPending}
         >
           <Form.Item
@@ -85,10 +95,17 @@ export default function Login() {
             ]}
           >
             <Input
-              prefix={<UserOutlined className={styles.inputIcon} />}
+              prefix={<UserOutlined style={{
+                color: '#bfbfbf',
+                marginRight: '8px'
+              }} />}
               placeholder="Enter your email"
               size="large"
-              className={styles.input}
+              style={{
+                borderRadius: '8px',
+                border: '1px solid #d9d9d9',
+                transition: 'all 0.3s ease'
+              }}
             />
           </Form.Item>
 
@@ -98,10 +115,17 @@ export default function Login() {
             rules={[{ required: true, message: "Please input your password!" }]}
           >
             <Input.Password
-              prefix={<LockOutlined className={styles.inputIcon} />}
+              prefix={<LockOutlined style={{
+                color: '#bfbfbf',
+                marginRight: '8px'
+              }} />}
               placeholder="Enter your password"
               size="large"
-              className={styles.input}
+              style={{
+                borderRadius: '8px',
+                border: '1px solid #d9d9d9',
+                transition: 'all 0.3s ease'
+              }}
               iconRender={(visible) =>
                 visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
               }
@@ -113,7 +137,16 @@ export default function Login() {
               type="primary" 
               htmlType="submit"
               size="large"
-              className={styles.loginButton}
+              style={{
+                background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
+                border: 'none',
+                borderRadius: '8px',
+                fontWeight: '600',
+                height: '48px',
+                fontSize: '16px',
+                boxShadow: '0 4px 12px rgba(24, 144, 255, 0.3)',
+                transition: 'all 0.3s ease'
+              }}
               block
               loading={isPending}
             >
@@ -121,9 +154,26 @@ export default function Login() {
             </Button>
           </Form.Item>
         </Form>
-        <div className={styles.actionsContainer} style={{ width: "100%" }}>
-          <Link className={styles.link} href="/forgot-password">Forgot password?</Link>
-          <Link className={styles.link} href="/register">Create account</Link>
+        <div style={{ 
+          width: "100%",
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '20px 0 0 0',
+          borderTop: '1px solid #f0f0f0'
+        }}>
+          <Link style={{
+            color: '#1890ff',
+            textDecoration: 'none',
+            fontSize: '14px',
+            transition: 'all 0.3s ease'
+          }} href="/forgot-password">Forgot password?</Link>
+          <Link style={{
+            color: '#1890ff',
+            textDecoration: 'none',
+            fontSize: '14px',
+            transition: 'all 0.3s ease'
+          }} href="/register">Create account</Link>
         </div>
       </Card>
 
