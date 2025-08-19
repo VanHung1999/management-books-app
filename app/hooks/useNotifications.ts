@@ -20,77 +20,71 @@ const getLoanNotifications = (currentUser: User, loanRecords: LoanRecord[]): Not
     const notificationsLoanRecords: Notification[] = [];
 
     loanRecords?.forEach((record: LoanRecord) => {
-        let notificationsLoanRecord: Notification | null = null;
+      let notificationsLoanRecord: Notification | null = null;
 
-        if (currentUser.role === 'admin') {
-            // Admin notifications
-            if (record.status === 'pending') {
-                notificationsLoanRecord = {
-                    id: `loan-pending-${record.id}`,
-                    title: '📚 User has requested a loan',
-                    message: `${record.borrowerName} has requested a loan for "${record.bookTitle}" (${record.quantity} books)`,
-                    type: 'info',
-                    timestamp: record.borrowedAt,
-                    isRead: false,
-                    category: 'loan',
-                    priority: 'medium',
-                    actionUrl: `/loanRecords`,
-                    metadata: {
-                        loanRecordId: record.id,
-                        borrowerName: record.borrowerName,
-                        bookTitle: record.bookTitle,
-                        quantity: record.quantity,
-                        status: record.status
-                    }
-                };
-            } else if (record.status === 'returned') {
-                notificationsLoanRecord = {
-                    id: `loan-returned-${record.id}`,
-                    title: '📖 User has returned a book',
-                    message: `${record.borrowerName} has returned "${record.bookTitle}" (${record.quantity} books)`,
-                    type: 'success',
-                    timestamp: record.returnedAt || new Date(),
-                    isRead: false,
-                    category: 'loan',
-                    priority: 'low',
-                    actionUrl: `/loanRecords`,
-                    metadata: {
-                        loanRecordId: record.id,
-                        borrowerName: record.borrowerName,
-                        bookTitle: record.bookTitle,
-                        quantity: record.quantity,
-                        status: record.status
-                    }
-                };
+      if (record.status === 'delivered' && record.borrowerName === currentUser.email) {
+        notificationsLoanRecord = {
+            id: `loan-delivered-${record.id}`,
+            title: '🚚 Book has been delivered',
+            message: `Book "${record.bookTitle}" (${record.quantity} books) has been delivered to you`,
+            type: 'success',
+            timestamp: record.deliveredAt || new Date(),
+            isRead: false,
+            category: 'loan',
+            priority: 'medium',
+            actionUrl: `/loanRecords`,
+            metadata: {
+                loanRecordId: record.id,
+                bookTitle: record.bookTitle,
+                quantity: record.quantity,
+                status: record.status
             }
-        } else {
-            // User notifications (người mượn sách)
-            if (record.status === 'delivered' && record.borrowerName === currentUser.email) {
-                notificationsLoanRecord = {
-                    id: `loan-delivered-${record.id}`,
-                    title: '🚚 Book has been delivered',
-                    message: `Book "${record.bookTitle}" (${record.quantity} books) has been delivered to you`,
-                    type: 'success',
-                    timestamp: record.deliveredAt || new Date(),
-                    isRead: false,
-                    category: 'loan',
-                    priority: 'medium',
-                    actionUrl: `/loanRecords`,
-                    metadata: {
-                        loanRecordId: record.id,
-                        bookTitle: record.bookTitle,
-                        quantity: record.quantity,
-                        status: record.status
-                    }
-                };
-            }
-        }
-        
-        if (notificationsLoanRecord) {
-            notificationsLoanRecords.push(notificationsLoanRecord);
-        }
-    });
-    
+        };
+    } else if (record.status === 'pending' && currentUser.role === 'admin') {
+        notificationsLoanRecord = {
+          id: `loan-pending-${record.id}`,
+          title: '📚 User has requested a loan',
+          message: `${record.borrowerName} has requested a loan for "${record.bookTitle}" (${record.quantity} books)`,
+          type: 'info',
+          timestamp: record.borrowedAt,
+          isRead: false,
+          category: 'loan',
+          priority: 'medium',
+          actionUrl: `/loanRecords`,
+          metadata: {
+              loanRecordId: record.id,
+              borrowerName: record.borrowerName,
+              bookTitle: record.bookTitle,
+              quantity: record.quantity,
+              status: record.status
+          }
+        };
+    } else if (record.status === 'returned' && currentUser.role === 'admin') {
+        notificationsLoanRecord = {
+          id: `loan-returned-${record.id}`,
+          title: '📖 User has returned a book',
+          message: `${record.borrowerName} has returned "${record.bookTitle}" (${record.quantity} books)`,
+          type: 'success',
+          timestamp: record.returnedAt || new Date(),
+          isRead: false,
+          category: 'loan',
+          priority: 'low',
+          actionUrl: `/loanRecords`,
+          metadata: {
+              loanRecordId: record.id,
+              borrowerName: record.borrowerName,
+              bookTitle: record.bookTitle,
+              quantity: record.quantity,
+              status: record.status
+          }
+        };
+    }
+
+    if (notificationsLoanRecord) {
+      notificationsLoanRecords.push(notificationsLoanRecord);
+    }
+  });
+
     return notificationsLoanRecords;
 };
 
