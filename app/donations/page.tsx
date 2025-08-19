@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Select, Button, Card, Typography, Space, Row, Col, Table, Tag, Tooltip, Skeleton } from 'antd';
+import { Form, Input, Select, Button, Card, Typography, Space, Row, Col, Table, Tag, Tooltip, Skeleton, message } from 'antd';
 import { getCategories } from '../database/categoryDatabase';
-import { PlusOutlined, DeleteOutlined, GiftOutlined, UserOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, TeamOutlined } from '@ant-design/icons';
+import { PlusOutlined, DeleteOutlined, GiftOutlined, UserOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, TeamOutlined, CloseOutlined } from '@ant-design/icons';
 import { useCreate, useList, useUpdate } from '@refinedev/core';
 import { User } from '../interface/user';
 import { DonationRecord } from '../interface/donationRecord';
@@ -55,18 +55,60 @@ export default function Donations() {
 
   const handleSubmit = (values: any) => {
     setIsCreating(true);
+    let successCount = 0;
+    let totalCount = values.donatedBooks.length;
+    
     const donationRecords = values.donatedBooks.map((donationRecord: any) => {
-      createDonationRecord({
-        values:{
-          ...donationRecord,
-          donationerName: currentUser?.email,
-          donationDate: new Date(),
-          status: "pending"
+      // Handle file upload - convert to base64 if it's a file
+      if (donationRecord.coverImageFile) {
+        // Convert file to base64 for storage
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const base64String = e.target?.result as string;
+          createDonationRecord({  
+            values: {
+              ...donationRecord,
+              coverImage: base64String,
+              donationerName: currentUser?.email,
+              donationDate: new Date(),
+              status: "pending"
+            }
+          });
+          successCount++;
+          if (successCount === totalCount) {
+            message.success(`Successfully submitted ${totalCount} book donation(s)!`);
+            form.resetFields();
+            setIsCreating(false);
+          }
+        };
+        reader.readAsDataURL(donationRecord.coverImageFile);
+      } else {
+        // Use URL directly
+        createDonationRecord({
+          values: {
+            ...donationRecord,
+            donationerName: currentUser?.email,
+            donationDate: new Date(),
+            status: "pending"
+          }
+        });
+        successCount++;
+        if (successCount === totalCount) {
+          message.success(`Successfully submitted ${totalCount} book donation(s)!`);
+          form.resetFields();
+          setIsCreating(false);
         }
-      });
+      }
     });
-    form.resetFields();
-    setIsCreating(false);
+    
+    // Fallback reset in case of errors
+    setTimeout(() => {
+      if (isCreating) {
+        form.resetFields();
+        setIsCreating(false);
+        message.info('Form reset. Please check if all donations were submitted successfully.');
+      }
+    }, 5000);
   };
 
   const resetAllForms = () => {
@@ -155,7 +197,8 @@ export default function Donations() {
             name: record.bookTitle,
             author: record.author,
             category: record.category,
-            num: record.num
+            num: record.num,
+            coverImage: record.coverImage,
           }
         });
       }
@@ -284,6 +327,58 @@ export default function Donations() {
       key: "publishYear",
       render: (year) => (
         <Text>{year || "-"}</Text>
+      ),
+    },
+    {
+      title: "Cover Image",
+      dataIndex: "coverImage",
+      key: "coverImage",
+      width: 100,
+      render: (coverImage) => (
+        coverImage ? (
+          <Tooltip title="Click to view full size">
+            <img
+              src={coverImage}
+              alt="Book Cover"
+              style={{
+                width: '60px',
+                height: '80px',
+                objectFit: 'cover',
+                borderRadius: '8px',
+                border: '2px solid #e8e8e8',
+                cursor: 'pointer',
+                transition: 'transform 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                (e.target as HTMLElement).style.transform = 'scale(1.05)';
+              }}
+              onMouseLeave={(e) => {
+                (e.target as HTMLElement).style.transform = 'scale(1)';
+              }}
+              onClick={() => {
+                // Open image in new tab for full view
+                window.open(coverImage, '_blank');
+              }}
+            />
+          </Tooltip>
+        ) : (
+          <Tooltip title="No cover image available">
+            <div style={{
+              width: '90px',
+              height: '80px',
+              background: '#f5f5f5',
+              borderRadius: '8px',
+              border: '2px dashed #d9d9d9',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#8c8c8c',
+              fontSize: '12px'
+            }}>
+              No Image
+            </div>
+          </Tooltip>
+        )
       ),
     },
     // Only show these columns for admin users
@@ -439,7 +534,7 @@ export default function Donations() {
             {(fields, { add, remove }) => (
               <>
                 {fields.map(({ key, name, ...restField }) => (
-                                     <Card 
+                  <Card 
                      key={key} 
                      size="small" 
                      style={{ 
@@ -573,14 +668,91 @@ export default function Donations() {
                           {...restField}
                           name={[name, 'coverImage']}
                           label="Cover Image"
-                          rules={[
-                            { 
-                              type: 'url', 
-                              message: 'The cover image must be a valid URL!' 
-                            }
-                          ]}
                         >
-                          <Input placeholder="Enter the cover image (optional)" />
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <Input 
+                              placeholder="Enter image URL or upload file" 
+                              value={form.getFieldValue(['donatedBooks', name, 'coverImage']) || ''}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                form.setFieldValue(['donatedBooks', name, 'coverImage'], value);
+                                form.setFieldValue(['donatedBooks', name, 'coverImageFile'], null);
+                              }}
+                            />
+                               <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                               <span style={{ fontSize: '12px', color: '#8c8c8c' }}>OR</span>
+                               <input
+                                 type="file"
+                                 accept="image/*"
+                                 onChange={(e) => {
+                                   const file = e.target.files?.[0];
+                                   if (file) {
+                                     // Validate file size (max 5MB)
+                                     if (file.size > 5 * 1024 * 1024) {
+                                       message.error('File size must be less than 5MB');
+                                       e.target.value = '';
+                                       return;
+                                     }
+                                     
+                                     // Validate file type
+                                     if (!file.type.startsWith('image/')) {
+                                       message.error('Please select an image file');
+                                       e.target.value = '';
+                                       return;
+                                     }
+                                     
+                                     form.setFieldValue(['donatedBooks', name, 'coverImageFile'], file);
+                                     form.setFieldValue(['donatedBooks', name, 'coverImage'], '');
+                                     message.success('File uploaded successfully!');
+                                   }
+                                 }}
+                                 style={{ fontSize: '12px' }}
+                               />
+                             </div>
+                                                         {/* Preview Image */}
+                             {(form.getFieldValue(['donatedBooks', name, 'coverImage']) || form.getFieldValue(['donatedBooks', name, 'coverImageFile'])) && (
+                               <div style={{ marginTop: '8px', position: 'relative' }}>
+                                 <img
+                                   src={form.getFieldValue(['donatedBooks', name, 'coverImage']) || 
+                                        (form.getFieldValue(['donatedBooks', name, 'coverImageFile']) ? 
+                                         URL.createObjectURL(form.getFieldValue(['donatedBooks', name, 'coverImageFile'])) : '')}
+                                   alt="Preview"
+                                   style={{
+                                     width: '100px',
+                                     height: '120px',
+                                     objectFit: 'cover',
+                                     borderRadius: '8px',
+                                     border: '2px solid #d9d9d9'
+                                   }}
+                                 />
+                                 <Button
+                                   type="text"
+                                   size="small"
+                                   icon={<CloseOutlined />}
+                                   style={{
+                                     position: 'absolute',
+                                     top: '-8px',
+                                     right: '-8px',
+                                     background: '#ff4d4f',
+                                     color: 'white',
+                                     border: 'none',
+                                     borderRadius: '50%',
+                                     width: '20px',
+                                     height: '20px',
+                                     display: 'flex',
+                                     alignItems: 'center',
+                                     justifyContent: 'center',
+                                     boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                                   }}
+                                   onClick={() => {
+                                     form.setFieldValue(['donatedBooks', name, 'coverImage'], '');
+                                     form.setFieldValue(['donatedBooks', name, 'coverImageFile'], null);
+                                     message.info('Cover image removed');
+                                   }}
+                                 />
+                               </div>
+                             )}
+                          </div>
                         </Form.Item>
                       </Col>
                       <Col span={12}>
@@ -899,7 +1071,7 @@ export default function Donations() {
                   `${range[0]}-${range[1]} of ${total} donations`,
                 style: { marginTop: '16px' }
               }}
-              scroll={{ x: 1400 }}
+              scroll={{ x: 1500 }}
               size="middle"
               bordered
               style={{ borderRadius: '8px' }}
