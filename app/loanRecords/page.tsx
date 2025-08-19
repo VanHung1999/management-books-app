@@ -1,7 +1,7 @@
 "use client";
 
 import { useList, useUpdate } from "@refinedev/core";
-import { Skeleton, Table, Tag, Space, Typography, Card, Tooltip, Button } from "antd";
+import { Skeleton, Table, Tag, Space, Typography, Card, Tooltip} from "antd";
 import { BookOutlined, UserOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, TeamOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { useEffect, useState } from "react";
@@ -155,7 +155,11 @@ export default function LoanRecords() {
   const getActionConfig = (record: any) => {
     const { status } = record;
     
-    // Admin actions
+    // Early returns for specific statuses
+    if (status === "completed") return renderStatusDisplay(STATUS_CONFIGS.completed);
+    if (status === "canceled") return renderStatusDisplay(STATUS_CONFIGS.canceled);
+    
+    // Admin actions (regardless of borrower)
     if (userData?.role === "admin") {
       if (status === "pending") {
         return renderActionContainer([
@@ -169,52 +173,40 @@ export default function LoanRecords() {
           })
         ], "Choose action: Deliver or Cancel", "#52c41a");
       }
+      if (status === "returned") {
+        return renderSingleAction(
+          renderActionButton({
+            ...ACTION_CONFIGS.completed,
+            onClick: () => handleStatusChange(record.id, "completed")
+          }),
+          "Complete the loan",
+          "#722ed1"
+        );
+      }
     }
     
-    // User actions for delivered status
-    if (status === "delivered" && userData?.email === record.borrowerName) {
-      return renderSingleAction(
-        renderActionButton({
-          ...ACTION_CONFIGS.received,
-          onClick: () => handleStatusChange(record.id, "received")
-        }),
-        "Received the book from the library",
-        "#1890ff"
-      );
-    }
-    
-    // User actions for received status
-    if (status === "received" && userData?.email === record.borrowerName) {
-      return renderSingleAction(
-        renderActionButton({
-          ...ACTION_CONFIGS.returned,
-          onClick: () => handleStatusChange(record.id, "returned")
-        }),
-        "Returned the book to the library",
-        "#fa8c16"
-      );
-    }
-    
-    // Admin actions for returned status
-    if (status === "returned") {
-      return renderSingleAction(
-        renderActionButton({
-          ...ACTION_CONFIGS.completed,
-          onClick: () => handleStatusChange(record.id, "completed")
-        }),
-        "Complete the loan",
-        "#722ed1"
-      );
-    }
-    
-    // Status displays for completed
-    if (status === "completed") {
-      return renderStatusDisplay(STATUS_CONFIGS.completed);
-    }
-    
-    // Status displays for canceled
-    if (status === "canceled") {
-      return renderStatusDisplay(STATUS_CONFIGS.canceled);
+    // User actions (for both regular users and admin users when they are the borrower)
+    if (userData?.email === record.borrowerName) {
+      if (status === "delivered") {
+        return renderSingleAction(
+          renderActionButton({
+            ...ACTION_CONFIGS.received,
+            onClick: () => handleStatusChange(record.id, "received")
+          }),
+          "Received the book from the library",
+          "#1890ff"
+        );
+      }
+      if (status === "received") {
+        return renderSingleAction(
+          renderActionButton({
+            ...ACTION_CONFIGS.returned,
+            onClick: () => handleStatusChange(record.id, "returned")
+          }),
+          "Returned the book to the library",
+          "#fa8c16"
+        );
+      }
     }
     
     // Default waiting status

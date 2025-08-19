@@ -4,7 +4,7 @@ import { Button, Typography } from 'antd';
 const { Text } = Typography;
 
 // Action button configuration
-export interface ActionButtonConfig {
+export interface DonationActionButtonConfig {
   text: string;
   onClick: () => void;
   gradient: string;
@@ -13,7 +13,7 @@ export interface ActionButtonConfig {
 }
 
 // Status display configuration
-export interface StatusDisplayConfig {
+export interface DonationStatusDisplayConfig {
   text: string;
   background: string;
   borderColor: string;
@@ -22,7 +22,7 @@ export interface StatusDisplayConfig {
 }
 
 // Helper function to render action button
-export const renderActionButton = (config: ActionButtonConfig) => (
+export const renderDonationActionButton = (config: DonationActionButtonConfig) => (
   <Button
     type="primary"
     size="small"
@@ -42,7 +42,7 @@ export const renderActionButton = (config: ActionButtonConfig) => (
 );
 
 // Helper function to render status display
-export const renderStatusDisplay = (config: StatusDisplayConfig) => (
+export const renderDonationStatusDisplay = (config: DonationStatusDisplayConfig) => (
   <div style={{ 
     display: 'flex', 
     flexDirection: 'column', 
@@ -79,7 +79,7 @@ export const renderStatusDisplay = (config: StatusDisplayConfig) => (
 );
 
 // Helper function to render action container
-export const renderActionContainer = (buttons: React.ReactNode[], description: string, descriptionColor: string) => (
+export const renderDonationActionContainer = (buttons: React.ReactNode[], description: string, descriptionColor: string) => (
   <div style={{ 
     display: 'flex', 
     flexDirection: 'column', 
@@ -112,7 +112,7 @@ export const renderActionContainer = (buttons: React.ReactNode[], description: s
 );
 
 // Helper function to render single action button with description
-export const renderSingleAction = (button: React.ReactNode, description: string, descriptionColor: string) => (
+export const renderDonationSingleAction = (button: React.ReactNode, description: string, descriptionColor: string) => (
   <div style={{ 
     display: 'flex', 
     flexDirection: 'column', 
@@ -134,55 +134,49 @@ export const renderSingleAction = (button: React.ReactNode, description: string,
   </div>
 );
 
-// Predefined action configurations
-export const ACTION_CONFIGS = {
-  delivered: {
-    text: "✨ Delivered",
+// Predefined action configurations for donations
+export const DONATION_ACTION_CONFIGS = {
+  confirm: {
+    text: "✅ Confirm",
     gradient: "linear-gradient(135deg, #52c41a 0%, #73d13d 100%)",
     shadowColor: "rgba(82, 196, 26, 0.3)",
     minWidth: "80px"
   },
-  canceled: {
-    text: "❌ Canceled",
+  cancel: {
+    text: "❌ Cancel",
     gradient: "linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%)",
     shadowColor: "rgba(255, 77, 79, 0.3)",
     minWidth: "80px"
   },
-  received: {
-    text: "📦 Received",
-    gradient: "linear-gradient(135deg, #1890ff 0%, #40a9ff 100%)",
-    shadowColor: "rgba(24, 144, 255, 0.3)",
-    minWidth: "100px"
-  },
-  returned: {
-    text: "🔄 Returned",
-    gradient: "linear-gradient(135deg, #fa8c16 0%, #ffa940 100%)",
-    shadowColor: "rgba(250, 140, 22, 0.3)",
-    minWidth: "100px"
-  },
-  completed: {
-    text: "✅ Complete",
+  send: {
+    text: "📦 Send",
     gradient: "linear-gradient(135deg, #722ed1 0%, #9254de 100%)",
     shadowColor: "rgba(114, 46, 209, 0.3)",
+    minWidth: "100px"
+  },
+  receive: {
+    text: "🎉 Receive",
+    gradient: "linear-gradient(135deg, #fa8c16 0%, #ffa940 100%)",
+    shadowColor: "rgba(250, 140, 22, 0.3)",
     minWidth: "100px"
   }
 };
 
-// Predefined status display configurations
-export const STATUS_CONFIGS = {
-  completed: {
-    text: "🎉 Completed",
+// Predefined status display configurations for donations
+export const DONATION_STATUS_CONFIGS = {
+  received: {
+    text: "🎉 Received",
     background: "linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%)",
     borderColor: "#b7eb8f",
     textColor: "#52c41a",
-    description: "The loan record book has complete"
+    description: "Books added to library"
   },
   canceled: {
     text: "❌ Canceled",
     background: "linear-gradient(135deg, #fff2f0 0%, #ffccc7 100%)",
     borderColor: "#ffbb96",
     textColor: "#ff4d4f",
-    description: "The loan request has been canceled"
+    description: "Donation request canceled"
   },
   waiting: {
     background: "linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%)",

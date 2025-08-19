@@ -7,7 +7,6 @@ export interface DonationRecord {
     bookTitle: string;
     author: string;
     category: string;
-    ISBN: string;
     publishYear?: number;
     coverImage?: string;
     description?: string;

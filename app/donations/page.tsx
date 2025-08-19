@@ -9,6 +9,14 @@ import { User } from '../interface/user';
 import { DonationRecord } from '../interface/donationRecord';
 import { Book } from '../interface/book';
 import type { ColumnsType } from "antd/es/table";
+import { 
+  renderDonationActionButton, 
+  renderDonationStatusDisplay, 
+  renderDonationActionContainer, 
+  renderDonationSingleAction,
+  DONATION_ACTION_CONFIGS,
+  DONATION_STATUS_CONFIGS
+} from '../components/DonationActionComponents';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -33,11 +41,7 @@ export default function Donations() {
     resource: "donationRecords",
   });
 
-  const { data: books, isLoading: bookLoading } = useList<Book>({
-    resource: "books",
-  });
-
-  const { mutate: updateBook } = useUpdate<Book>({
+  const { mutate: createBook } = useCreate<Book>({
     resource: "books",
   });
 
@@ -146,23 +150,80 @@ export default function Donations() {
 
       // If received, add books to the library
       if (newStatus === "received") {
-        const book = books?.data?.find(item => item.name === record.bookTitle);
-        if (book) {
-          updateBook({
-            id: book.id,
-            values: {
-              status: {
-                ...book.status,
-                available: book.status.available + record.num
-              }
-            }
-          });
-        }
+        createBook({
+          values: {
+            name: record.bookTitle,
+            author: record.author,
+            category: record.category,
+            num: record.num
+          }
+        });
       }
       
       // Reload the page
       window.location.reload();
     }
+  };
+
+  // Get action configuration based on status and user role
+  const getDonationActionConfig = (record: any) => {
+    const { status } = record;
+    
+    // Admin actions
+    if (currentUser?.role === "admin") {
+      if (status === "pending") {
+        return renderDonationActionContainer([
+          renderDonationActionButton({
+            ...DONATION_ACTION_CONFIGS.confirm,
+            onClick: () => handleStatusChange(record.id, "confirmed")
+          }),
+          renderDonationActionButton({
+            ...DONATION_ACTION_CONFIGS.cancel,
+            onClick: () => handleStatusChange(record.id, "canceled")
+          })
+        ], "Choose action: Confirm or Cancel", "#52c41a");
+      } else if (status === "sent") {
+        return renderDonationSingleAction(
+          renderDonationActionButton({
+            ...DONATION_ACTION_CONFIGS.receive,
+            onClick: () => handleStatusChange(record.id, "received")
+          }),
+          "Add books to library",
+          "#fa8c16"
+        );
+      }
+    }
+    
+    // User actions for confirmed status
+    if (status === "confirmed" && currentUser?.email === record.donationerName) {
+      return renderDonationSingleAction(
+        renderDonationActionButton({
+          ...DONATION_ACTION_CONFIGS.send,
+          onClick: () => handleStatusChange(record.id, "sent")
+        }),
+        "Mark as sent",
+        "#722ed1"
+      );
+    }
+    
+    // Status displays for received
+    if (status === "received") {
+      return renderDonationStatusDisplay(DONATION_STATUS_CONFIGS.received);
+    }
+    
+    // Status displays for canceled
+    if (status === "canceled") {
+      return renderDonationStatusDisplay(DONATION_STATUS_CONFIGS.canceled);
+    }
+    
+    // Default waiting status
+    return renderDonationStatusDisplay({
+      ...DONATION_STATUS_CONFIGS.waiting,
+      text: "⏳ Waiting",
+      description: currentUser?.role === "admin" 
+        ? "Waiting response from customer" 
+        : "Waiting response from admin"
+    });
   };
 
   const columns: ColumnsType<any> = [
@@ -215,14 +276,6 @@ export default function Donations() {
         <Tag color="green" style={{ borderRadius: "6px" }}>
           {num}
         </Tag>
-      ),
-    },
-    {
-      title: "ISBN",
-      dataIndex: "ISBN",
-      key: "ISBN",
-      render: (isbn) => (
-        <Text code>{isbn}</Text>
       ),
     },
     {
@@ -303,407 +356,7 @@ export default function Donations() {
       key: "action",
       align: "center",
       width: 180,
-      render: (_, record) => {
-        const { status } = record;
-        
-        // Admin actions
-        if (currentUser?.role === "admin") {
-          if (status === "pending") {
-            return (
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
-                height: '100%',
-                gap: '8px'
-              }}>
-                <div style={{
-                  display: 'flex',
-                  gap: '8px',
-                  justifyContent: 'center'
-                }}>
-                  <Button
-                    type="primary"
-                    size="small"
-                    onClick={() => handleStatusChange(record.id, "confirmed")}
-                    style={{
-                      background: "linear-gradient(135deg, #52c41a 0%, #73d13d 100%)",
-                      border: "none",
-                      borderRadius: "8px",
-                      fontWeight: "600",
-                      boxShadow: "0 2px 8px rgba(82, 196, 26, 0.3)",
-                      minWidth: "80px",
-                      height: "32px"
-                    }}
-                  >
-                    ✅ Confirm
-                  </Button>
-                  <Button
-                    type="primary"
-                    size="small"
-                    onClick={() => handleStatusChange(record.id, "canceled")}
-                    style={{
-                      background: "linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%)",
-                      border: "none",
-                      borderRadius: "8px",
-                      fontWeight: "600",
-                      boxShadow: "0 2px 8px rgba(255, 77, 79, 0.3)",
-                      minWidth: "80px",
-                      height: "32px"
-                    }}
-                  >
-                    ❌ Cancel
-                  </Button>
-                </div>
-                <Text style={{ 
-                  color: "#52c41a", 
-                  fontSize: '11px',
-                  fontWeight: '500',
-                  textAlign: 'center',
-                  lineHeight: '1.2'
-                }}>
-                  Choose action: Confirm or Cancel
-                </Text>
-              </div>
-            );
-          } else if (status === "confirmed" && currentUser?.email === record.donationerName) {
-            return (
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
-                height: '100%',
-                gap: '4px'
-              }}>
-                <Button
-                  type="primary"
-                  size="small"
-                  onClick={() => handleStatusChange(record.id, "sent")}
-                  style={{
-                    background: "linear-gradient(135deg, #722ed1 0%, #9254de 100%)",
-                    border: "none",
-                    borderRadius: "8px",
-                    fontWeight: "600",
-                    boxShadow: "0 2px 8px rgba(114, 46, 209, 0.3)",
-                    minWidth: "100px",
-                    height: "32px"
-                  }}
-                >
-                  📦 Send
-                </Button>
-                <Text style={{ 
-                  color: "#722ed1", 
-                  fontSize: '11px',
-                  fontWeight: '500',
-                  textAlign: 'center',
-                  lineHeight: '1.2'
-                }}>
-                  Mark as sent
-                </Text>
-              </div>
-            );
-          } else if (status === "sent") {
-            return (
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
-                height: '100%',
-                gap: '4px'
-              }}>
-                <Button
-                  type="primary"
-                  size="small"
-                  onClick={() => handleStatusChange(record.id, "received")}
-                  style={{
-                    background: "linear-gradient(135deg, #fa8c16 0%, #ffa940 100%)",
-                    border: "none",
-                    borderRadius: "8px",
-                    fontWeight: "600",
-                    boxShadow: "0 2px 8px rgba(250, 140, 22, 0.3)",
-                    minWidth: "100px",
-                    height: "32px"
-                  }}
-                >
-                  🎉 Receive
-                </Button>
-                <Text style={{ 
-                  color: "#fa8c16", 
-                  fontSize: '11px',
-                  fontWeight: '500',
-                  textAlign: 'center',
-                  lineHeight: '1.2'
-                }}>
-                  Add books to library
-                </Text>
-              </div>
-            );
-          } else if (status === "received") {
-            return (
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
-                height: '100%',
-                gap: '4px'
-              }}>
-                <div style={{
-                  padding: '8px 16px',
-                  background: 'linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%)',
-                  borderRadius: '8px',
-                  border: '2px solid #b7eb8f'
-                }}>
-                  <Text style={{ 
-                    color: "#52c41a", 
-                    fontStyle: "italic",
-                    fontSize: '13px',
-                    fontWeight: '600'
-                  }}>
-                    🎉 Received
-                  </Text>
-                </div>
-                <Text style={{ 
-                  color: "#52c41a", 
-                  fontSize: '11px',
-                  fontWeight: '500',
-                  textAlign: 'center',
-                  lineHeight: '1.2'
-                }}>
-                  Books added to library
-                </Text>
-              </div>
-            );
-          } else if (status === "canceled") {
-            return (
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
-                height: '100%',
-                gap: '4px'
-              }}>
-                <div style={{
-                  padding: '8px 16px',
-                  background: 'linear-gradient(135deg, #fff2f0 0%, #ffccc7 100%)',
-                  borderRadius: '8px',
-                  border: '2px solid #ffbb96'
-                }}>
-                  <Text style={{ 
-                    color: "#ff4d4f", 
-                    fontStyle: "italic",
-                    fontSize: '13px',
-                    fontWeight: '600'
-                  }}>
-                    ❌ Canceled
-                  </Text>
-                </div>
-                <Text style={{ 
-                  color: "#ff4d4f", 
-                  fontSize: '11px',
-                  fontWeight: '500',
-                  textAlign: 'center',
-                  lineHeight: '1.2'
-                }}>
-                  Donation request canceled
-                </Text>
-              </div>
-            );
-          } else {
-            return (
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
-                height: '100%',
-                gap: '4px'
-              }}>
-                <div style={{
-                  padding: '8px 16px',
-                  background: 'linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%)',
-                  borderRadius: '8px',
-                  border: '1px solid #d9d9d9'
-                }}>
-                  <Text style={{ 
-                    color: "#8c8c8c", 
-                    fontStyle: "italic",
-                    fontSize: '13px',
-                    fontWeight: '500'
-                  }}>
-                    ⏳ Waiting
-                  </Text>
-                </div>
-                <Text style={{ 
-                  color: "#8c8c8c", 
-                  fontSize: '11px',
-                  fontWeight: '500',
-                  textAlign: 'center',
-                  lineHeight: '1.2'
-                }}>
-                  Waiting response from customer
-                </Text>
-              </div>
-            );
-          }
-        }
-        
-        // User actions - show status info
-        else if (currentUser?.role === "user") {
-          if (status === "confirmed") {
-            return (
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
-                height: '100%',
-                gap: '4px'
-              }}>
-                <Button
-                  type="primary"
-                  size="small"
-                  onClick={() => handleStatusChange(record.id, "sent")}
-                  style={{
-                    background: "linear-gradient(135deg, #722ed1 0%, #9254de 100%)",
-                    border: "none",
-                    borderRadius: "8px",
-                    fontWeight: "600",
-                    boxShadow: "0 2px 8px rgba(114, 46, 209, 0.3)",
-                    minWidth: "100px",
-                    height: "32px"
-                  }}
-                >
-                  📦 Send
-                </Button>
-                <Text style={{ 
-                  color: "#722ed1", 
-                  fontSize: '11px',
-                  fontWeight: '500',
-                  textAlign: 'center',
-                  lineHeight: '1.2'
-                }}>
-                  Mark as sent
-                </Text>
-              </div>
-            );
-          } else if (status === "canceled") {
-            return (
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
-                height: '100%',
-                gap: '4px'
-              }}>
-                <div style={{
-                  padding: '8px 16px',
-                  background: 'linear-gradient(135deg, #fff2f0 0%, #ffccc7 100%)',
-                  borderRadius: '8px',
-                  border: '2px solid #ffbb96'
-                }}>
-                  <Text style={{ 
-                    color: "#ff4d4f", 
-                    fontStyle: "italic",
-                    fontSize: '13px',
-                    fontWeight: '600'
-                  }}>
-                    ❌ Canceled
-                  </Text>
-                </div>
-                <Text style={{ 
-                  color: "#ff4d4f", 
-                  fontSize: '11px',
-                  fontWeight: '500',
-                  textAlign: 'center',
-                  lineHeight: '1.2'
-                }}>
-                  Donation request canceled
-                </Text>
-              </div>
-            );
-          } else if (status === "received") {
-            return (
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
-                height: '100%',
-                gap: '4px'
-              }}>
-                <div style={{
-                  padding: '8px 16px',
-                  background: 'linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%)',
-                  borderRadius: '8px',
-                  border: '2px solid #b7eb8f'
-                }}>
-                  <Text style={{ 
-                    color: "#52c41a", 
-                    fontStyle: "italic",
-                    fontSize: '13px',
-                    fontWeight: '600'
-                  }}>
-                    🎉 Received
-                  </Text>
-                </div>
-                <Text style={{ 
-                  color: "#52c41a", 
-                  fontSize: '11px',
-                  fontWeight: '500',
-                  textAlign: 'center',
-                  lineHeight: '1.2'
-                }}>
-                  Books added to library
-                </Text>
-              </div>
-            );
-          } else {
-            return (
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
-                height: '100%',
-                gap: '4px'
-              }}>
-                <div style={{
-                  padding: '8px 16px',
-                  background: 'linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%)',
-                  borderRadius: '8px',
-                  border: '1px solid #d9d9d9'
-                }}>
-                  <Text style={{ 
-                    color: "#8c8c8c", 
-                    fontStyle: "italic",
-                    fontSize: '13px',
-                    fontWeight: '500'
-                  }}>
-                    ⏳ Waiting
-                  </Text>
-                </div>
-                <Text style={{ 
-                  color: "#8c8c8c", 
-                  fontSize: '11px',
-                  fontWeight: '500',
-                  textAlign: 'center',
-                  lineHeight: '1.2'
-                }}>
-                  Waiting response from admin
-                </Text>
-              </div>
-            );
-          }
-        }
-        
-        return null;
-      },
+      render: (_, record) => getDonationActionConfig(record),
     },
   ];
 
@@ -898,22 +551,6 @@ export default function Donations() {
                     </Row>
 
                     <Row gutter={16}>
-                      <Col span={12}>
-                        <Form.Item
-                          {...restField}
-                          name={[name, 'ISBN']}
-                          label="ISBN"
-                          rules={[
-                            { required: true, message: 'Please enter the ISBN!' },
-                            { 
-                              pattern: /^(?:[0-9]{10}|[0-9]{13})$/, 
-                              message: 'ISBN must be 10 or 13 digits!' 
-                            }
-                          ]}
-                        >
-                          <Input placeholder="Enter the ISBN" />
-                        </Form.Item>
-                      </Col>
                       <Col span={12}>
                         <Form.Item
                           {...restField}

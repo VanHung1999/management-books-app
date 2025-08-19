@@ -19,71 +19,69 @@ export interface Notification {
 const getLoanNotifications = (currentUser: User, loanRecords: LoanRecord[]): Notification[] => {
     const notificationsLoanRecords: Notification[] = [];
 
-    loanRecords?.forEach((record: LoanRecord) => {
-      let notificationsLoanRecord: Notification | null = null;
+    // Helper function to create base notification
+    const createBaseNotification = (record: LoanRecord, type: Notification['type'], priority: Notification['priority']) => ({
+        id: `loan-${record.status}-${record.id}`,
+        type,
+        timestamp: record.borrowedAt || new Date(),
+        isRead: false,
+        category: 'loan' as const,
+        priority,
+        actionUrl: '/loanRecords',
+        metadata: {
+            loanRecordId: record.id,
+            bookTitle: record.bookTitle,
+            quantity: record.quantity,
+            status: record.status
+        }
+    });
 
-      if (record.status === 'delivered' && record.borrowerName === currentUser.email) {
-        notificationsLoanRecord = {
-            id: `loan-delivered-${record.id}`,
+    // Notification configurations mapping
+    const notificationConfigs = {
+        delivered: {
+            condition: (record: LoanRecord) => record.borrowerName === currentUser.email,
             title: '🚚 Book has been delivered',
-            message: `Book "${record.bookTitle}" (${record.quantity} books) has been delivered to you`,
-            type: 'success',
-            timestamp: record.deliveredAt || new Date(),
-            isRead: false,
-            category: 'loan',
-            priority: 'medium',
-            actionUrl: `/loanRecords`,
-            metadata: {
-                loanRecordId: record.id,
-                bookTitle: record.bookTitle,
-                quantity: record.quantity,
-                status: record.status
-            }
-        };
-    } else if (record.status === 'pending' && currentUser.role === 'admin') {
-        notificationsLoanRecord = {
-          id: `loan-pending-${record.id}`,
-          title: '📚 User has requested a loan',
-          message: `${record.borrowerName} has requested a loan for "${record.bookTitle}" (${record.quantity} books)`,
-          type: 'info',
-          timestamp: record.borrowedAt,
-          isRead: false,
-          category: 'loan',
-          priority: 'medium',
-          actionUrl: `/loanRecords`,
-          metadata: {
-              loanRecordId: record.id,
-              borrowerName: record.borrowerName,
-              bookTitle: record.bookTitle,
-              quantity: record.quantity,
-              status: record.status
-          }
-        };
-    } else if (record.status === 'returned' && currentUser.role === 'admin') {
-        notificationsLoanRecord = {
-          id: `loan-returned-${record.id}`,
-          title: '📖 User has returned a book',
-          message: `${record.borrowerName} has returned "${record.bookTitle}" (${record.quantity} books)`,
-          type: 'success',
-          timestamp: record.returnedAt || new Date(),
-          isRead: false,
-          category: 'loan',
-          priority: 'low',
-          actionUrl: `/loanRecords`,
-          metadata: {
-              loanRecordId: record.id,
-              borrowerName: record.borrowerName,
-              bookTitle: record.bookTitle,
-              quantity: record.quantity,
-              status: record.status
-          }
-        };
-    }
+            message: (record: LoanRecord) => `Book "${record.bookTitle}" (${record.quantity} books) has been delivered to you`,
+            type: 'success' as const,
+            priority: 'medium' as const,
+            timestamp: (record: LoanRecord) => record.deliveredAt || new Date()
+        },
+        pending: {
+            condition: (record: LoanRecord) => currentUser.role === 'admin',
+            title: '📚 User has requested a loan',
+            message: (record: LoanRecord) => `${record.borrowerName} has requested a loan for "${record.bookTitle}" (${record.quantity} books)`,
+            type: 'info' as const,
+            priority: 'medium' as const,
+            timestamp: (record: LoanRecord) => record.borrowedAt
+        },
+        returned: {
+            condition: (record: LoanRecord) => currentUser.role === 'admin',
+            title: '📖 User has returned a book',
+            message: (record: LoanRecord) => `${record.borrowerName} has returned "${record.bookTitle}" (${record.quantity} books)`,
+            type: 'success' as const,
+            priority: 'low' as const,
+            timestamp: (record: LoanRecord) => record.returnedAt || new Date()
+        }
+    };
 
-    if (notificationsLoanRecord) {
-      notificationsLoanRecords.push(notificationsLoanRecord);
-    }
-  });
+    loanRecords?.forEach((record: LoanRecord) => {
+        const config = notificationConfigs[record.status as keyof typeof notificationConfigs];
+        
+        if (config && config.condition(record)) {
+            const notification: Notification = {
+                ...createBaseNotification(record, config.type, config.priority),
+                title: config.title,
+                message: config.message(record),
+                timestamp: config.timestamp(record),
+                metadata: {
+                    ...createBaseNotification(record, config.type, config.priority).metadata,
+                    ...(config.condition.name === 'pending' || config.condition.name === 'returned' ? { borrowerName: record.borrowerName } : {})
+                }
+            };
+            
+            notificationsLoanRecords.push(notification);
+        }
+    });
 
     return notificationsLoanRecords;
 };
