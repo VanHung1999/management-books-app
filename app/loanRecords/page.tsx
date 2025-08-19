@@ -7,12 +7,18 @@ import type { ColumnsType } from "antd/es/table";
 import { useEffect, useState } from "react";
 import { LoanRecord } from "../interface/loanRecord";
 import { Book } from "../interface/book";
+import { 
+  renderActionButton, 
+  renderStatusDisplay, 
+  renderActionContainer, 
+  renderSingleAction,
+  ACTION_CONFIGS,
+  STATUS_CONFIGS
+} from "../components/LoanActionComponents";
 
 const { Title, Text } = Typography;
 
 export default function LoanRecords() {
-
-
   const [userData, setUserData] = useState<any>(null);
 
   // Load user from localStorage on client-side
@@ -96,7 +102,6 @@ export default function LoanRecords() {
 
   // Handle status change
   const handleStatusChange = (recordId: string, newStatus: "delivered" | "received" | "returned" | "completed" | "pending" | "canceled") => {
-
     //update the loan record
     const record = loanRecords?.data?.find(item => item.id === recordId);
     if (record) {
@@ -144,6 +149,82 @@ export default function LoanRecords() {
       //reload the page
       window.location.reload();
     }
+  };
+
+  // Get action configuration based on status and user role
+  const getActionConfig = (record: any) => {
+    const { status } = record;
+    
+    // Admin actions
+    if (userData?.role === "admin") {
+      if (status === "pending") {
+        return renderActionContainer([
+          renderActionButton({
+            ...ACTION_CONFIGS.delivered,
+            onClick: () => handleStatusChange(record.id, "delivered")
+          }),
+          renderActionButton({
+            ...ACTION_CONFIGS.canceled,
+            onClick: () => handleStatusChange(record.id, "canceled")
+          })
+        ], "Choose action: Deliver or Cancel", "#52c41a");
+      }
+    }
+    
+    // User actions for delivered status
+    if (status === "delivered" && userData?.email === record.borrowerName) {
+      return renderSingleAction(
+        renderActionButton({
+          ...ACTION_CONFIGS.received,
+          onClick: () => handleStatusChange(record.id, "received")
+        }),
+        "Received the book from the library",
+        "#1890ff"
+      );
+    }
+    
+    // User actions for received status
+    if (status === "received" && userData?.email === record.borrowerName) {
+      return renderSingleAction(
+        renderActionButton({
+          ...ACTION_CONFIGS.returned,
+          onClick: () => handleStatusChange(record.id, "returned")
+        }),
+        "Returned the book to the library",
+        "#fa8c16"
+      );
+    }
+    
+    // Admin actions for returned status
+    if (status === "returned") {
+      return renderSingleAction(
+        renderActionButton({
+          ...ACTION_CONFIGS.completed,
+          onClick: () => handleStatusChange(record.id, "completed")
+        }),
+        "Complete the loan",
+        "#722ed1"
+      );
+    }
+    
+    // Status displays for completed
+    if (status === "completed") {
+      return renderStatusDisplay(STATUS_CONFIGS.completed);
+    }
+    
+    // Status displays for canceled
+    if (status === "canceled") {
+      return renderStatusDisplay(STATUS_CONFIGS.canceled);
+    }
+    
+    // Default waiting status
+    return renderStatusDisplay({
+      ...STATUS_CONFIGS.waiting,
+      text: "⏳ Waiting",
+      description: userData?.role === "admin" 
+        ? "Waiting response from customer" 
+        : "Waiting response from admin"
+    });
   };
 
   const columns: ColumnsType<any> = [
@@ -257,481 +338,7 @@ export default function LoanRecords() {
       key: "action",
       align: "center",
       width: 180,
-      render: (_, record) => {
-        const { status } = record;
-        
-         // Admin actions
-         if (userData?.role === "admin") {
-           if (status === "pending") {
-             return (
-               <div style={{ 
-                 display: 'flex', 
-                 flexDirection: 'column', 
-                 justifyContent: 'center', 
-                 alignItems: 'center', 
-                 height: '100%',
-                 gap: '8px'
-               }}>
-                 <div style={{
-                   display: 'flex',
-                   gap: '8px',
-                   justifyContent: 'center'
-                 }}>
-                   <Button
-                     type="primary"
-                     size="small"
-                     onClick={() => handleStatusChange(record.id, "delivered")}
-                     style={{
-                       background: "linear-gradient(135deg, #52c41a 0%, #73d13d 100%)",
-                       border: "none",
-                       borderRadius: "8px",
-                       fontWeight: "600",
-                       boxShadow: "0 2px 8px rgba(82, 196, 26, 0.3)",
-                       minWidth: "80px",
-                       height: "32px"
-                     }}
-                   >
-                     ✨ Delivered
-                   </Button>
-                   <Button
-                     type="primary"
-                     size="small"
-                     onClick={() => handleStatusChange(record.id, "canceled")}
-                     style={{
-                       background: "linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%)",
-                       border: "none",
-                       borderRadius: "8px",
-                       fontWeight: "600",
-                       boxShadow: "0 2px 8px rgba(255, 77, 79, 0.3)",
-                       minWidth: "80px",
-                       height: "32px"
-                     }}
-                   >
-                     ❌ Canceled
-                   </Button>
-                 </div>
-                 <Text style={{ 
-                   color: "#52c41a", 
-                   fontSize: '11px',
-                   fontWeight: '500',
-                   textAlign: 'center',
-                   lineHeight: '1.2'
-                 }}>
-                   Choose action: Deliver or Cancel
-                 </Text>
-               </div>
-             );
-          } else if (status === "delivered" && userData?.email === record.borrowerName) {
-            return (
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
-                height: '100%',
-                gap: '4px'
-              }}>
-                <Button
-                  type="primary"
-                  size="small"
-                  onClick={() => handleStatusChange(record.id, "received")}
-                  style={{
-                    background: "linear-gradient(135deg, #1890ff 0%, #40a9ff 100%)",
-                    border: "none",
-                    borderRadius: "8px",
-                    fontWeight: "600",
-                    boxShadow: "0 2px 8px rgba(24, 144, 255, 0.3)",
-                    minWidth: "100px",
-                    height: "32px"
-                  }}
-                >
-                  📦 Received
-                </Button>
-                <Text style={{ 
-                  color: "#1890ff", 
-                  fontSize: '11px',
-                  fontWeight: '500',
-                  textAlign: 'center',
-                  lineHeight: '1.2'
-                }}>
-                  Received the book from the library
-                </Text>
-              </div>
-            );
-          }  else if (status === "received" && userData?.email === record.borrowerName) {
-            return (
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
-                height: '100%',
-                gap: '4px'
-              }}>
-                <Button
-                  type="primary"
-                  size="small"
-                  onClick={() => handleStatusChange(record.id, "returned")}
-                  style={{
-                    background: "linear-gradient(135deg, #fa8c16 0%, #ffa940 100%)",
-                    border: "none",
-                    borderRadius: "8px",
-                    fontWeight: "600",
-                    boxShadow: "0 2px 8px rgba(250, 140, 22, 0.3)",
-                    minWidth: "100px",
-                    height: "32px"
-                  }}
-                >
-                  🔄 Returned
-                </Button>
-                <Text style={{ 
-                  color: "#fa8c16", 
-                  fontSize: '11px',
-                  fontWeight: '500',
-                  textAlign: 'center',
-                  lineHeight: '1.2'
-                }}>
-                  Returned the book to the library
-                </Text>
-              </div>
-            );
-          } else if (status === "returned") {
-            return (
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
-                height: '100%',
-                gap: '4px'
-              }}>
-                <Button
-                  type="primary"
-                  size="small"
-                  onClick={() => handleStatusChange(record.id, "completed")}
-                  style={{
-                    background: "linear-gradient(135deg, #722ed1 0%, #9254de 100%)",
-                    border: "none",
-                    borderRadius: "8px",
-                    fontWeight: "600",
-                    boxShadow: "0 2px 8px rgba(114, 46, 209, 0.3)",
-                    minWidth: "100px",
-                    height: "32px"
-                  }}
-                >
-                  ✅ Complete
-                </Button>
-                <Text style={{ 
-                  color: "#722ed1", 
-                  fontSize: '11px',
-                  fontWeight: '500',
-                  textAlign: 'center',
-                  lineHeight: '1.2'
-                }}>
-                  Complete the loan
-                </Text>
-              </div>
-            );
-          } else if (status === "completed") {
-            return (
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
-                height: '100%',
-                gap: '4px'
-              }}>
-                <div style={{
-                  padding: '8px 16px',
-                  background: 'linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%)',
-                  borderRadius: '8px',
-                  border: '2px solid #b7eb8f'
-                }}>
-                  <Text style={{ 
-                    color: "#52c41a", 
-                    fontStyle: "italic",
-                    fontSize: '13px',
-                    fontWeight: '600'
-                  }}>
-                    🎉 Completed
-                  </Text>
-                </div>
-                <Text style={{ 
-                  color: "#52c41a", 
-                  fontSize: '11px',
-                  fontWeight: '500',
-                  textAlign: 'center',
-                  lineHeight: '1.2'
-                }}>
-                  The loan record book has complete
-                </Text>
-              </div>
-            );
-          } else if (status === "canceled") {
-            return (
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
-                height: '100%',
-                gap: '4px'
-              }}>
-                <div style={{
-                  padding: '8px 16px',
-                  background: 'linear-gradient(135deg, #fff2f0 0%, #ffccc7 100%)',
-                  borderRadius: '8px',
-                  border: '2px solid #ffbb96'
-                }}>
-                  <Text style={{ 
-                    color: "#ff4d4f", 
-                    fontStyle: "italic",
-                    fontSize: '13px',
-                    fontWeight: '600'
-                  }}>
-                    ❌ Canceled
-                  </Text>
-                </div>
-                <Text style={{ 
-                  color: "#ff4d4f", 
-                  fontSize: '11px',
-                  fontWeight: '500',
-                  textAlign: 'center',
-                  lineHeight: '1.2'
-                }}>
-                  The loan request has been canceled
-                </Text>
-              </div>
-            );
-          } else {
-            return (
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
-                height: '100%',
-                gap: '4px'
-              }}>
-                <div style={{
-                  padding: '8px 16px',
-                  background: 'linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%)',
-                  borderRadius: '8px',
-                  border: '1px solid #d9d9d9'
-                }}>
-                  <Text style={{ 
-                    color: "#8c8c8c", 
-                    fontStyle: "italic",
-                    fontSize: '13px',
-                    fontWeight: '500'
-                  }}>
-                    ⏳ Waiting
-                  </Text>
-                </div>
-                <Text style={{ 
-                  color: "#8c8c8c", 
-                  fontSize: '11px',
-                  fontWeight: '500',
-                  textAlign: 'center',
-                  lineHeight: '1.2'
-                }}>
-                  Waiting response from customer
-                </Text>
-              </div>
-            );
-          }
-        }
-        
-        // User actions
-        else if (userData?.role === "user") {
-          if (status === "delivered") {
-            return (
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
-                height: '100%',
-                gap: '4px'
-              }}>
-                <Button
-                  type="primary"
-                  size="small"
-                  onClick={() => handleStatusChange(record.id, "received")}
-                  style={{
-                    background: "linear-gradient(135deg, #1890ff 0%, #40a9ff 100%)",
-                    border: "none",
-                    borderRadius: "8px",
-                    fontWeight: "600",
-                    boxShadow: "0 2px 8px rgba(24, 144, 255, 0.3)",
-                    minWidth: "100px",
-                    height: "32px"
-                  }}
-                >
-                  📦 Received
-                </Button>
-                <Text style={{ 
-                  color: "#1890ff", 
-                  fontSize: '11px',
-                  fontWeight: '500',
-                  textAlign: 'center',
-                  lineHeight: '1.2'
-                }}>
-                  Received the book from the library
-                </Text>
-              </div>
-            );
-          } else if (status === "received") {
-            return (
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
-                height: '100%',
-                gap: '4px'
-              }}>
-                <Button
-                  type="primary"
-                  size="small"
-                  onClick={() => handleStatusChange(record.id, "returned")}
-                  style={{
-                    background: "linear-gradient(135deg, #fa8c16 0%, #ffa940 100%)",
-                    border: "none",
-                    borderRadius: "8px",
-                    fontWeight: "600",
-                    boxShadow: "0 2px 8px rgba(250, 140, 22, 0.3)",
-                    minWidth: "100px",
-                    height: "32px"
-                  }}
-                >
-                  🔄 Returned
-                </Button>
-                <Text style={{ 
-                  color: "#fa8c16", 
-                  fontSize: '11px',
-                  fontWeight: '500',
-                  textAlign: 'center',
-                  lineHeight: '1.2'
-                }}>
-                  Returned the book to the library
-                </Text>
-              </div>
-            );
-          } else if (status === "completed") {
-            return (
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
-                height: '100%',
-                gap: '4px'
-              }}>
-                <div style={{
-                  padding: '8px 16px',
-                  background: 'linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%)',
-                  borderRadius: '8px',
-                  border: '2px solid #b7eb8f'
-                }}>
-                  <Text style={{ 
-                    color: "#52c41a", 
-                    fontStyle: "italic",
-                    fontSize: '13px',
-                    fontWeight: '600'
-                  }}>
-                    🎉 Completed
-                  </Text>
-                </div>
-                <Text style={{ 
-                  color: "#52c41a", 
-                  fontSize: '11px',
-                  fontWeight: '500',
-                  textAlign: 'center',
-                  lineHeight: '1.2'
-                }}>
-                  The loan record book has complete
-                </Text>
-              </div>
-            );
-          } else if (status === "canceled") {
-            return (
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
-                height: '100%',
-                gap: '4px'
-              }}>
-                <div style={{
-                  padding: '8px 16px',
-                  background: 'linear-gradient(135deg, #fff2f0 0%, #ffccc7 100%)',
-                  borderRadius: '8px',
-                  border: '2px solid #ffbb96'
-                }}>
-                  <Text style={{ 
-                    color: "#ff4d4f", 
-                    fontStyle: "italic",
-                    fontSize: '13px',
-                    fontWeight: '600'
-                  }}>
-                    ❌ Canceled
-                  </Text>
-                </div>
-                <Text style={{ 
-                  color: "#ff4d4f", 
-                  fontSize: '11px',
-                  fontWeight: '500',
-                  textAlign: 'center',
-                  lineHeight: '1.2'
-                }}>
-                  The loan request has been canceled
-                </Text>
-              </div>
-            );
-          } else {
-            return (
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
-                height: '100%',
-                gap: '4px'
-              }}>
-                <div style={{
-                  padding: '8px 16px',
-                  background: 'linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%)',
-                  borderRadius: '8px',
-                  border: '1px solid #d9d9d9'
-                }}>
-                  <Text style={{ 
-                    color: "#8c8c8c", 
-                    fontStyle: "italic",
-                    fontSize: '13px',
-                    fontWeight: '500'
-                  }}>
-                    ⏳ Waiting
-                  </Text>
-                </div>
-                <Text style={{ 
-                  color: "#8c8c8c", 
-                  fontSize: '11px',
-                  fontWeight: '500',
-                  textAlign: 'center',
-                  lineHeight: '1.2'
-                }}>
-                  Waiting response from admin
-                </Text>
-              </div>
-            );
-          }
-        }
-        
-        return null;
-      },
+      render: (_, record) => getActionConfig(record),
     },
   ];
 
