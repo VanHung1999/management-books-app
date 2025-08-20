@@ -30,10 +30,9 @@ export default function Donations() {
   const [inputValues, setInputValues] = useState<{[key: string]: string}>({}); // Track input values
   const [filePreviewUrls, setFilePreviewUrls] = useState<{[key: string]: string}>({}); // Track file preview URLs
   const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const [bookTitleExist, setBookTitleExist] = useState<string[]>([]);
   const [isPreviewVisible, setIsPreviewVisible] = useState(false);
-  const [duplicateBooks, setDuplicateBooks] = useState<{[key: number]: {isDuplicate: boolean, message: string, existingBook?: any}}>({});
-
+  const [validateBookTitle, setValidateBookTitle] = useState<{[key: number]: {canSubmit: boolean, message: string }}>({});
+  const [checkboxStates, setCheckboxStates] = useState<{[key: number]: boolean}>({});
 
   const { mutate: createDonationRecord } = useCreate(
     {
@@ -53,38 +52,16 @@ export default function Donations() {
     resource: "books",
   });
 
-  const { data: bookData, isLoading: loadingBooks } = useList<Book>({
+  const { data: booksData } = useList<Book>({
     resource: "books",
   });
 
-  useEffect(() => {
-    if (bookData) {
-      setBookTitleExist(bookData.data.map((book: Book) => book.name));
-    }
-  }, [bookData]);
-
-  // Check for duplicate book titles
-  const checkDuplicateBookTitle = (bookTitle: string, currentIndex: number): { isDuplicate: boolean; message: string; existingBook: any } => {
-    if (!bookTitle || bookTitle.trim().length < 2) {
-      return { isDuplicate: false, message: '', existingBook: null };
-    }
+  // Check book existence and duplicates
+  const checkBookExistsInLibrary = (bookTitle: string, currentIndex: number) : {hasExistinginLibrary: boolean | null, hasExistinginDonationForm: boolean} => {
     
     const trimmedTitle = bookTitle.trim().toLowerCase();
     
-    // Check against existing books in the library
-    const existingBook = bookData?.data?.find(book => 
-      book.name.toLowerCase() === trimmedTitle
-    );
-    
-    if (existingBook) {
-      return {
-        isDuplicate: true,
-        message: `Book "${bookTitle}" already exists in the library`,
-        existingBook
-      };
-    }
-    
-    // Check against other books in the current form
+    // Check against other books in current form
     const currentFormBooks = form.getFieldValue('donatedBooks') || [];
     const duplicateInForm = currentFormBooks.find((book: any, index: number) => 
       index !== currentIndex && 
@@ -94,13 +71,21 @@ export default function Donations() {
     
     if (duplicateInForm) {
       return {
-        isDuplicate: true,
-        message: `Book "${bookTitle}" is already added in this donation form`,
-        existingBook: null
+        hasExistinginLibrary: null,
+        hasExistinginDonationForm: true,
       };
     }
     
-    return { isDuplicate: false, message: '', existingBook: null };
+    // Check if exists in library
+    const exists = booksData?.data?.some(book => 
+      book.name.toLowerCase() === trimmedTitle
+    );
+
+    if (exists) {
+      return { hasExistinginLibrary: true, hasExistinginDonationForm: false};
+    } else {
+      return { hasExistinginLibrary: false, hasExistinginDonationForm: false};
+    }
   };
 
   useEffect(() => {
@@ -124,13 +109,7 @@ export default function Donations() {
   }, [filePreviewUrls]);
 
   const handleSubmit = (values: any) => {
-    // Check for duplicate books before submitting
-    const hasDuplicates = Object.values(duplicateBooks).some(book => book.isDuplicate);
-    if (hasDuplicates) {
-      message.error('Please fix duplicate book titles before submitting');
-      return;
-    }
-    
+    // Check for duplicate books before submitting    
     setIsCreating(true);
     let successCount = 0;
     let totalCount = values.donatedBooks.length;
@@ -198,7 +177,7 @@ export default function Donations() {
     });
     setFilePreviewUrls({});
     setInputValues({});
-    setDuplicateBooks({});
+    setCheckboxStates({});
   };
 
   // Handle file upload with preview
@@ -633,7 +612,7 @@ export default function Donations() {
       title: "Action",
       key: "action",
       align: "center",
-      width: 180,
+      width: 200,
       fixed: "right",
       render: (_, record) => getDonationActionConfig(record),
     },
@@ -737,52 +716,64 @@ export default function Donations() {
                             {...restField}
                             name={[name, 'bookTitle']}
                             label="Book Title"
-                            validateStatus={duplicateBooks[name]?.isDuplicate ? 'error' : undefined}
-                            help={duplicateBooks[name]?.message}
+                            validateStatus={validateBookTitle[name]?.canSubmit ? undefined : 'error'}
+                            help={validateBookTitle[name]?.message}
                             rules={[
-                              { required: true, message: 'Please enter the book title!' },
-                              { min: 2, message: 'The book title must be at least 2 characters!' },
-                              { max: 200, message: 'The book title must be less than 200 characters!' },
-                              {
-                                validator: async (_, value) => {
-                                  if (value && value.trim().length >= 2) {
-                                    const duplicateCheck = checkDuplicateBookTitle(value, name);
-                                    if (duplicateCheck.isDuplicate) {
-                                      setDuplicateBooks(prev => ({
-                                        ...prev,
-                                        [name]: duplicateCheck
-                                      }));
-                                      throw new Error(duplicateCheck.message);
-                                    } else {
-                                      setDuplicateBooks(prev => {
-                                        const newState = { ...prev };
-                                        delete newState[name];
-                                        return newState;
-                                      });
-                                    }
-                                  }
-                                  return Promise.resolve();
-                                }
-                              }
-                            ]}
+                               { required: true, message: 'Please enter the book title!' },
+                               { min: 2, message: 'The book title must be at least 2 characters!' },
+                               { max: 200, message: 'The book title must be less than 200 characters!' }
+                             ]}
                           >
                             <Input 
                               placeholder="Enter the book title" 
-                              onBlur={(e) => {
-                                const value = e.target.value;
-                                if (value && value.trim().length >= 2) {
-                                  const duplicateCheck = checkDuplicateBookTitle(value, name);
-                                  setDuplicateBooks(prev => ({
-                                    ...prev,
-                                    [name]: duplicateCheck
-                                  }));
-                                }
-                              }}
+                                 onBlur={(e) => {
+                                   const value = e.target.value;
+                                   if (value && value.trim().length >= 2) {
+                                     // Check book validation
+                                     const validation = checkBookExistsInLibrary(value, name);
+                                     
+                                     if (validation.hasExistinginDonationForm) {
+                                       setValidateBookTitle(prev => ({
+                                         ...prev,
+                                         [name]: {
+                                           canSubmit: false,
+                                           message: `Book "${value}" is already added in this donation form. Please enter a different book title.`,
+                                         }
+                                       }));
+                                     } else if (validation.hasExistinginLibrary && !checkboxStates[name]) {
+                                       setValidateBookTitle(prev => ({
+                                         ...prev,
+                                         [name]: {
+                                           canSubmit: false,
+                                           message: `Book "${value}" already exists in the library. Please check the box "This book already exists in the library" or enter a different book title.`, 
+                                         }
+                                       }));
+                                     } else if (!validation.hasExistinginLibrary && checkboxStates[name]) {
+                                       setValidateBookTitle(prev => ({
+                                         ...prev,
+                                         [name]: {
+                                           canSubmit: false,
+                                           message: `Book "${value}" does not exist in the library. Please uncheck the box or enter a different book title.`,
+                                         }
+                                       }));
+                                     } else {
+                                       // Clear any error messages
+                                       setValidateBookTitle(prev => ({
+                                        ...prev,
+                                        [name]: {
+                                          canSubmit: true,
+                                          message: ``,
+                                        }
+                                      }));
+                                     }
+                                   }
+                                   console.log(validateBookTitle);
+                                 }}
                               onChange={(e) => {
                                 const value = e.target.value;
                                 // Clear duplicate message when user starts typing
-                                if (duplicateBooks[name]) {
-                                  setDuplicateBooks(prev => {
+                                if (validateBookTitle[name]) {
+                                  setValidateBookTitle(prev => {
                                     const newState = { ...prev };
                                     delete newState[name];
                                     return newState;
@@ -798,12 +789,18 @@ export default function Donations() {
                             name={[name, 'author']}
                             label="Author"
                             rules={[
-                              { required: true, message: 'Please enter the author name!' },
-                              { min: 2, message: 'The author name must be at least 2 characters!' },
-                              { max: 100, message: 'The author name must be less than 100 characters!' }
+                               { 
+                                 required: !checkboxStates[name], 
+                                 message: 'Please enter the author name!' 
+                               },
+                               { min: 2, message: 'The author name must be at least 2 characters!' },
+                               { max: 100, message: 'The author name must be less than 100 characters!' }
                             ]}
                           >
-                            <Input placeholder="Enter the author name" />
+                             <Input 
+                               placeholder="Enter the author name" 
+                               disabled={checkboxStates[name] || false}
+                             />
                           </Form.Item>
                         </Col>
                       </Row>
@@ -820,6 +817,50 @@ export default function Donations() {
                               <input 
                                 type="checkbox" 
                                 style={{ width: '16px', height: '16px' }}
+                                  onChange={(e) => {
+                                   // Update form value
+                                   form.setFieldValue(['donatedBooks', name, 'hasExist'], e.target.checked);
+                                   
+                                   // Update local state to trigger re-render
+                                   setCheckboxStates(prev => ({
+                                     ...prev,
+                                     [name]: e.target.checked
+                                   }));
+                                   
+                                   // Clear any existing error messages when checkbox changes
+                                   if (validateBookTitle[name]) {
+                                     setValidateBookTitle(prev => {
+                                       const newState = { ...prev };
+                                       delete newState[name];
+                                       return newState;
+                                     });
+                                   }
+                                   
+                                   if (e.target.checked) {
+                                     // If checked, clear other fields except book title
+                                     form.setFieldValue(['donatedBooks', name, 'author'], '');
+                                     form.setFieldValue(['donatedBooks', name, 'category'], undefined);
+                                     form.setFieldValue(['donatedBooks', name, 'num'], '');
+                                     form.setFieldValue(['donatedBooks', name, 'publishYear'], '');
+                                     form.setFieldValue(['donatedBooks', name, 'notes'], '');
+                                     form.setFieldValue(['donatedBooks', name, 'description'], '');
+                                     form.setFieldValue(['donatedBooks', name, 'coverImage'], '');
+                                     form.setFieldValue(['donatedBooks', name, 'coverImageFile'], null);
+                                     
+                                     // Clear file preview
+                                     if (filePreviewUrls[`preview-${name}`]) {
+                                       URL.revokeObjectURL(filePreviewUrls[`preview-${name}`]);
+                                       setFilePreviewUrls(prev => {
+                                         const newUrls = { ...prev };
+                                         delete newUrls[`preview-${name}`];
+                                         return newUrls;
+                                       });
+                                     }
+                                     
+                                     // Clear input values
+                                     setInputValues(prev => ({ ...prev, [`cover-${name}`]: '' }));
+                                   }
+                                 }}
                               />
                               <span style={{ fontSize: '14px', color: '#333' }}>
                                 This book already exists in the library
@@ -831,41 +872,52 @@ export default function Donations() {
 
                      <Row gutter={24}>
                        <Col span={12}>
-                         <Form.Item
-                           {...restField}
-                           name={[name, 'category']}
-                           label="Category"
-                           rules={[
-                             { required: true, message: 'Please select the category!' }
-                           ]}
-                         >
-                           <Select placeholder="Select the category" options={categories.map(category => ({
-                             label: category,
-                             value: category
-                           }))} />
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'category']}
+                            label="Category"
+                            rules={[
+                               { 
+                                 required: !checkboxStates[name], 
+                                 message: 'Please select the category!' 
+                               }
+                            ]}
+                          >
+                           <Select 
+                              placeholder="Select the category" 
+                              options={categories.map(category => ({
+                                label: category,
+                                value: category
+                              }))}
+                              disabled={checkboxStates[name] || false}
+                            />
                          </Form.Item>
                        </Col>
                        <Col span={12}>
-                         <Form.Item
-                           {...restField}
-                           name={[name, 'num']}
-                           label="Number of Books"
-                           rules={[
-                             { required: true, message: 'Please enter the number of books!' },
-                             { 
-                               type: 'number', 
-                               min: 1, 
-                               transform: (value) => Number(value),
-                               message: 'The number of books must be at least 1!' 
-                             },
-                           ]}
-                         >
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'num']}
+                            label="Number of Books"
+                            rules={[
+                               { 
+                                 required: !checkboxStates[name], 
+                                 message: 'Please enter the number of books!' 
+                               },
+                               { 
+                                 type: 'number', 
+                                 min: 1, 
+                                 transform: (value) => Number(value),
+                                 message: 'The number of books must be at least 1!' 
+                               },
+                            ]}
+                          >
                            <Input 
-                             type="number" 
-                             placeholder="Enter the number of books"
-                             min={1}
-                             max={100}
-                           />
+                              type="number" 
+                              placeholder="Enter the number of books"
+                              min={1}
+                              max={100}
+                              disabled={checkboxStates[name] || false}
+                            />
                          </Form.Item>
                        </Col>
                      </Row>
@@ -877,12 +929,13 @@ export default function Donations() {
                            name={[name, 'publishYear']}
                            label="Publish Year"
                          >
-                           <Input 
-                             type="number" 
-                             placeholder="Enter the publish year"
-                             min={1900}
-                             max={new Date().getFullYear() + 1}
-                           />
+                            <Input 
+                              type="number" 
+                              placeholder="Enter the publish year"
+                              min={1900}
+                              max={new Date().getFullYear() + 1}
+                              disabled={checkboxStates[name] || false}
+                            />
                          </Form.Item>
                        </Col>
                        <Col span={12}>
@@ -895,11 +948,12 @@ export default function Donations() {
                            ]}
                          >
                            <TextArea 
-                             rows={2} 
-                             placeholder="Enter additional notes (optional)"
-                             showCount
-                             maxLength={300}
-                           />
+                              rows={2} 
+                              placeholder="Enter additional notes (optional)"
+                              showCount
+                              maxLength={300}
+                              disabled={checkboxStates[name] || false}
+                            />
                          </Form.Item>
                        </Col>
                      </Row>
@@ -912,16 +966,17 @@ export default function Donations() {
                            label="Cover Image"
                          >
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                              <Input 
-                                placeholder="Enter image URL or upload file" 
-                                value={inputValues[`cover-${name}`] || ''}
-                                onChange={(e) => {
-                                  const value = e.target.value;
-                                  form.setFieldValue(['donatedBooks', name, 'coverImage'], value);
-                                  form.setFieldValue(['donatedBooks', name, 'coverImageFile'], null);
-                                  setInputValues(prev => ({ ...prev, [`cover-${name}`]: value }));
-                                }}
-                              />
+                                <Input 
+                                  placeholder="Enter image URL or upload file" 
+                                  value={inputValues[`cover-${name}`] || ''}
+                                  onChange={(e) => {
+                                    const value = e.target.value;
+                                    form.setFieldValue(['donatedBooks', name, 'coverImage'], value);
+                                    form.setFieldValue(['donatedBooks', name, 'coverImageFile'], null);
+                                    setInputValues(prev => ({ ...prev, [`cover-${name}`]: value }));
+                                  }}
+                                  disabled={checkboxStates[name] || false}
+                                />
                               <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                                 <span style={{ fontSize: '12px', color: '#8c8c8c' }}>OR</span>
                                 <div style={{ position: 'relative' }}>
@@ -945,26 +1000,27 @@ export default function Donations() {
                                     }}
                                     id={`file-input-${name}`}
                                   />
-                                  <Button
-                                    type="default"
-                                    size="small"
-                                    icon={<PlusOutlined />}
-                                    style={{
-                                      background: '#f0f0f0',
-                                      border: '1px dashed #d9d9d9',
-                                      borderRadius: '6px',
-                                      padding: '4px 12px',
-                                      fontSize: '12px',
-                                      color: '#595959',
-                                      cursor: 'pointer',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      gap: '4px'
-                                    }}
-                                    onClick={() => document.getElementById(`file-input-${name}`)?.click()}
-                                  >
-                                    Choose File
-                                  </Button>
+                                      <Button
+                                       type="default"
+                                       size="small"
+                                       icon={<PlusOutlined />}
+                                       style={{
+                                         background: '#f0f0f0',
+                                         border: '1px dashed #d9d9d9',
+                                         borderRadius: '6px',
+                                         padding: '4px 12px',
+                                         fontSize: '12px',
+                                         color: '#595959',
+                                         cursor: 'pointer',
+                                         display: 'flex',
+                                         alignItems: 'center',
+                                         gap: '4px'
+                                       }}
+                                       onClick={() => document.getElementById(`file-input-${name}`)?.click()}
+                                       disabled={checkboxStates[name] || false}
+                                     >
+                                       Choose File
+                                     </Button>
                                   <span style={{ 
                                     fontSize: '11px', 
                                     color: '#8c8c8c', 
@@ -1037,21 +1093,22 @@ export default function Donations() {
                        </Col>
                      </Row>
 
-                     <Form.Item
-                       {...restField}
-                       name={[name, 'description']}
-                       label="Description"
-                       rules={[
-                         { max: 500, message: 'The description must be less than 500 characters!' }
-                       ]}
-                     >
-                       <TextArea 
-                         rows={3} 
-                         placeholder="Enter the description (optional)"
-                         showCount
-                         maxLength={500}
-                       />
-                     </Form.Item>
+                      <Form.Item
+                        {...restField}
+                        name={[name, 'description']}
+                        label="Description"
+                        rules={[
+                          { max: 500, message: 'The description must be less than 500 characters!' }
+                        ]}
+                      >
+                         <TextArea 
+                           rows={3} 
+                           placeholder="Enter the description (optional)"
+                           showCount
+                           maxLength={500}
+                           disabled={checkboxStates[name] || false}
+                         />
+                      </Form.Item>
                    </Card>
                  ))}
 
