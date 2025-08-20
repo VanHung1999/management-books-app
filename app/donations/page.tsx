@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Form, Input, Select, Button, Card, Typography, Space, Row, Col, Table, Tag, Tooltip, Skeleton, message } from 'antd';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Form, Input, Select, Button, Card, Typography, Space, Row, Col, Table, Tag, Tooltip, Skeleton, App } from 'antd';
 import { getCategories } from '../database/categoryDatabase';
 import { PlusOutlined, DeleteOutlined, GiftOutlined, UserOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, TeamOutlined, CloseOutlined } from '@ant-design/icons';
 import { useCreate, useList, useUpdate } from '@refinedev/core';
@@ -22,10 +22,18 @@ const { Title, Text } = Typography;
 const { TextArea } = Input;
 
 export default function Donations() {
+  const { message } = App.useApp();
   const [form] = Form.useForm();
   const categories = getCategories();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [inputValues, setInputValues] = useState<{[key: string]: string}>({}); // Track input values
+  const [filePreviewUrls, setFilePreviewUrls] = useState<{[key: string]: string}>({}); // Track file preview URLs
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [bookTitleExist, setBookTitleExist] = useState<string[]>([]);
+  const [isPreviewVisible, setIsPreviewVisible] = useState(false);
+  const [duplicateBooks, setDuplicateBooks] = useState<{[key: number]: {isDuplicate: boolean, message: string, existingBook?: any}}>({});
+
 
   const { mutate: createDonationRecord } = useCreate(
     {
@@ -45,6 +53,56 @@ export default function Donations() {
     resource: "books",
   });
 
+  const { data: bookData, isLoading: loadingBooks } = useList<Book>({
+    resource: "books",
+  });
+
+  useEffect(() => {
+    if (bookData) {
+      setBookTitleExist(bookData.data.map((book: Book) => book.name));
+    }
+  }, [bookData]);
+
+  // Check for duplicate book titles
+  const checkDuplicateBookTitle = (bookTitle: string, currentIndex: number): { isDuplicate: boolean; message: string; existingBook: any } => {
+    if (!bookTitle || bookTitle.trim().length < 2) {
+      return { isDuplicate: false, message: '', existingBook: null };
+    }
+    
+    const trimmedTitle = bookTitle.trim().toLowerCase();
+    
+    // Check against existing books in the library
+    const existingBook = bookData?.data?.find(book => 
+      book.name.toLowerCase() === trimmedTitle
+    );
+    
+    if (existingBook) {
+      return {
+        isDuplicate: true,
+        message: `Book "${bookTitle}" already exists in the library`,
+        existingBook
+      };
+    }
+    
+    // Check against other books in the current form
+    const currentFormBooks = form.getFieldValue('donatedBooks') || [];
+    const duplicateInForm = currentFormBooks.find((book: any, index: number) => 
+      index !== currentIndex && 
+      book.bookTitle && 
+      book.bookTitle.trim().toLowerCase() === trimmedTitle
+    );
+    
+    if (duplicateInForm) {
+      return {
+        isDuplicate: true,
+        message: `Book "${bookTitle}" is already added in this donation form`,
+        existingBook: null
+      };
+    }
+    
+    return { isDuplicate: false, message: '', existingBook: null };
+  };
+
   useEffect(() => {
     const currentUser = localStorage.getItem("currentUser");
     if (currentUser) {
@@ -53,7 +111,26 @@ export default function Donations() {
     }
   }, []);
 
+  // Cleanup file preview URLs on unmount
+  useEffect(() => {
+    return () => {
+      // Revoke all object URLs to prevent memory leaks
+      Object.values(filePreviewUrls).forEach(url => {
+        if (url.startsWith('blob:')) {
+          URL.revokeObjectURL(url);
+        }
+      });
+    };
+  }, [filePreviewUrls]);
+
   const handleSubmit = (values: any) => {
+    // Check for duplicate books before submitting
+    const hasDuplicates = Object.values(duplicateBooks).some(book => book.isDuplicate);
+    if (hasDuplicates) {
+      message.error('Please fix duplicate book titles before submitting');
+      return;
+    }
+    
     setIsCreating(true);
     let successCount = 0;
     let totalCount = values.donatedBooks.length;
@@ -113,7 +190,46 @@ export default function Donations() {
 
   const resetAllForms = () => {
     form.resetFields();
+    // Clean up all preview URLs when resetting
+    Object.values(filePreviewUrls).forEach(url => {
+      if (url.startsWith('blob:')) {
+        URL.revokeObjectURL(url);
+      }
+    });
+    setFilePreviewUrls({});
+    setInputValues({});
+    setDuplicateBooks({});
   };
+
+  // Handle file upload with preview
+  const handleFileUpload = useCallback((file: File, name: number) => {
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      message.error('File size must be less than 5MB');
+      return false;
+    }
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      message.error('Please select an image file');
+      return false;
+    }
+    
+    // Set file and clear URL input
+    form.setFieldValue(['donatedBooks', name, 'coverImageFile'], file);
+    form.setFieldValue(['donatedBooks', name, 'coverImage'], '');
+    setInputValues(prev => ({ ...prev, [`cover-${name}`]: '' }));
+    
+    // Create and store preview URL
+    const previewUrl = URL.createObjectURL(file);
+    setFilePreviewUrls(prev => ({
+      ...prev,
+      [`preview-${name}`]: previewUrl
+    }));
+    
+    message.success('File uploaded successfully!');
+    return true;
+  }, [form, message, setInputValues, setFilePreviewUrls]);
 
   // Filter data based on user role
   const filteredData = !loadingDonationRecords && currentUser?.role === "user" 
@@ -199,6 +315,8 @@ export default function Donations() {
             category: record.category,
             num: record.num,
             coverImage: record.coverImage,
+            description: record.description,
+            publishYear: record.publishYear,
           }
         });
       }
@@ -269,11 +387,13 @@ export default function Donations() {
     });
   };
 
-  const columns: ColumnsType<any> = [
+    const columns: ColumnsType<any> = [
     {
       title: "Donor",
       dataIndex: "donationerName",
       key: "donationerName",
+      align: "center",
+      width: 220,
       render: (text) => (
         <Space>
           <UserOutlined style={{ color: "#1890ff" }} />
@@ -285,6 +405,8 @@ export default function Donations() {
       title: "Book Title",
       dataIndex: "bookTitle",
       key: "bookTitle",
+      align: "center",
+      width: 250,
       render: (text) => (
         <Space>
           <GiftOutlined style={{ color: "#52c41a" }} />
@@ -296,6 +418,8 @@ export default function Donations() {
       title: "Author",
       dataIndex: "author",
       key: "author",
+      align: "center",
+      width: 160,
       render: (text) => (
         <Text>{text}</Text>
       ),
@@ -304,6 +428,8 @@ export default function Donations() {
       title: "Category",
       dataIndex: "category",
       key: "category",
+      align: "center",
+      width: 200,
       render: (category) => (
         <Tag color="blue" style={{ borderRadius: "6px" }}>
           {category}
@@ -311,10 +437,11 @@ export default function Donations() {
       ),
     },
     {
-      title: "Quantity",
+      title: "Qty",
       dataIndex: "num",
       key: "num",
       align: "center",
+      width: 80,
       render: (num) => (
         <Tag color="green" style={{ borderRadius: "6px" }}>
           {num}
@@ -322,18 +449,41 @@ export default function Donations() {
       ),
     },
     {
-      title: "Publish Year",
+      title: "Published Year",
       dataIndex: "publishYear",
       key: "publishYear",
+      align: "center",
+      width: 140,
       render: (year) => (
         <Text>{year || "-"}</Text>
+      ),
+    },
+    {
+      title: "Notes",
+      dataIndex: "notes",
+      key: "notes",
+      align: "center",
+      width: 300,
+      render: (notes) => (
+        notes ? (
+          <Text style={{ 
+            display: 'block',
+            wordBreak: 'break-word',
+            whiteSpace: 'normal'
+          }}>
+            {notes}
+          </Text>
+        ) : (
+          <Text type="secondary" style={{ fontStyle: 'italic' }}>-</Text>
+        )
       ),
     },
     {
       title: "Cover Image",
       dataIndex: "coverImage",
       key: "coverImage",
-      width: 100,
+      width: 120,
+      align: "center",
       render: (coverImage) => (
         coverImage ? (
           <Tooltip title="Click to view full size">
@@ -341,10 +491,10 @@ export default function Donations() {
               src={coverImage}
               alt="Book Cover"
               style={{
-                width: '60px',
-                height: '80px',
+                width: '50px',
+                height: '65px',
                 objectFit: 'cover',
-                borderRadius: '8px',
+                borderRadius: '6px',
                 border: '2px solid #e8e8e8',
                 cursor: 'pointer',
                 transition: 'transform 0.2s ease'
@@ -356,24 +506,24 @@ export default function Donations() {
                 (e.target as HTMLElement).style.transform = 'scale(1)';
               }}
               onClick={() => {
-                // Open image in new tab for full view
-                window.open(coverImage, '_blank');
+                setPreviewImage(coverImage);
+                setIsPreviewVisible(true);
               }}
             />
           </Tooltip>
         ) : (
           <Tooltip title="No cover image available">
             <div style={{
-              width: '90px',
-              height: '80px',
+              width: '100px',
+              height: '65px',
               background: '#f5f5f5',
-              borderRadius: '8px',
+              borderRadius: '6px',
               border: '2px dashed #d9d9d9',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               color: '#8c8c8c',
-              fontSize: '12px'
+              fontSize: '10px'
             }}>
               No Image
             </div>
@@ -387,19 +537,29 @@ export default function Donations() {
         title: "Confirmer",
         dataIndex: "confirmerName",
         key: "confirmerName",
-        render: (text: string) => text || "-",
+        width: 120,
+        align: "center" as const,
+        render: (text: string) => (
+          <Text>{text || "-"}</Text>
+        ),
       },
       {
         title: "Receiver",
         dataIndex: "receiverName",
         key: "receiverName",
-        render: (text: string) => text || "-",
+        width: 120,
+        align: "center" as const,
+        render: (text: string) => (
+          <Text>{text || "-"}</Text>
+        ),
       }
     ] : []),
     {
       title: "Donated At",
       dataIndex: "donationDate",
       key: "donationDate",
+      align: "center",
+      width: 140,
       render: (date) => (
         <Space>
           <CalendarOutlined style={{ color: "#722ed1" }} />
@@ -411,24 +571,47 @@ export default function Donations() {
       title: "Confirmed At",
       dataIndex: "confirmDate",
       key: "confirmDate",
-      render: (date) => formatDate(date),
+      align: "center",
+      width: 140,
+      render: (date) => (
+        <Space>
+          <CalendarOutlined style={{ color: "#722ed1" }} />
+          <Text>{formatDate(date)}</Text>
+        </Space>
+      ),
     },
     {
       title: "Sent At",
       dataIndex: "sendDate",
       key: "sendDate",
-      render: (date) => formatDate(date),
+      align: "center",
+      width: 140,
+      render: (date) => (
+        <Space>
+          <CalendarOutlined style={{ color: "#722ed1" }} />
+          <Text>{formatDate(date)}</Text>
+        </Space>
+      ),
     },
     {
       title: "Received At",
       dataIndex: "receiveDate",
       key: "receiveDate",
-      render: (date) => formatDate(date),
+      align: "center",
+      width: 140,
+      render: (date) => (
+        <Space>
+          <CalendarOutlined style={{ color: "#722ed1" }} />
+          <Text>{formatDate(date)}</Text>
+        </Space>
+      ),
     },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
+      align: "center",
+      width: 120,
       render: (status) => (
         <Tag 
           color={getStatusColor(status)} 
@@ -451,6 +634,7 @@ export default function Donations() {
       key: "action",
       align: "center",
       width: 180,
+      fixed: "right",
       render: (_, record) => getDonationActionConfig(record),
     },
   ];
@@ -461,261 +645,323 @@ export default function Donations() {
       minHeight: '100vh',
       backgroundColor: '#f8fafc'
     }}>
-      {/* Header Section */}
-      <div style={{ 
-        textAlign: 'center', 
-        marginBottom: '40px',
-        padding: '32px 0'
-      }}>
-        <div style={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          borderRadius: '20px',
-          padding: '40px',
-          color: 'white',
-          boxShadow: '0 20px 40px rgba(102, 126, 234, 0.3)',
-          marginBottom: '32px'
-        }}>
-          <Title level={1} style={{ 
-            color: 'white', 
-            margin: '0 0 16px 0',
-            fontSize: '48px',
-            fontWeight: '800',
-            textShadow: '0 2px 4px rgba(0,0,0,0.1)'
-          }}>
-            📚 Book Donation Center
-          </Title>
-          <p style={{ 
-            fontSize: '18px', 
-            margin: '0',
-            opacity: '0.9',
-            fontWeight: '400'
-          }}>
-            Share knowledge by donating books to our community library
-          </p>
-        </div>
-      </div>
-
-      {/* Donation Form Card */}
-      <Card style={{ 
-        maxWidth: '1000px', 
-        margin: '0 auto 48px auto',
-        borderRadius: '16px',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-        border: 'none'
-      }}>
-        <div style={{
-          background: 'linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%)',
-          margin: '-24px -24px 24px -24px',
-          padding: '24px',
-          borderRadius: '16px 16px 0 0',
-          borderBottom: '2px solid #b7eb8f'
-        }}>
-          <Title level={3} style={{ 
-            textAlign: 'center', 
-            margin: '0',
-            color: '#52c41a',
-            fontSize: '24px',
-            fontWeight: '700'
-          }}>
-            🎁 Submit Your Book Donation
-          </Title>
-        </div>
         
-        <Form 
-          form={form} 
-          onFinish={handleSubmit}
-          layout="vertical"
-          size="large"
-          initialValues={{
-            donatedBooks: [{}]
-          }}
-        >
-          <Form.List name="donatedBooks">
-            {(fields, { add, remove }) => (
-              <>
-                {fields.map(({ key, name, ...restField }) => (
-                  <Card 
-                     key={key} 
-                     size="small" 
-                     style={{ 
-                       marginBottom: '24px', 
-                       border: '2px solid #e8f5e8',
-                       borderRadius: '12px',
-                       boxShadow: '0 4px 16px rgba(82, 196, 26, 0.1)',
-                       background: 'linear-gradient(135deg, #fafafa 0%, #f0f9ff 100%)'
-                     }}
-                     title={
-                       <div style={{
-                         display: 'flex',
-                         alignItems: 'center',
-                         gap: '8px',
-                         color: '#52c41a',
-                         fontWeight: '600'
-                       }}>
-                         <span style={{ fontSize: '18px' }}>📖</span>
-                         <span>Book {name + 1}</span>
-                       </div>
-                     }
-                     extra={
-                       fields.length > 1 && (
-                         <Button 
-                           type="text" 
-                           danger 
-                           icon={<DeleteOutlined />}
-                           onClick={() => remove(name)}
-                           style={{
-                             borderRadius: '8px',
-                             fontWeight: '500'
-                           }}
-                         >
-                           Remove
-                         </Button>
-                       )
-                     }
-                   >
-                    <Row gutter={16}>
-                      <Col span={12}>
-                        <Form.Item
-                          {...restField}
-                          name={[name, 'bookTitle']}
-                          label="Book Title"
-                          rules={[
-                            { required: true, message: 'Please enter the book title!' },
-                            { min: 2, message: 'The book title must be at least 2 characters!' },
-                            { max: 200, message: 'The book title must be less than 200 characters!' }
-                          ]}
-                        >
-                          <Input placeholder="Enter the book title" />
-                        </Form.Item>
-                      </Col>
-                      <Col span={12}>
-                        <Form.Item
-                          {...restField}
-                          name={[name, 'author']}
-                          label="Author"
-                          rules={[
-                            { required: true, message: 'Please enter the author name!' },
-                            { min: 2, message: 'The author name must be at least 2 characters!' },
-                            { max: 100, message: 'The author name must be less than 100 characters!' }
-                          ]}
-                        >
-                          <Input placeholder="Enter the author name" />
-                        </Form.Item>
-                      </Col>
-                    </Row>
-
-                    <Row gutter={16}>
-                      <Col span={12}>
-                        <Form.Item
-                          {...restField}
-                          name={[name, 'category']}
-                          label="Category"
-                          rules={[
-                            { required: true, message: 'Please select the category!' }
-                          ]}
-                        >
-                          <Select placeholder="Select the category" options={categories.map(category => ({
-                            label: category,
-                            value: category
-                          }))} />
-                        </Form.Item>
-                      </Col>
-                      <Col span={12}>
-                        <Form.Item
-                          {...restField}
-                          name={[name, 'num']}
-                          label="Number"
-                          rules={[
-                            { required: true, message: 'Please enter the number of books!' },
-                            { 
-                              type: 'number', 
-                              min: 1, 
-                              transform: (value) => Number(value),
-                              message: 'The number of books must be at least 1!' 
-                            },
-                          ]}
-                        >
-                          <Input 
-                            type="number" 
-                            placeholder="Enter the number of books"
-                            min={1}
-                            max={100}
-                          />
-                        </Form.Item>
-                      </Col>
-                    </Row>
-
-                    <Row gutter={16}>
-                      <Col span={12}>
-                        <Form.Item
-                          {...restField}
-                          name={[name, 'publishYear']}
-                          label="Publish Year"
-                        >
-                          <Input 
-                            type="number" 
-                            placeholder="Enter the publish year"
-                            min={1900}
-                            max={new Date().getFullYear() + 1}
-                          />
-                        </Form.Item>
-                      </Col>
-                    </Row>
-
-                    <Row gutter={16}>
-                      <Col span={12}>
-                        <Form.Item
-                          {...restField}
-                          name={[name, 'coverImage']}
-                          label="Cover Image"
-                        >
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <Input 
-                              placeholder="Enter image URL or upload file" 
-                              value={form.getFieldValue(['donatedBooks', name, 'coverImage']) || ''}
-                              onChange={(e) => {
-                                const value = e.target.value;
-                                form.setFieldValue(['donatedBooks', name, 'coverImage'], value);
-                                form.setFieldValue(['donatedBooks', name, 'coverImageFile'], null);
-                              }}
-                            />
-                               <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                               <span style={{ fontSize: '12px', color: '#8c8c8c' }}>OR</span>
-                               <input
-                                 type="file"
-                                 accept="image/*"
-                                 onChange={(e) => {
-                                   const file = e.target.files?.[0];
-                                   if (file) {
-                                     // Validate file size (max 5MB)
-                                     if (file.size > 5 * 1024 * 1024) {
-                                       message.error('File size must be less than 5MB');
-                                       e.target.value = '';
-                                       return;
-                                     }
-                                     
-                                     // Validate file type
-                                     if (!file.type.startsWith('image/')) {
-                                       message.error('Please select an image file');
-                                       e.target.value = '';
-                                       return;
-                                     }
-                                     
-                                     form.setFieldValue(['donatedBooks', name, 'coverImageFile'], file);
-                                     form.setFieldValue(['donatedBooks', name, 'coverImage'], '');
-                                     message.success('File uploaded successfully!');
+       {/* Donation Form Section */}
+       <div style={{ 
+         marginBottom: '32px',
+         padding: '24px',
+         backgroundColor: '#fafafa',
+         borderRadius: '16px',
+         border: '1px solid #e8e8e8',
+         boxShadow: '0 2px 12px rgba(0,0,0,0.08)'
+       }}>
+         {/* Section Header */}
+         <div style={{ 
+           marginBottom: '24px',
+           textAlign: 'center'
+         }}>
+           <h2 style={{ 
+             margin: '0 0 8px 0',
+             fontSize: '24px',
+             fontWeight: '700',
+             color: '#262626',
+             letterSpacing: '0.5px'
+           }}>
+             🎁 Submit Your Book Donation
+           </h2>
+           <p style={{ 
+             margin: '0',
+             fontSize: '14px',
+             color: '#8c8c8c',
+             fontStyle: 'italic'
+           }}>
+             Submit your book donations to help expand our library collection
+           </p>
+         </div>
+         
+         <Form 
+           form={form} 
+           onFinish={handleSubmit}
+           layout="vertical"
+           size="large"
+           initialValues={{
+             donatedBooks: [{}]
+           }}
+         >
+           <Form.List name="donatedBooks">
+             {(fields, { add, remove }) => (
+               <>
+                 {fields.map(({ key, name, ...restField }) => (
+                   <Card 
+                      key={key} 
+                      size="small" 
+                      style={{ 
+                        marginBottom: '24px', 
+                        border: '1px solid #e8e8e8',
+                        borderRadius: '12px',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                        background: '#ffffff'
+                      }}
+                      title={
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          color: '#262626',
+                          fontWeight: '600'
+                        }}>
+                          <span style={{ fontSize: '18px' }}>📖</span>
+                          <span>Book {name + 1}</span>
+                        </div>
+                      }
+                      extra={
+                        fields.length > 1 && (
+                          <Button 
+                            type="text" 
+                            danger 
+                            icon={<DeleteOutlined />}
+                            onClick={() => remove(name)}
+                            style={{
+                              borderRadius: '8px',
+                              fontWeight: '500'
+                            }}
+                          >
+                            Remove
+                          </Button>
+                        )
+                      }
+                    >
+                     <Row gutter={24}>
+                       <Col span={12}>
+                         <Form.Item
+                           {...restField}
+                           name={[name, 'bookTitle']}
+                           label="Book Title"
+                           validateStatus={duplicateBooks[name]?.isDuplicate ? 'error' : undefined}
+                           help={duplicateBooks[name]?.message}
+                           rules={[
+                             { required: true, message: 'Please enter the book title!' },
+                             { min: 2, message: 'The book title must be at least 2 characters!' },
+                             { max: 200, message: 'The book title must be less than 200 characters!' },
+                             {
+                               validator: async (_, value) => {
+                                 if (value && value.trim().length >= 2) {
+                                   const duplicateCheck = checkDuplicateBookTitle(value, name);
+                                   if (duplicateCheck.isDuplicate) {
+                                     setDuplicateBooks(prev => ({
+                                       ...prev,
+                                       [name]: duplicateCheck
+                                     }));
+                                     throw new Error(duplicateCheck.message);
+                                   } else {
+                                     setDuplicateBooks(prev => {
+                                       const newState = { ...prev };
+                                       delete newState[name];
+                                       return newState;
+                                     });
                                    }
-                                 }}
-                                 style={{ fontSize: '12px' }}
-                               />
-                             </div>
-                                                         {/* Preview Image */}
-                             {(form.getFieldValue(['donatedBooks', name, 'coverImage']) || form.getFieldValue(['donatedBooks', name, 'coverImageFile'])) && (
+                                 }
+                                 return Promise.resolve();
+                               }
+                             }
+                           ]}
+                         >
+                           <Input 
+                             placeholder="Enter the book title" 
+                             onBlur={(e) => {
+                               const value = e.target.value;
+                               if (value && value.trim().length >= 2) {
+                                 const duplicateCheck = checkDuplicateBookTitle(value, name);
+                                 setDuplicateBooks(prev => ({
+                                   ...prev,
+                                   [name]: duplicateCheck
+                                 }));
+                               }
+                             }}
+                             onChange={(e) => {
+                               const value = e.target.value;
+                               // Clear duplicate message when user starts typing
+                               if (duplicateBooks[name]) {
+                                 setDuplicateBooks(prev => {
+                                   const newState = { ...prev };
+                                   delete newState[name];
+                                   return newState;
+                                 });
+                               }
+                             }}
+                           />
+                         </Form.Item>
+                       </Col>
+                       <Col span={12}>
+                         <Form.Item
+                           {...restField}
+                           name={[name, 'author']}
+                           label="Author"
+                           rules={[
+                             { required: true, message: 'Please enter the author name!' },
+                             { min: 2, message: 'The author name must be at least 2 characters!' },
+                             { max: 100, message: 'The author name must be less than 100 characters!' }
+                           ]}
+                         >
+                           <Input placeholder="Enter the author name" />
+                         </Form.Item>
+                       </Col>
+                     </Row>
+
+                     <Row gutter={24}>
+                       <Col span={12}>
+                         <Form.Item
+                           {...restField}
+                           name={[name, 'category']}
+                           label="Category"
+                           rules={[
+                             { required: true, message: 'Please select the category!' }
+                           ]}
+                         >
+                           <Select placeholder="Select the category" options={categories.map(category => ({
+                             label: category,
+                             value: category
+                           }))} />
+                         </Form.Item>
+                       </Col>
+                       <Col span={12}>
+                         <Form.Item
+                           {...restField}
+                           name={[name, 'num']}
+                           label="Number of Books"
+                           rules={[
+                             { required: true, message: 'Please enter the number of books!' },
+                             { 
+                               type: 'number', 
+                               min: 1, 
+                               transform: (value) => Number(value),
+                               message: 'The number of books must be at least 1!' 
+                             },
+                           ]}
+                         >
+                           <Input 
+                             type="number" 
+                             placeholder="Enter the number of books"
+                             min={1}
+                             max={100}
+                           />
+                         </Form.Item>
+                       </Col>
+                     </Row>
+
+                     <Row gutter={24}>
+                       <Col span={12}>
+                         <Form.Item
+                           {...restField}
+                           name={[name, 'publishYear']}
+                           label="Publish Year"
+                         >
+                           <Input 
+                             type="number" 
+                             placeholder="Enter the publish year"
+                             min={1900}
+                             max={new Date().getFullYear() + 1}
+                           />
+                         </Form.Item>
+                       </Col>
+                       <Col span={12}>
+                         <Form.Item
+                           {...restField}
+                           name={[name, 'notes']}
+                           label="Notes"
+                           rules={[
+                             { max: 300, message: 'Notes must be less than 300 characters!' }
+                           ]}
+                         >
+                           <TextArea 
+                             rows={2} 
+                             placeholder="Enter additional notes (optional)"
+                             showCount
+                             maxLength={300}
+                           />
+                         </Form.Item>
+                       </Col>
+                     </Row>
+
+                     <Row gutter={24}>
+                       <Col span={24}>
+                         <Form.Item
+                           {...restField}
+                           name={[name, 'coverImage']}
+                           label="Cover Image"
+                         >
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                              <Input 
+                                placeholder="Enter image URL or upload file" 
+                                value={inputValues[`cover-${name}`] || ''}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  form.setFieldValue(['donatedBooks', name, 'coverImage'], value);
+                                  form.setFieldValue(['donatedBooks', name, 'coverImageFile'], null);
+                                  setInputValues(prev => ({ ...prev, [`cover-${name}`]: value }));
+                                }}
+                              />
+                              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                <span style={{ fontSize: '12px', color: '#8c8c8c' }}>OR</span>
+                                <div style={{ position: 'relative' }}>
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => {
+                                       const file = e.target.files?.[0];
+                                       if (file) {
+                                         if (handleFileUpload(file, name)) {
+                                           e.target.value = '';
+                                         }
+                                       }
+                                     }}
+                                    style={{
+                                      position: 'absolute',
+                                      opacity: 0,
+                                      width: '100%',
+                                      height: '100%',
+                                      cursor: 'pointer'
+                                    }}
+                                    id={`file-input-${name}`}
+                                  />
+                                  <Button
+                                    type="default"
+                                    size="small"
+                                    icon={<PlusOutlined />}
+                                    style={{
+                                      background: '#f0f0f0',
+                                      border: '1px dashed #d9d9d9',
+                                      borderRadius: '6px',
+                                      padding: '4px 12px',
+                                      fontSize: '12px',
+                                      color: '#595959',
+                                      cursor: 'pointer',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '4px'
+                                    }}
+                                    onClick={() => document.getElementById(`file-input-${name}`)?.click()}
+                                  >
+                                    Choose File
+                                  </Button>
+                                  <span style={{ 
+                                    fontSize: '11px', 
+                                    color: '#8c8c8c', 
+                                    marginLeft: '8px',
+                                    fontStyle: 'italic'
+                                  }}>
+                                    {form.getFieldValue(['donatedBooks', name, 'coverImageFile']) ? 
+                                      form.getFieldValue(['donatedBooks', name, 'coverImageFile']).name : 
+                                      'No file chosen'
+                                    }
+                                  </span>
+                                </div>
+                              </div>
+                             {/* Preview Image */}
+                             {(form.getFieldValue(['donatedBooks', name, 'coverImage']) || filePreviewUrls[`preview-${name}`]) && (
                                <div style={{ marginTop: '8px', position: 'relative' }}>
                                  <img
-                                   src={form.getFieldValue(['donatedBooks', name, 'coverImage']) || 
-                                        (form.getFieldValue(['donatedBooks', name, 'coverImageFile']) ? 
-                                         URL.createObjectURL(form.getFieldValue(['donatedBooks', name, 'coverImageFile'])) : '')}
+                                   src={form.getFieldValue(['donatedBooks', name, 'coverImage']) || filePreviewUrls[`preview-${name}`] || ''}
                                    alt="Preview"
                                    style={{
                                      width: '100px',
@@ -744,112 +990,138 @@ export default function Donations() {
                                      justifyContent: 'center',
                                      boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
                                    }}
-                                   onClick={() => {
-                                     form.setFieldValue(['donatedBooks', name, 'coverImage'], '');
-                                     form.setFieldValue(['donatedBooks', name, 'coverImageFile'], null);
-                                     message.info('Cover image removed');
-                                   }}
+                                      onClick={() => {
+                                      form.setFieldValue(['donatedBooks', name, 'coverImage'], '');
+                                      form.setFieldValue(['donatedBooks', name, 'coverImageFile'], null);
+                                      setInputValues(prev => ({ ...prev, [`cover-${name}`]: '' }));
+                                      
+                                      // Clean up preview URL
+                                      if (filePreviewUrls[`preview-${name}`]) {
+                                        URL.revokeObjectURL(filePreviewUrls[`preview-${name}`]);
+                                        setFilePreviewUrls(prev => {
+                                          const newUrls = { ...prev };
+                                          delete newUrls[`preview-${name}`];
+                                          return newUrls;
+                                        });
+                                      }
+                                      
+                                      message.info('Cover image removed');
+                                    }}
                                  />
                                </div>
                              )}
-                          </div>
-                        </Form.Item>
-                      </Col>
-                      <Col span={12}>
-                        <Form.Item
-                          {...restField}
-                          name={[name, 'notes']}
-                          label="Notes"
-                          rules={[
-                            { max: 300, message: 'Notes must be less than 300 characters!' }
-                          ]}
-                        >
-                          <TextArea 
-                            rows={2} 
-                            placeholder="Enter additional notes (optional)"
-                            showCount
-                            maxLength={300}
-                          />
-                        </Form.Item>
-                      </Col>
-                    </Row>
+                                                    
+                           </div>
+                         </Form.Item>
+                       </Col>
+                     </Row>
 
-                    <Form.Item
-                      {...restField}
-                      name={[name, 'description']}
-                      label="Description"
-                      rules={[
-                        { max: 500, message: 'The description must be less than 500 characters!' }
-                      ]}
-                    >
-                      <TextArea 
-                        rows={3} 
-                        placeholder="Enter the description (optional)"
-                        showCount
-                        maxLength={500}
-                      />
-                    </Form.Item>
-                  </Card>
-                ))}
+                     <Form.Item
+                       {...restField}
+                       name={[name, 'description']}
+                       label="Description"
+                       rules={[
+                         { max: 500, message: 'The description must be less than 500 characters!' }
+                       ]}
+                     >
+                       <TextArea 
+                         rows={3} 
+                         placeholder="Enter the description (optional)"
+                         showCount
+                         maxLength={500}
+                       />
+                     </Form.Item>
+                   </Card>
+                 ))}
 
-                <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                  <Button 
-                    type="dashed" 
-                    icon={<PlusOutlined />}
-                    onClick={() => add()}
-                    size="large"
-                    style={{ width: '200px' }}
-                  >
-                    Add Another Book
-                  </Button>
-                </div>
-              </>
-            )}
-          </Form.List>
+                 <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                   <Button 
+                     type="dashed" 
+                     icon={<PlusOutlined />}
+                     onClick={() => add()}
+                     size="large"
+                     style={{ width: '200px' }}
+                   >
+                     Add Another Book
+                   </Button>
+                 </div>
+               </>
+             )}
+           </Form.List>
 
-          <Form.Item style={{ textAlign: 'center', marginTop: '30px' }}>
-            <Space size="large">
-              <Button 
-                type="primary" 
-                htmlType="submit"
-                size="large"
-                disabled={isCreating}
-                style={{
-                  background: 'linear-gradient(135deg, #52c41a 0%, #73d13d 100%)',
-                  border: 'none',
-                  padding: '0 40px',
-                  height: '48px',
-                  fontSize: '16px',
-                  fontWeight: '600'
-                }}
-              >
-                {isCreating ? 'Submitting...' : 'Submit Donation'}
-              </Button>
-              <Button 
-                onClick={resetAllForms}
-                size="large"
-                style={{
-                  padding: '0 40px',
-                  height: '48px',
-                  fontSize: '16px'
-                }}
-              >
-                Reset All
-              </Button>
-            </Space>
-          </Form.Item>
-        </Form>
-      </Card>
+           <Form.Item style={{ textAlign: 'center', marginTop: '30px' }}>
+             <Space size="large">
+               <Button 
+                 type="primary" 
+                 htmlType="submit"
+                 size="large"
+                 disabled={isCreating}
+                 style={{
+                   background: 'linear-gradient(135deg, #52c41a 0%, #73d13d 100%)',
+                   border: 'none',
+                   padding: '0 40px',
+                   height: '48px',
+                   fontSize: '16px',
+                   fontWeight: '600'
+                 }}
+               >
+                 {isCreating ? 'Submitting...' : 'Submit Donation'}
+               </Button>
+               <Button 
+                 onClick={resetAllForms}
+                 size="large"
+                 style={{
+                   padding: '0 40px',
+                   height: '48px',
+                   fontSize: '16px'
+                 }}
+               >
+                 Reset All
+               </Button>
+             </Space>
+           </Form.Item>
+         </Form>
+       </div>
 
-       {/* Donation Records Table */}
+       {/* Donation Record Management Section */}
        {!loadingDonationRecords && (
-         <div style={{ marginTop: '0' }}>
+         <div style={{ 
+           marginBottom: '32px',
+           padding: '24px',
+           backgroundColor: '#fafafa',
+           borderRadius: '16px',
+           border: '1px solid #e8e8e8',
+           boxShadow: '0 2px 12px rgba(0,0,0,0.08)'
+         }}>
+           {/* Section Header */}
+           <div style={{ 
+             marginBottom: '24px',
+             textAlign: 'center'
+           }}>
+             <h2 style={{ 
+               margin: '0 0 8px 0',
+               fontSize: '24px',
+               fontWeight: '700',
+               color: '#262626',
+               letterSpacing: '0.5px'
+             }}>
+               📊 Donation Record Management
+             </h2>
+             <p style={{ 
+               margin: '0',
+               fontSize: '14px',
+               color: '#8c8c8c',
+               fontStyle: 'italic'
+             }}>
+               Overview and management of all donation activities
+             </p>
+           </div>
+
            {/* Statistics Cards */}
            <div style={{ 
              display: 'grid',
              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-             gap: '20px',
-             marginBottom: '24px'
+             gap: '20px'
            }}>
             {/* Total Donations */}
             <div style={{ 
@@ -1020,80 +1292,172 @@ export default function Donations() {
               </div>
             </div>
           </div>
-
-          {/* Table */}
-          <Card 
-            title={
-              <Space size="large">
-                <div style={{ 
-                  background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
-                  borderRadius: '50%',
-                  width: '40px',
-                  height: '40px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white'
-                }}>
-                  <TeamOutlined style={{ fontSize: '20px' }} />
-                </div>
-                <div>
-                  <Title level={4} style={{ margin: 0, color: '#262626' }}>
-                    Donation Records
-                  </Title>
-                  <Text style={{ color: '#8c8c8c', fontSize: '14px' }}>
-                    Track and manage all book donation transactions
-                  </Text>
-                </div>
-              </Space>
-            }
-            style={{ 
-              borderRadius: '12px', 
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-              border: '1px solid #e8e8e8'
-            }}
-            styles={{
-             header: {
-               background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
-               borderBottom: '2px solid #e8e8e8'
-             }
-           }}
-          >
-            <Table
-              columns={columns}
-              dataSource={filteredData}
-              rowKey="id"
-              pagination={{
-                pageSize: 10,
-                showSizeChanger: true,
-                showQuickJumper: true,
-                showTotal: (total, range) => 
-                  `${range[0]}-${range[1]} of ${total} donations`,
-                style: { marginTop: '16px' }
-              }}
-              scroll={{ x: 1500 }}
-              size="middle"
-              bordered
-              style={{ borderRadius: '8px' }}
-            />
-          </Card>
-        </div>
-      )}
-
-       {/* Loading State */}
-       {loadingDonationRecords && (
-         <div style={{ marginTop: '0' }}>
-           <Skeleton.Input active size="large" style={{ width: "200px", height: "32px", marginBottom: '24px' }} />
-           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "16px", marginBottom: '24px' }}>
-             {[...Array(4)].map((_, index) => (
-               <Skeleton key={index} active>
-                 <div style={{ height: "120px", padding: "16px" }} />
-               </Skeleton>
-             ))}
-           </div>
-           <Skeleton.Input active size="large" style={{ width: "100%", height: "400px" }} />
          </div>
        )}
-    </div>
-  );
-}
+
+       {/* Donation Records Table Section */}
+       {!loadingDonationRecords && (
+         <div style={{ 
+           marginBottom: '32px',
+           padding: '24px',
+           backgroundColor: '#fafafa',
+           borderRadius: '16px',
+           border: '1px solid #e8e8e8',
+           boxShadow: '0 2px 12px rgba(0,0,0,0.08)'
+         }}>
+           {/* Section Header */}
+           <div style={{ 
+             marginBottom: '24px',
+             textAlign: 'center'
+           }}>
+             <h2 style={{ 
+               margin: '0 0 8px 0',
+               fontSize: '24px',
+               fontWeight: '700',
+               color: '#262626',
+               letterSpacing: '0.5px'
+             }}>
+               📋 Donation Records
+             </h2>
+             <p style={{ 
+               margin: '0',
+               fontSize: '14px',
+               color: '#8c8c8c',
+               fontStyle: 'italic'
+             }}>
+               Track and manage all book donation transactions
+             </p>
+           </div>
+
+           {/* Table */}
+           <Card 
+             title={
+               <Space size="large">
+                 <div style={{ 
+                   background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
+                   borderRadius: '50%',
+                   width: '40px',
+                   height: '40px',
+                   display: 'flex',
+                   alignItems: 'center',
+                   justifyContent: 'center',
+                   color: 'white'
+                 }}>
+                   <TeamOutlined style={{ fontSize: '20px' }} />
+                 </div>
+                 <div>
+                   <Title level={4} style={{ margin: 0, color: '#262626' }}>
+                     Donation Records Details
+                   </Title>
+                   <Text style={{ color: '#8c8c8c', fontSize: '14px' }}>
+                     Track and manage all book donation transactions
+                   </Text>
+                 </div>
+               </Space>
+             }
+             style={{ 
+               borderRadius: '12px', 
+               boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+               border: '1px solid #e8e8e8'
+             }}
+             styles={{
+              header: {
+                background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
+                borderBottom: '2px solid #e8e8e8'
+              }
+            }}
+           >
+             <Table
+               columns={columns}
+               dataSource={filteredData}
+               rowKey="id"
+               pagination={{
+                 pageSize: 10,
+                 showSizeChanger: true,
+                 showQuickJumper: true,
+                 showTotal: (total, range) => 
+                   `${range[0]}-${range[1]} of ${total} donations`,
+                 style: { marginTop: '16px' }
+               }}
+               scroll={{ x: 2230 }}
+               size="small"
+               bordered
+               style={{ borderRadius: '8px' }}
+             />
+           </Card>
+         </div>
+       )}
+
+        {/* Loading State */}
+        {loadingDonationRecords && (
+          <div style={{ marginTop: '0' }}>
+            <Skeleton.Input active size="large" style={{ width: "200px", height: "32px", marginBottom: '24px' }} />
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "16px", marginBottom: '24px' }}>
+              {[...Array(4)].map((_, index) => (
+                <Skeleton key={index} active>
+                  <div style={{ height: "120px", padding: "16px" }} />
+                </Skeleton>
+              ))}
+            </div>
+            <Skeleton.Input active size="large" style={{ width: "100%", height: "400px" }} />
+          </div>
+        )}
+
+        {/* Image Preview Modal */}
+        {isPreviewVisible && previewImage && (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0,0,0,0.8)',
+              zIndex: 1000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer'
+            }}
+            onClick={() => setIsPreviewVisible(false)}
+          >
+            <div style={{ position: 'relative' }}>
+              <img
+                src={previewImage}
+                alt="Full size preview"
+                style={{
+                  maxWidth: '90vw',
+                  maxHeight: '90vh',
+                  objectFit: 'contain',
+                  borderRadius: '8px'
+                }}
+              />
+              <Button
+                type="text"
+                icon={<CloseOutlined />}
+                style={{
+                  position: 'absolute',
+                  top: '-40px',
+                  right: '0',
+                  color: 'white',
+                  fontSize: '24px',
+                  background: 'rgba(0,0,0,0.5)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '32px',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsPreviewVisible(false);
+                }}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }

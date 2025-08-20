@@ -224,6 +224,8 @@ export default function LoanRecords() {
       title: "Borrower",
       dataIndex: "borrowerName",
       key: "borrowerName",
+      align: "center" as const,
+      width: 220,
       render: (text) => (
         <Space>
           <UserOutlined style={{ color: "#1890ff" }} />
@@ -235,6 +237,8 @@ export default function LoanRecords() {
       title: "Book",
       dataIndex: "bookTitle",
       key: "bookTitle",
+      align: "center" as const,
+      width: 350,
       render: (text) => (
         <Space>
           <BookOutlined style={{ color: "#52c41a" }} />
@@ -246,7 +250,8 @@ export default function LoanRecords() {
       title: "Quantity",
       dataIndex: "quantity",
       key: "quantity",
-      align: "center",
+      align: "center" as const,
+      width: 80,
       render: (quantity) => (
         <Tag color="blue" style={{ borderRadius: "6px" }}>
           {quantity}
@@ -259,12 +264,16 @@ export default function LoanRecords() {
         title: "Deliverer",
         dataIndex: "delivererName",
         key: "delivererName",
+        align: "center" as const,
+        width: 120,
         render: (text: string) => text || "-",
       },
       {
         title: "Return Confirmer",
         dataIndex: "returnConfirmerName",
         key: "returnConfirmerName",
+        align: "center" as const,
+        width: 120,
         render: (text: string) => text || "-",
       }
     ] : []),
@@ -272,6 +281,8 @@ export default function LoanRecords() {
       title: "Borrowed At",
       dataIndex: "borrowedAt",
       key: "borrowedAt",
+      align: "center" as const,
+      width: 140,
       render: (date) => (
         <Space>
           <CalendarOutlined style={{ color: "#722ed1" }} />
@@ -283,30 +294,40 @@ export default function LoanRecords() {
       title: "Delivered At",
       dataIndex: "deliveredAt",
       key: "deliveredAt",
+      align: "center" as const,
+      width: 140,
       render: (date) => formatDate(date),
     },
     {
       title: "Received At",
       dataIndex: "receivedAt",
       key: "receivedAt",
+      align: "center" as const,
+      width: 140,
       render: (date) => formatDate(date),
     },
     {
       title: "Returned At",
       dataIndex: "returnedAt",
       key: "returnedAt",
+      align: "center" as const,
+      width: 140,
       render: (date) => formatDate(date),
     },
     {
       title: "Return Confirmed At",
       dataIndex: "returnConfirmedAt",
       key: "returnConfirmedAt",
+      align: "center" as const,
+      width: 140,
       render: (date) => formatDate(date),
     },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
+      align: "center" as const,
+      width: 120,
       render: (status) => (
         <Tag 
           color={getStatusColor(status)} 
@@ -330,6 +351,7 @@ export default function LoanRecords() {
       key: "action",
       align: "center",
       width: 180,
+      fixed: "right",
       render: (_, record) => getActionConfig(record),
     },
   ];
@@ -619,8 +641,8 @@ export default function LoanRecords() {
               `${range[0]}-${range[1]} of ${total} transactions`,
             style: { marginTop: '16px' }
           }}
-          scroll={{ x: 1200 }}
-          size="middle"
+          scroll={{ x: 2230 }}
+          size="small"
           bordered
           style={{ borderRadius: '8px' }}
         />
