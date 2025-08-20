@@ -16,5 +16,6 @@ export interface DonationRecord {
     sendDate?: Date;
     receiveDate?: Date;
     notes?: string;
+    hasExist: boolean;
     status: "pending" | "confirmed" | "sent"| "received" | "canceled";
   }

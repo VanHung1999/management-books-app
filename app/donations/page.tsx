@@ -731,82 +731,103 @@ export default function Donations() {
                         )
                       }
                     >
-                     <Row gutter={24}>
-                       <Col span={12}>
-                         <Form.Item
-                           {...restField}
-                           name={[name, 'bookTitle']}
-                           label="Book Title"
-                           validateStatus={duplicateBooks[name]?.isDuplicate ? 'error' : undefined}
-                           help={duplicateBooks[name]?.message}
-                           rules={[
-                             { required: true, message: 'Please enter the book title!' },
-                             { min: 2, message: 'The book title must be at least 2 characters!' },
-                             { max: 200, message: 'The book title must be less than 200 characters!' },
-                             {
-                               validator: async (_, value) => {
-                                 if (value && value.trim().length >= 2) {
-                                   const duplicateCheck = checkDuplicateBookTitle(value, name);
-                                   if (duplicateCheck.isDuplicate) {
-                                     setDuplicateBooks(prev => ({
-                                       ...prev,
-                                       [name]: duplicateCheck
-                                     }));
-                                     throw new Error(duplicateCheck.message);
-                                   } else {
-                                     setDuplicateBooks(prev => {
-                                       const newState = { ...prev };
-                                       delete newState[name];
-                                       return newState;
-                                     });
-                                   }
-                                 }
-                                 return Promise.resolve();
-                               }
-                             }
-                           ]}
-                         >
-                           <Input 
-                             placeholder="Enter the book title" 
-                             onBlur={(e) => {
-                               const value = e.target.value;
-                               if (value && value.trim().length >= 2) {
-                                 const duplicateCheck = checkDuplicateBookTitle(value, name);
-                                 setDuplicateBooks(prev => ({
-                                   ...prev,
-                                   [name]: duplicateCheck
-                                 }));
-                               }
-                             }}
-                             onChange={(e) => {
-                               const value = e.target.value;
-                               // Clear duplicate message when user starts typing
-                               if (duplicateBooks[name]) {
-                                 setDuplicateBooks(prev => {
-                                   const newState = { ...prev };
-                                   delete newState[name];
-                                   return newState;
-                                 });
-                               }
-                             }}
-                           />
-                         </Form.Item>
-                       </Col>
-                       <Col span={12}>
-                         <Form.Item
-                           {...restField}
-                           name={[name, 'author']}
-                           label="Author"
-                           rules={[
-                             { required: true, message: 'Please enter the author name!' },
-                             { min: 2, message: 'The author name must be at least 2 characters!' },
-                             { max: 100, message: 'The author name must be less than 100 characters!' }
-                           ]}
-                         >
-                           <Input placeholder="Enter the author name" />
-                         </Form.Item>
-                       </Col>
-                     </Row>
+                        <Row gutter={24}>
+                        <Col span={12}>
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'bookTitle']}
+                            label="Book Title"
+                            validateStatus={duplicateBooks[name]?.isDuplicate ? 'error' : undefined}
+                            help={duplicateBooks[name]?.message}
+                            rules={[
+                              { required: true, message: 'Please enter the book title!' },
+                              { min: 2, message: 'The book title must be at least 2 characters!' },
+                              { max: 200, message: 'The book title must be less than 200 characters!' },
+                              {
+                                validator: async (_, value) => {
+                                  if (value && value.trim().length >= 2) {
+                                    const duplicateCheck = checkDuplicateBookTitle(value, name);
+                                    if (duplicateCheck.isDuplicate) {
+                                      setDuplicateBooks(prev => ({
+                                        ...prev,
+                                        [name]: duplicateCheck
+                                      }));
+                                      throw new Error(duplicateCheck.message);
+                                    } else {
+                                      setDuplicateBooks(prev => {
+                                        const newState = { ...prev };
+                                        delete newState[name];
+                                        return newState;
+                                      });
+                                    }
+                                  }
+                                  return Promise.resolve();
+                                }
+                              }
+                            ]}
+                          >
+                            <Input 
+                              placeholder="Enter the book title" 
+                              onBlur={(e) => {
+                                const value = e.target.value;
+                                if (value && value.trim().length >= 2) {
+                                  const duplicateCheck = checkDuplicateBookTitle(value, name);
+                                  setDuplicateBooks(prev => ({
+                                    ...prev,
+                                    [name]: duplicateCheck
+                                  }));
+                                }
+                              }}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                // Clear duplicate message when user starts typing
+                                if (duplicateBooks[name]) {
+                                  setDuplicateBooks(prev => {
+                                    const newState = { ...prev };
+                                    delete newState[name];
+                                    return newState;
+                                  });
+                                }
+                              }}
+                            />
+                          </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'author']}
+                            label="Author"
+                            rules={[
+                              { required: true, message: 'Please enter the author name!' },
+                              { min: 2, message: 'The author name must be at least 2 characters!' },
+                              { max: 100, message: 'The author name must be less than 100 characters!' }
+                            ]}
+                          >
+                            <Input placeholder="Enter the author name" />
+                          </Form.Item>
+                        </Col>
+                      </Row>
+
+                      {/* Checkbox below Book Title */}
+                      <Row gutter={24}>
+                        <Col span={24}>
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'hasExist']}
+                            valuePropName="checked"
+                          >
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                              <input 
+                                type="checkbox" 
+                                style={{ width: '16px', height: '16px' }}
+                              />
+                              <span style={{ fontSize: '14px', color: '#333' }}>
+                                This book already exists in the library
+                              </span>
+                            </label>
+                          </Form.Item>
+                        </Col>
+                      </Row>
 
                      <Row gutter={24}>
                        <Col span={12}>
