@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Form, Input, Select, Button, Card, Typography, Space, Row, Col, Table, Tag, Tooltip, Skeleton, App } from 'antd';
 import { getCategories } from '../database/categoryDatabase';
 import { PlusOutlined, DeleteOutlined, GiftOutlined, UserOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, TeamOutlined, CloseOutlined } from '@ant-design/icons';
@@ -31,8 +31,8 @@ export default function Donations() {
   const [filePreviewUrls, setFilePreviewUrls] = useState<{[key: string]: string}>({}); // Track file preview URLs
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isPreviewVisible, setIsPreviewVisible] = useState(false);
-  const [validateBookTitle, setValidateBookTitle] = useState<{[key: number]: {canSubmit: boolean, message: string }}>({});
   const [checkboxStates, setCheckboxStates] = useState<{[key: number]: boolean}>({});
+  const [validateBookTitle, setValidateBookTitle] = useState<{[key: number]: {canSubmit: boolean, message: string }}>({});
 
   const { mutate: createDonationRecord } = useCreate(
     {
@@ -56,37 +56,53 @@ export default function Donations() {
     resource: "books",
   });
 
-  // Check book existence and duplicates
-  const checkBookExistsInLibrary = (bookTitle: string, currentIndex: number) : {hasExistinginLibrary: boolean | null, hasExistinginDonationForm: boolean} => {
-    
-    const trimmedTitle = bookTitle.trim().toLowerCase();
-    
-    // Check against other books in current form
+  const { mutate: updateBook } = useUpdate<Book>({
+    resource: "books",
+  });
+
+  const handleBookTitleValidation = (value: string, name: number, checkboxValue?: boolean) => {
+    // Use passed checkboxValue if provided, otherwise fall back to state
+    const currentCheckboxValue = checkboxValue !== undefined ? checkboxValue : checkboxStates[name];
+    const trimmedTitle = value.trim();
+
     const currentFormBooks = form.getFieldValue('donatedBooks') || [];
     const duplicateInForm = currentFormBooks.find((book: any, index: number) => 
-      index !== currentIndex && 
+      index !== name && 
       book.bookTitle && 
-      book.bookTitle.trim().toLowerCase() === trimmedTitle
+      book.bookTitle.trim().toLowerCase() === trimmedTitle.toLowerCase()
     );
-    
-    if (duplicateInForm) {
-      return {
-        hasExistinginLibrary: null,
-        hasExistinginDonationForm: true,
-      };
-    }
-    
-    // Check if exists in library
-    const exists = booksData?.data?.some(book => 
-      book.name.toLowerCase() === trimmedTitle
-    );
+    const hasExistinginLibrary = booksData?.data?.some(book => book.name === trimmedTitle);
 
-    if (exists) {
-      return { hasExistinginLibrary: true, hasExistinginDonationForm: false};
-    } else {
-      return { hasExistinginLibrary: false, hasExistinginDonationForm: false};
+    const hasExistinginDonationForm = donationRecordData?.data?.some(donation => donation.bookTitle === trimmedTitle);
+    if (duplicateInForm) {
+      setValidateBookTitle(prev => ({ ...prev, [name]: { canSubmit: false, message: 'This book already exists in the current donation form!' } }));
+      return;
     }
+
+    if (hasExistinginDonationForm) {
+      const donationRecord = donationRecordData?.data?.find(donation => donation.bookTitle === trimmedTitle);
+      if ((donationRecord?.status === "pending" || donationRecord?.status === "confirmed" || donationRecord?.status === "sent") && !hasExistinginLibrary) {
+        setValidateBookTitle(prev => ({ ...prev, [name]: { canSubmit: false, message: 'This book doesn\'t exist in the library but in the process to be added!' } }));
+        return;
+      }
+    }
+
+    if (hasExistinginLibrary && !currentCheckboxValue) {
+      setValidateBookTitle(prev => ({ ...prev, [name]: { canSubmit: false, message: 'This book already exists in the library!' } }));
+      return;
+    }
+
+    if (!hasExistinginLibrary && currentCheckboxValue) {
+      setValidateBookTitle(prev => ({ ...prev, [name]: { canSubmit: false, message: 'This book doesn\'t exist in the library' } }));
+      return;
+    }
+
+    setValidateBookTitle(prev => ({ ...prev, [name]: { canSubmit: true, message: '' } }));
+    return;
+    
   };
+
+
 
   useEffect(() => {
     const currentUser = localStorage.getItem("currentUser");
@@ -109,6 +125,7 @@ export default function Donations() {
   }, [filePreviewUrls]);
 
   const handleSubmit = (values: any) => {
+
     // Check for duplicate books before submitting    
     setIsCreating(true);
     let successCount = 0;
@@ -178,6 +195,7 @@ export default function Donations() {
     setFilePreviewUrls({});
     setInputValues({});
     setCheckboxStates({});
+    setValidateBookTitle({});
   };
 
   // Handle file upload with preview
@@ -258,7 +276,7 @@ export default function Donations() {
   };
 
   // Handle status change
-  const handleStatusChange = (recordId: string, newStatus: "confirmed" | "sent" | "received" | "canceled") => {
+  const handleStatusChange = (recordId: string, newStatus: "confirmed" | "sent" | "received" | "canceled", hasExistinginLibrary: boolean) => {
     const record = donationRecordData?.data?.find(item => item.id === recordId);
     if (record) {
       const updatedRecord: any = { ...record, status: newStatus };
@@ -287,17 +305,30 @@ export default function Donations() {
 
       // If received, add books to the library
       if (newStatus === "received") {
-        createBook({
-          values: {
-            name: record.bookTitle,
-            author: record.author,
-            category: record.category,
-            num: record.num,
-            coverImage: record.coverImage,
-            description: record.description,
-            publishYear: record.publishYear,
-          }
-        });
+        if (!hasExistinginLibrary) {
+          createBook({
+            values: {
+              name: record.bookTitle,
+              author: record.author,
+              category: record.category,
+              num: record.num,
+              coverImage: record.coverImage,
+              description: record.description,
+              publishYear: record.publishYear,
+            }
+          });
+        } else {
+            const book = booksData?.data?.find(book => book.name === record.bookTitle);
+            updateBook({
+              id: book?.id,
+              values: {
+                num: book?.num + record.num,
+                status: {
+                  available: book?.status.available + record.num
+                }
+              }
+            });
+        }
       }
       
       // Reload the page
@@ -315,18 +346,18 @@ export default function Donations() {
         return renderDonationActionContainer([
           renderDonationActionButton({
             ...DONATION_ACTION_CONFIGS.confirm,
-            onClick: () => handleStatusChange(record.id, "confirmed")
+            onClick: () => handleStatusChange(record.id, "confirmed", record.hasExist)
           }),
           renderDonationActionButton({
             ...DONATION_ACTION_CONFIGS.cancel,
-            onClick: () => handleStatusChange(record.id, "canceled")
+            onClick: () => handleStatusChange(record.id, "canceled", record.hasExist)
           })
         ], "Choose action: Confirm or Cancel", "#52c41a");
       } else if (status === "sent") {
         return renderDonationSingleAction(
           renderDonationActionButton({
             ...DONATION_ACTION_CONFIGS.receive,
-            onClick: () => handleStatusChange(record.id, "received")
+            onClick: () => handleStatusChange(record.id, "received", record.hasExist)
           }),
           "Add books to library",
           "#fa8c16"
@@ -339,7 +370,7 @@ export default function Donations() {
       return renderDonationSingleAction(
         renderDonationActionButton({
           ...DONATION_ACTION_CONFIGS.send,
-          onClick: () => handleStatusChange(record.id, "sent")
+          onClick: () => handleStatusChange(record.id, "sent", record.hasExist)
         }),
         "Mark as sent",
         "#722ed1"
@@ -626,52 +657,52 @@ export default function Donations() {
     }}>
         
        {/* Donation Form Section */}
-       <div style={{ 
-         marginBottom: '32px',
-         padding: '24px',
-         backgroundColor: '#fafafa',
-         borderRadius: '16px',
-         border: '1px solid #e8e8e8',
-         boxShadow: '0 2px 12px rgba(0,0,0,0.08)'
-       }}>
-         {/* Section Header */}
-         <div style={{ 
-           marginBottom: '24px',
-           textAlign: 'center'
-         }}>
-           <h2 style={{ 
-             margin: '0 0 8px 0',
-             fontSize: '24px',
-             fontWeight: '700',
-             color: '#262626',
-             letterSpacing: '0.5px'
-           }}>
-             🎁 Submit Your Book Donation
-           </h2>
-           <p style={{ 
-             margin: '0',
-             fontSize: '14px',
-             color: '#8c8c8c',
-             fontStyle: 'italic'
-           }}>
-             Submit your book donations to help expand our library collection
-           </p>
-         </div>
+        <div style={{ 
+          marginBottom: '32px',
+          padding: '24px',
+          backgroundColor: '#fafafa',
+          borderRadius: '16px',
+          border: '1px solid #e8e8e8',
+          boxShadow: '0 2px 12px rgba(0,0,0,0.08)'
+        }}>
+          {/* Section Header */}
+          <div style={{ 
+            marginBottom: '24px',
+            textAlign: 'center'
+          }}>
+            <h2 style={{ 
+              margin: '0 0 8px 0',
+              fontSize: '24px',
+              fontWeight: '700',
+              color: '#262626',
+              letterSpacing: '0.5px'
+            }}>
+              🎁 Submit Your Book Donation
+            </h2>
+            <p style={{ 
+              margin: '0',
+              fontSize: '14px',
+              color: '#8c8c8c',
+              fontStyle: 'italic'
+            }}>
+              Submit your book donations to help expand our library collection
+            </p>
+          </div>
          
-         <Form 
-           form={form} 
-           onFinish={handleSubmit}
-           layout="vertical"
-           size="large"
-           initialValues={{
-             donatedBooks: [{}]
-           }}
-         >
-           <Form.List name="donatedBooks">
-             {(fields, { add, remove }) => (
-               <>
-                 {fields.map(({ key, name, ...restField }) => (
-                   <Card 
+          <Form 
+            form={form} 
+            onFinish={handleSubmit}
+            layout="vertical"
+            size="large"
+            initialValues={{
+              donatedBooks: [{}]
+            }}
+          >
+            <Form.List name="donatedBooks">
+              {(fields, { add, remove }) => (
+                <>
+                  {fields.map(({ key, name, ...restField }) => (
+                    <Card 
                       key={key} 
                       size="small" 
                       style={{ 
@@ -699,7 +730,39 @@ export default function Donations() {
                             type="text" 
                             danger 
                             icon={<DeleteOutlined />}
-                            onClick={() => remove(name)}
+                                onClick={() => {
+                                  // Clean up all related states for this field BEFORE removing
+                                  setCheckboxStates(prev => {
+                                    const newState = { ...prev };
+                                    delete newState[name];
+                                    return newState;
+                                  });
+                                  
+                                  setValidateBookTitle(prev => {
+                                    const newState = { ...prev };
+                                    delete newState[name];
+                                    return newState;
+                                  });
+                                  
+                                  setInputValues(prev => {
+                                    const newState = { ...prev };
+                                    delete newState[`cover-${name}`];
+                                    return newState;
+                                  });
+                                  
+                                  // Clean up file preview URL
+                                  if (filePreviewUrls[`preview-${name}`]) {
+                                    URL.revokeObjectURL(filePreviewUrls[`preview-${name}`]);
+                                    setFilePreviewUrls(prev => {
+                                      const newUrls = { ...prev };
+                                      delete newUrls[`preview-${name}`];
+                                      return newUrls;
+                                    });
+                                  }
+                                  
+                                  // Remove the field from form AFTER cleaning up states
+                                  remove(name);
+                                }}
                             style={{
                               borderRadius: '8px',
                               fontWeight: '500'
@@ -710,74 +773,34 @@ export default function Donations() {
                         )
                       }
                     >
-                        <Row gutter={24}>
+                      <Row gutter={24}>
                         <Col span={12}>
                           <Form.Item
-                            {...restField}
-                            name={[name, 'bookTitle']}
-                            label="Book Title"
-                            validateStatus={validateBookTitle[name]?.canSubmit ? undefined : 'error'}
-                            help={validateBookTitle[name]?.message}
-                            rules={[
-                               { required: true, message: 'Please enter the book title!' },
-                               { min: 2, message: 'The book title must be at least 2 characters!' },
-                               { max: 200, message: 'The book title must be less than 200 characters!' }
-                             ]}
-                          >
+                              {...restField}
+                              name={[name, 'bookTitle']}
+                              label="Book Title"
+                              validateStatus={
+                                validateBookTitle[name]?.canSubmit === false
+                                  ? 'error' 
+                                  : undefined
+                              }
+                              help={
+                                validateBookTitle[name]?.canSubmit === false
+                                  ? validateBookTitle[name]?.message
+                                  : undefined
+                              }
+                             rules={[
+                                { required: true, message: 'Please enter the book title!' },
+                                { min: 2, message: 'The book title must be at least 2 characters!' },
+                                { max: 200, message: 'The book title must be less than 200 characters!' }
+                            ]}
+                           >
                             <Input 
                               placeholder="Enter the book title" 
-                                 onBlur={(e) => {
-                                   const value = e.target.value;
-                                   if (value && value.trim().length >= 2) {
-                                     // Check book validation
-                                     const validation = checkBookExistsInLibrary(value, name);
-                                     
-                                     if (validation.hasExistinginDonationForm) {
-                                       setValidateBookTitle(prev => ({
-                                         ...prev,
-                                         [name]: {
-                                           canSubmit: false,
-                                           message: `Book "${value}" is already added in this donation form. Please enter a different book title.`,
-                                         }
-                                       }));
-                                     } else if (validation.hasExistinginLibrary && !checkboxStates[name]) {
-                                       setValidateBookTitle(prev => ({
-                                         ...prev,
-                                         [name]: {
-                                           canSubmit: false,
-                                           message: `Book "${value}" already exists in the library. Please check the box "This book already exists in the library" or enter a different book title.`, 
-                                         }
-                                       }));
-                                     } else if (!validation.hasExistinginLibrary && checkboxStates[name]) {
-                                       setValidateBookTitle(prev => ({
-                                         ...prev,
-                                         [name]: {
-                                           canSubmit: false,
-                                           message: `Book "${value}" does not exist in the library. Please uncheck the box or enter a different book title.`,
-                                         }
-                                       }));
-                                     } else {
-                                       // Clear any error messages
-                                       setValidateBookTitle(prev => ({
-                                        ...prev,
-                                        [name]: {
-                                          canSubmit: true,
-                                          message: ``,
-                                        }
-                                      }));
-                                     }
-                                   }
-                                   console.log(validateBookTitle);
-                                 }}
                               onChange={(e) => {
                                 const value = e.target.value;
-                                // Clear duplicate message when user starts typing
-                                if (validateBookTitle[name]) {
-                                  setValidateBookTitle(prev => {
-                                    const newState = { ...prev };
-                                    delete newState[name];
-                                    return newState;
-                                  });
+                                if (value && value.trim().length >= 2) {
+                                  handleBookTitleValidation(value, name);
                                 }
                               }}
                             />
@@ -790,17 +813,17 @@ export default function Donations() {
                             label="Author"
                             rules={[
                                { 
-                                 required: !checkboxStates[name], 
-                                 message: 'Please enter the author name!' 
+                                  required: !checkboxStates[name], 
+                                  message: 'Please enter the author name!' 
                                },
                                { min: 2, message: 'The author name must be at least 2 characters!' },
                                { max: 100, message: 'The author name must be less than 100 characters!' }
                             ]}
                           >
-                             <Input 
-                               placeholder="Enter the author name" 
-                               disabled={checkboxStates[name] || false}
-                             />
+                              <Input 
+                                placeholder="Enter the author name" 
+                                disabled={checkboxStates[name] || false}
+                              />
                           </Form.Item>
                         </Col>
                       </Row>
@@ -818,25 +841,16 @@ export default function Donations() {
                                 type="checkbox" 
                                 style={{ width: '16px', height: '16px' }}
                                   onChange={(e) => {
-                                   // Update form value
-                                   form.setFieldValue(['donatedBooks', name, 'hasExist'], e.target.checked);
-                                   
-                                   // Update local state to trigger re-render
-                                   setCheckboxStates(prev => ({
-                                     ...prev,
-                                     [name]: e.target.checked
-                                   }));
-                                   
-                                   // Clear any existing error messages when checkbox changes
-                                   if (validateBookTitle[name]) {
-                                     setValidateBookTitle(prev => {
-                                       const newState = { ...prev };
-                                       delete newState[name];
-                                       return newState;
-                                     });
-                                   }
-                                   
-                                   if (e.target.checked) {
+                                    // Update form value
+                                    form.setFieldValue(['donatedBooks', name, 'hasExist'], e.target.checked);
+                                    
+                                    // Update local state to trigger re-render
+                                    setCheckboxStates(prev => ({
+                                      ...prev,
+                                      [name]: e.target.checked
+                                    }));
+                                    
+                                    if (e.target.checked) {
                                      // If checked, clear other fields except book title
                                      form.setFieldValue(['donatedBooks', name, 'author'], '');
                                      form.setFieldValue(['donatedBooks', name, 'category'], undefined);
@@ -859,7 +873,13 @@ export default function Donations() {
                                      
                                      // Clear input values
                                      setInputValues(prev => ({ ...prev, [`cover-${name}`]: '' }));
-                                   }
+                                     
+                                    }
+
+                                    // Use the new checkbox value directly instead of relying on state
+                                    const newCheckboxValue = e.target.checked;
+                                    handleBookTitleValidation(form.getFieldValue(['donatedBooks', name, 'bookTitle']), name, newCheckboxValue);
+
                                  }}
                               />
                               <span style={{ fontSize: '14px', color: '#333' }}>
@@ -870,8 +890,8 @@ export default function Donations() {
                         </Col>
                       </Row>
 
-                     <Row gutter={24}>
-                       <Col span={12}>
+                      <Row gutter={24}>
+                        <Col span={12}>
                           <Form.Item
                             {...restField}
                             name={[name, 'category']}
@@ -891,44 +911,43 @@ export default function Donations() {
                               }))}
                               disabled={checkboxStates[name] || false}
                             />
-                         </Form.Item>
-                       </Col>
-                       <Col span={12}>
+                          </Form.Item>
+                        </Col>
+                        <Col span={12}>
                           <Form.Item
                             {...restField}
                             name={[name, 'num']}
                             label="Number of Books"
                             rules={[
-                               { 
-                                 required: !checkboxStates[name], 
-                                 message: 'Please enter the number of books!' 
-                               },
-                               { 
-                                 type: 'number', 
-                                 min: 1, 
-                                 transform: (value) => Number(value),
-                                 message: 'The number of books must be at least 1!' 
-                               },
+                              { 
+                                required: true,
+                                message: 'Please enter the number of books!' 
+                              },
+                              { 
+                                type: 'number', 
+                                min: 1, 
+                                transform: (value) => Number(value),
+                                message: 'The number of books must be at least 1!' 
+                              },
                             ]}
                           >
-                           <Input 
+                            <Input 
                               type="number" 
                               placeholder="Enter the number of books"
                               min={1}
                               max={100}
-                              disabled={checkboxStates[name] || false}
                             />
-                         </Form.Item>
-                       </Col>
-                     </Row>
+                          </Form.Item>
+                        </Col>
+                      </Row>
 
-                     <Row gutter={24}>
-                       <Col span={12}>
-                         <Form.Item
-                           {...restField}
-                           name={[name, 'publishYear']}
-                           label="Publish Year"
-                         >
+                      <Row gutter={24}>
+                        <Col span={12}>
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'publishYear']}
+                            label="Publish Year"
+                          >
                             <Input 
                               type="number" 
                               placeholder="Enter the publish year"
@@ -936,47 +955,47 @@ export default function Donations() {
                               max={new Date().getFullYear() + 1}
                               disabled={checkboxStates[name] || false}
                             />
-                         </Form.Item>
-                       </Col>
-                       <Col span={12}>
-                         <Form.Item
-                           {...restField}
-                           name={[name, 'notes']}
-                           label="Notes"
-                           rules={[
-                             { max: 300, message: 'Notes must be less than 300 characters!' }
-                           ]}
-                         >
-                           <TextArea 
+                          </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'notes']}
+                            label="Notes"
+                            rules={[
+                              { max: 300, message: 'Notes must be less than 300 characters!' }
+                            ]}
+                           >
+                            <TextArea 
                               rows={2} 
                               placeholder="Enter additional notes (optional)"
                               showCount
                               maxLength={300}
                               disabled={checkboxStates[name] || false}
                             />
-                         </Form.Item>
-                       </Col>
-                     </Row>
+                          </Form.Item>
+                        </Col>
+                      </Row>
 
-                     <Row gutter={24}>
-                       <Col span={24}>
-                         <Form.Item
-                           {...restField}
-                           name={[name, 'coverImage']}
-                           label="Cover Image"
-                         >
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                <Input 
-                                  placeholder="Enter image URL or upload file" 
-                                  value={inputValues[`cover-${name}`] || ''}
-                                  onChange={(e) => {
-                                    const value = e.target.value;
-                                    form.setFieldValue(['donatedBooks', name, 'coverImage'], value);
-                                    form.setFieldValue(['donatedBooks', name, 'coverImageFile'], null);
-                                    setInputValues(prev => ({ ...prev, [`cover-${name}`]: value }));
-                                  }}
-                                  disabled={checkboxStates[name] || false}
-                                />
+                      <Row gutter={24}>
+                        <Col span={24}>
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'coverImage']}
+                            label="Cover Image"
+                          >
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                              <Input 
+                                placeholder="Enter image URL or upload file" 
+                                value={inputValues[`cover-${name}`] || ''}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  form.setFieldValue(['donatedBooks', name, 'coverImage'], value);
+                                  form.setFieldValue(['donatedBooks', name, 'coverImageFile'], null);
+                                  setInputValues(prev => ({ ...prev, [`cover-${name}`]: value }));
+                                }}
+                                disabled={checkboxStates[name] || false}
+                              />
                               <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                                 <span style={{ fontSize: '12px', color: '#8c8c8c' }}>OR</span>
                                 <div style={{ position: 'relative' }}>
@@ -984,13 +1003,13 @@ export default function Donations() {
                                     type="file"
                                     accept="image/*"
                                     onChange={(e) => {
-                                       const file = e.target.files?.[0];
-                                       if (file) {
-                                         if (handleFileUpload(file, name)) {
-                                           e.target.value = '';
-                                         }
-                                       }
-                                     }}
+                                      const file = e.target.files?.[0];
+                                      if (file) {
+                                        if (handleFileUpload(file, name)) {
+                                          e.target.value = '';
+                                        }
+                                      }
+                                    }}
                                     style={{
                                       position: 'absolute',
                                       opacity: 0,
@@ -1000,27 +1019,27 @@ export default function Donations() {
                                     }}
                                     id={`file-input-${name}`}
                                   />
-                                      <Button
-                                       type="default"
-                                       size="small"
-                                       icon={<PlusOutlined />}
-                                       style={{
-                                         background: '#f0f0f0',
-                                         border: '1px dashed #d9d9d9',
-                                         borderRadius: '6px',
-                                         padding: '4px 12px',
-                                         fontSize: '12px',
-                                         color: '#595959',
-                                         cursor: 'pointer',
-                                         display: 'flex',
-                                         alignItems: 'center',
-                                         gap: '4px'
-                                       }}
-                                       onClick={() => document.getElementById(`file-input-${name}`)?.click()}
-                                       disabled={checkboxStates[name] || false}
-                                     >
-                                       Choose File
-                                     </Button>
+                                  <Button
+                                    type="default"
+                                    size="small"
+                                    icon={<PlusOutlined />}
+                                    style={{
+                                      background: '#f0f0f0',
+                                      border: '1px dashed #d9d9d9',
+                                      borderRadius: '6px',
+                                      padding: '4px 12px',
+                                      fontSize: '12px',
+                                      color: '#595959',
+                                      cursor: 'pointer',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '4px'
+                                    }}
+                                    onClick={() => document.getElementById(`file-input-${name}`)?.click()}
+                                    disabled={checkboxStates[name] || false}
+                                  >
+                                    Choose File
+                                  </Button>
                                   <span style={{ 
                                     fontSize: '11px', 
                                     color: '#8c8c8c', 
@@ -1034,40 +1053,40 @@ export default function Donations() {
                                   </span>
                                 </div>
                               </div>
-                             {/* Preview Image */}
-                             {(form.getFieldValue(['donatedBooks', name, 'coverImage']) || filePreviewUrls[`preview-${name}`]) && (
-                               <div style={{ marginTop: '8px', position: 'relative' }}>
-                                 <img
-                                   src={form.getFieldValue(['donatedBooks', name, 'coverImage']) || filePreviewUrls[`preview-${name}`] || ''}
-                                   alt="Preview"
-                                   style={{
-                                     width: '100px',
-                                     height: '120px',
-                                     objectFit: 'cover',
-                                     borderRadius: '8px',
-                                     border: '2px solid #d9d9d9'
-                                   }}
-                                 />
-                                 <Button
-                                   type="text"
-                                   size="small"
-                                   icon={<CloseOutlined />}
-                                   style={{
-                                     position: 'absolute',
-                                     top: '-8px',
-                                     right: '-8px',
-                                     background: '#ff4d4f',
-                                     color: 'white',
-                                     border: 'none',
-                                     borderRadius: '50%',
-                                     width: '20px',
-                                     height: '20px',
-                                     display: 'flex',
-                                     alignItems: 'center',
-                                     justifyContent: 'center',
-                                     boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                                   }}
-                                      onClick={() => {
+                              {/* Preview Image */}
+                              {(form.getFieldValue(['donatedBooks', name, 'coverImage']) || filePreviewUrls[`preview-${name}`]) && (
+                                <div style={{ marginTop: '8px', position: 'relative' }}>
+                                  <img
+                                    src={form.getFieldValue(['donatedBooks', name, 'coverImage']) || filePreviewUrls[`preview-${name}`] || ''}
+                                    alt="Preview"
+                                    style={{
+                                      width: '100px',
+                                      height: '120px',
+                                      objectFit: 'cover',
+                                      borderRadius: '8px',
+                                      border: '2px solid #d9d9d9'
+                                    }}
+                                  />
+                                  <Button
+                                    type="text"
+                                    size="small"
+                                    icon={<CloseOutlined />}
+                                    style={{
+                                      position: 'absolute',
+                                      top: '-8px',
+                                      right: '-8px',
+                                      background: '#ff4d4f',
+                                      color: 'white',
+                                      border: 'none',
+                                      borderRadius: '50%',
+                                      width: '20px',
+                                      height: '20px',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                                    }}
+                                    onClick={() => {
                                       form.setFieldValue(['donatedBooks', name, 'coverImage'], '');
                                       form.setFieldValue(['donatedBooks', name, 'coverImageFile'], null);
                                       setInputValues(prev => ({ ...prev, [`cover-${name}`]: '' }));
@@ -1084,14 +1103,13 @@ export default function Donations() {
                                       
                                       message.info('Cover image removed');
                                     }}
-                                 />
-                               </div>
-                             )}
-                                                    
-                           </div>
-                         </Form.Item>
-                       </Col>
-                     </Row>
+                                  />
+                                </div>
+                              )}                            
+                            </div>
+                          </Form.Item>
+                        </Col>
+                      </Row>
 
                       <Form.Item
                         {...restField}
@@ -1101,168 +1119,118 @@ export default function Donations() {
                           { max: 500, message: 'The description must be less than 500 characters!' }
                         ]}
                       >
-                         <TextArea 
-                           rows={3} 
-                           placeholder="Enter the description (optional)"
-                           showCount
-                           maxLength={500}
-                           disabled={checkboxStates[name] || false}
-                         />
+                        <TextArea 
+                          rows={3} 
+                          placeholder="Enter the description (optional)"
+                          showCount
+                          maxLength={500}
+                          disabled={checkboxStates[name] || false}
+                        />
                       </Form.Item>
-                   </Card>
-                 ))}
+                    </Card>
+                  ))}
 
-                 <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                   <Button 
-                     type="dashed" 
-                     icon={<PlusOutlined />}
-                     onClick={() => add()}
-                     size="large"
-                     style={{ width: '200px' }}
-                   >
-                     Add Another Book
-                   </Button>
-                 </div>
-               </>
-             )}
-           </Form.List>
+                  <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                    <Button 
+                      type="dashed" 
+                      icon={<PlusOutlined />}
+                      onClick={() => {
+                        add();
+                      }}
+                      size="large"
+                      style={{ width: '200px' }}
+                    >
+                      Add Another Book
+                    </Button>
+                  </div>
+                </>
+              )}
+            </Form.List>
 
-           <Form.Item style={{ textAlign: 'center', marginTop: '30px' }}>
-             <Space size="large">
-               <Button 
-                 type="primary" 
-                 htmlType="submit"
-                 size="large"
-                 disabled={isCreating}
-                 style={{
-                   background: 'linear-gradient(135deg, #52c41a 0%, #73d13d 100%)',
-                   border: 'none',
-                   padding: '0 40px',
-                   height: '48px',
-                   fontSize: '16px',
-                   fontWeight: '600'
-                 }}
-               >
-                 {isCreating ? 'Submitting...' : 'Submit Donation'}
-               </Button>
-               <Button 
-                 onClick={resetAllForms}
-                 size="large"
-                 style={{
-                   padding: '0 40px',
-                   height: '48px',
-                   fontSize: '16px'
-                 }}
-               >
-                 Reset All
-               </Button>
-             </Space>
-           </Form.Item>
-         </Form>
-       </div>
+            <Form.Item style={{ textAlign: 'center', marginTop: '30px' }}>
+              <Space size="large">
+                <Button 
+                  type="primary" 
+                  htmlType="submit"
+                  size="large"
+                  disabled={isCreating || Object.values(validateBookTitle).some(validation => validation && validation.canSubmit === false)}
+                  style={{
+                    background: 'linear-gradient(135deg, #52c41a 0%, #73d13d 100%)',
+                    border: 'none',
+                    padding: '0 40px',
+                    height: '48px',
+                    fontSize: '16px',
+                    fontWeight: '600'
+                  }}
+                >
+                  {isCreating ? 'Submitting...' : 'Submit Donation'}
+                </Button>
+                <Button 
+                  onClick={resetAllForms}
+                  size="large"
+                  style={{
+                    padding: '0 40px',
+                    height: '48px',
+                    fontSize: '16px'
+                  }}
+                >
+                  Reset All
+                </Button>
+              </Space>
+            </Form.Item>
+          </Form>
+        </div>
 
-       {/* Donation Record Management Section */}
-       {!loadingDonationRecords && (
-         <div style={{ 
-           marginBottom: '32px',
-           padding: '24px',
-           backgroundColor: '#fafafa',
-           borderRadius: '16px',
-           border: '1px solid #e8e8e8',
-           boxShadow: '0 2px 12px rgba(0,0,0,0.08)'
-         }}>
-           {/* Section Header */}
-           <div style={{ 
-             marginBottom: '24px',
-             textAlign: 'center'
-           }}>
-             <h2 style={{ 
-               margin: '0 0 8px 0',
-               fontSize: '24px',
-               fontWeight: '700',
-               color: '#262626',
-               letterSpacing: '0.5px'
-             }}>
-               📊 Donation Record Management
-             </h2>
-             <p style={{ 
-               margin: '0',
-               fontSize: '14px',
-               color: '#8c8c8c',
-               fontStyle: 'italic'
-             }}>
-               Overview and management of all donation activities
-             </p>
-           </div>
-
-           {/* Statistics Cards */}
-           <div style={{ 
-             display: 'grid',
-             gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-             gap: '20px'
-           }}>
-            {/* Total Donations */}
+        {/* Donation Record Management Section */}
+        {!loadingDonationRecords && (
+          <div style={{ 
+            marginBottom: '32px',
+            padding: '24px',
+            backgroundColor: '#fafafa',
+            borderRadius: '16px',
+            border: '1px solid #e8e8e8',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.08)'
+          }}>
+            {/* Section Header */}
             <div style={{ 
-              padding: '20px',
-              background: 'linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%)',
-              borderRadius: '12px',
-              border: '2px solid #b7eb8f',
-              boxShadow: '0 4px 16px rgba(82, 196, 26, 0.15)',
-              transition: 'all 0.3s ease',
+              marginBottom: '24px',
               textAlign: 'center'
             }}>
-              <div style={{ 
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: '16px',
-                gap: '8px'
-              }}>
-                <span style={{ fontSize: '20px' }}>📊</span>
-                <h3 style={{ 
-                  margin: '0',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  color: '#52c41a'
-                }}>
-                  Total Donations
-                </h3>
-              </div>
-              <div style={{ 
-                fontSize: '32px',
+              <h2 style={{ 
+                margin: '0 0 8px 0',
+                fontSize: '24px',
                 fontWeight: '700',
-                color: '#52c41a'
+                color: '#262626',
+                letterSpacing: '0.5px'
               }}>
-                {totalRecords}
-              </div>
+                📊 Donation Record Management
+              </h2>
+              <p style={{ 
+                margin: '0',
+                fontSize: '14px',
+                color: '#8c8c8c',
+                fontStyle: 'italic'
+              }}>
+                Overview and management of all donation activities
+              </p>
             </div>
 
-            {/* Processing Records */}
-            <Tooltip
-              title={
-                <div style={{ textAlign: 'left' }}>
-                  <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>Processing Records Breakdown:</div>
-                  <div>• Pending: {pendingRecords}</div>
-                  <div>• Confirmed: {confirmedRecords}</div>
-                  <div>• Sent: {sentRecords}</div>
-                </div>
-              }
-              placement="top"
-              color="#fa8c16"
-            >
-              <div 
-                style={{ 
-                  padding: '20px',
-                  background: 'linear-gradient(135deg, #fff7e6 0%, #ffe7ba 100%)',
-                  borderRadius: '12px',
-                  border: '2px solid #ffd591',
-                  boxShadow: '0 4px 16px rgba(250, 140, 22, 0.15)',
-                  transition: 'all 0.3s ease',
-                  textAlign: 'center',
-                  cursor: 'help',
-                  position: 'relative'
-                }}
-              >
+            {/* Statistics Cards */}
+            <div style={{ 
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '20px'
+            }}>
+              {/* Total Donations */}
+              <div style={{ 
+                padding: '20px',
+                background: 'linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%)',
+                borderRadius: '12px',
+                border: '2px solid #b7eb8f',
+                boxShadow: '0 4px 16px rgba(82, 196, 26, 0.15)',
+                transition: 'all 0.3s ease',
+                textAlign: 'center'
+              }}>
                 <div style={{ 
                   display: 'flex',
                   alignItems: 'center',
@@ -1270,201 +1238,253 @@ export default function Donations() {
                   marginBottom: '16px',
                   gap: '8px'
                 }}>
-                  <span style={{ fontSize: '20px' }}>⚡</span>
+                  <span style={{ fontSize: '20px' }}>📊</span>
                   <h3 style={{ 
                     margin: '0',
                     fontSize: '16px',
                     fontWeight: '600',
-                    color: '#fa8c16'
+                    color: '#52c41a'
                   }}>
-                    Processing Records
+                    Total Donations
                   </h3>
                 </div>
                 <div style={{ 
                   fontSize: '32px',
                   fontWeight: '700',
-                  color: '#fa8c16'
-                }}>
-                  {processingRecords}
-                </div>
-                <div style={{ 
-                  fontSize: '12px',
-                  color: '#d48806',
-                  marginTop: '4px',
-                  fontStyle: 'italic'
-                }}>
-                  Hover for details
-                </div>
-              </div>
-            </Tooltip>
-
-            {/* Received */}
-            <div style={{ 
-              padding: '20px',
-              background: 'linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%)',
-              borderRadius: '12px',
-              border: '2px solid #b7eb8f',
-              boxShadow: '0 4px 16px rgba(82, 196, 26, 0.15)',
-              transition: 'all 0.3s ease',
-              textAlign: 'center'
-            }}>
-              <div style={{ 
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: '16px',
-                gap: '8px'
-              }}>
-                <span style={{ fontSize: '20px' }}>✅</span>
-                <h3 style={{ 
-                  margin: '0',
-                  fontSize: '16px',
-                  fontWeight: '600',
                   color: '#52c41a'
                 }}>
-                  Received
-                </h3>
+                  {totalRecords}
+                </div>
               </div>
-              <div style={{ 
-                fontSize: '32px',
-                fontWeight: '700',
-                color: '#52c41a'
-              }}>
-                {receivedRecords}
-              </div>
-            </div>
 
-            {/* Canceled */}
-            <div style={{ 
-              padding: '20px',
-              background: 'linear-gradient(135deg, #fff2f0 0%, #ffccc7 100%)',
-              borderRadius: '12px',
-              border: '2px solid #ffbb96',
-              boxShadow: '0 4px 16px rgba(255, 77, 79, 0.15)',
-              transition: 'all 0.3s ease',
-              textAlign: 'center'
-            }}>
+              {/* Processing Records */}
+              <Tooltip
+                title={
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>Processing Records Breakdown:</div>
+                    <div>• Pending: {pendingRecords}</div>
+                    <div>• Confirmed: {confirmedRecords}</div>
+                    <div>• Sent: {sentRecords}</div>
+                  </div>
+                }
+                placement="top"
+                color="#fa8c16"
+              >
+                <div 
+                  style={{ 
+                    padding: '20px',
+                    background: 'linear-gradient(135deg, #fff7e6 0%, #ffe7ba 100%)',
+                    borderRadius: '12px',
+                    border: '2px solid #ffd591',
+                    boxShadow: '0 4px 16px rgba(250, 140, 22, 0.15)',
+                    transition: 'all 0.3s ease',
+                    textAlign: 'center',
+                    cursor: 'help',
+                    position: 'relative'
+                  }}
+                >
+                  <div style={{ 
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '16px',
+                    gap: '8px'
+                  }}>
+                    <span style={{ fontSize: '20px' }}>⚡</span>
+                    <h3 style={{ 
+                      margin: '0',
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      color: '#fa8c16'
+                    }}>
+                      Processing Records
+                    </h3>
+                  </div>
+                  <div style={{ 
+                    fontSize: '32px',
+                    fontWeight: '700',
+                    color: '#fa8c16'
+                  }}>
+                    {processingRecords}
+                  </div>
+                  <div style={{ 
+                    fontSize: '12px',
+                    color: '#d48806',
+                    marginTop: '4px',
+                    fontStyle: 'italic'
+                  }}>
+                    Hover for details
+                  </div>
+                </div>
+              </Tooltip>
+
+              {/* Received */}
               <div style={{ 
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: '16px',
-                gap: '8px'
+                padding: '20px',
+                background: 'linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%)',
+                borderRadius: '12px',
+                border: '2px solid #b7eb8f',
+                boxShadow: '0 4px 16px rgba(82, 196, 26, 0.15)',
+                transition: 'all 0.3s ease',
+                textAlign: 'center'
               }}>
-                <span style={{ fontSize: '20px' }}>❌</span>
-                <h3 style={{ 
-                  margin: '0',
-                  fontSize: '16px',
-                  fontWeight: '600',
+                <div style={{ 
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: '16px',
+                  gap: '8px'
+                }}>
+                  <span style={{ fontSize: '20px' }}>✅</span>
+                  <h3 style={{ 
+                    margin: '0',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    color: '#52c41a'
+                  }}>
+                    Received
+                  </h3>
+                </div>
+                <div style={{ 
+                  fontSize: '32px',
+                  fontWeight: '700',
+                  color: '#52c41a'
+                }}>
+                  {receivedRecords}
+                </div>
+              </div>
+
+              {/* Canceled */}
+              <div style={{ 
+                padding: '20px',
+                background: 'linear-gradient(135deg, #fff2f0 0%, #ffccc7 100%)',
+                borderRadius: '12px',
+                border: '2px solid #ffbb96',
+                boxShadow: '0 4px 16px rgba(255, 77, 79, 0.15)',
+                transition: 'all 0.3s ease',
+                textAlign: 'center'
+              }}>
+                <div style={{ 
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: '16px',
+                  gap: '8px'
+                }}>
+                  <span style={{ fontSize: '20px' }}>❌</span>
+                  <h3 style={{ 
+                    margin: '0',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    color: '#ff4d4f'
+                  }}>
+                    Canceled
+                  </h3>
+                </div>
+                <div style={{ 
+                  fontSize: '32px',
+                  fontWeight: '700',
                   color: '#ff4d4f'
                 }}>
-                  Canceled
-                </h3>
-              </div>
-              <div style={{ 
-                fontSize: '32px',
-                fontWeight: '700',
-                color: '#ff4d4f'
-              }}>
-                {canceledRecords}
+                  {canceledRecords}
+                </div>
               </div>
             </div>
           </div>
-         </div>
-       )}
+        )}
 
-       {/* Donation Records Table Section */}
-       {!loadingDonationRecords && (
-         <div style={{ 
-           marginBottom: '32px',
-           padding: '24px',
-           backgroundColor: '#fafafa',
-           borderRadius: '16px',
-           border: '1px solid #e8e8e8',
-           boxShadow: '0 2px 12px rgba(0,0,0,0.08)'
-         }}>
-           {/* Section Header */}
-           <div style={{ 
-             marginBottom: '24px',
-             textAlign: 'center'
-           }}>
-             <h2 style={{ 
-               margin: '0 0 8px 0',
-               fontSize: '24px',
-               fontWeight: '700',
-               color: '#262626',
-               letterSpacing: '0.5px'
-             }}>
-               📋 Donation Records
-             </h2>
-             <p style={{ 
-               margin: '0',
-               fontSize: '14px',
-               color: '#8c8c8c',
-               fontStyle: 'italic'
-             }}>
-               Track and manage all book donation transactions
-             </p>
-           </div>
+        {/* Donation Records Table Section */}
+        {!loadingDonationRecords && (
+          <div style={{ 
+            marginBottom: '32px',
+            padding: '24px',
+            backgroundColor: '#fafafa',
+            borderRadius: '16px',
+            border: '1px solid #e8e8e8',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.08)'
+          }}>
+            {/* Section Header */}
+            <div style={{ 
+              marginBottom: '24px',
+              textAlign: 'center'
+            }}>
+              <h2 style={{ 
+                margin: '0 0 8px 0',
+                fontSize: '24px',
+                fontWeight: '700',
+                color: '#262626',
+                letterSpacing: '0.5px'
+              }}>
+                📋 Donation Records
+              </h2>
+              <p style={{ 
+                margin: '0',
+                fontSize: '14px',
+                color: '#8c8c8c',
+                fontStyle: 'italic'
+              }}>
+                Track and manage all book donation transactions
+              </p>
+            </div>
 
-           {/* Table */}
-           <Card 
-             title={
-               <Space size="large">
-                 <div style={{ 
-                   background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
-                   borderRadius: '50%',
-                   width: '40px',
-                   height: '40px',
-                   display: 'flex',
-                   alignItems: 'center',
-                   justifyContent: 'center',
-                   color: 'white'
-                 }}>
-                   <TeamOutlined style={{ fontSize: '20px' }} />
-                 </div>
-                 <div>
-                   <Title level={4} style={{ margin: 0, color: '#262626' }}>
-                     Donation Records Details
-                   </Title>
-                   <Text style={{ color: '#8c8c8c', fontSize: '14px' }}>
-                     Track and manage all book donation transactions
-                   </Text>
-                 </div>
-               </Space>
-             }
-             style={{ 
-               borderRadius: '12px', 
-               boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-               border: '1px solid #e8e8e8'
-             }}
-             styles={{
-              header: {
-                background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
-                borderBottom: '2px solid #e8e8e8'
+            {/* Table */}
+            <Card 
+              title={
+                <Space size="large">
+                  <div style={{ 
+                    background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
+                    borderRadius: '50%',
+                    width: '40px',
+                    height: '40px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white'
+                  }}>
+                    <TeamOutlined style={{ fontSize: '20px' }} />
+                  </div>
+                  <div>
+                    <Title level={4} style={{ margin: 0, color: '#262626' }}>
+                      Donation Records Details
+                    </Title>
+                    <Text style={{ color: '#8c8c8c', fontSize: '14px' }}>
+                      Track and manage all book donation transactions
+                    </Text>
+                  </div>
+                </Space>
               }
-            }}
-           >
-             <Table
-               columns={columns}
-               dataSource={filteredData}
-               rowKey="id"
-               pagination={{
-                 pageSize: 10,
-                 showSizeChanger: true,
-                 showQuickJumper: true,
-                 showTotal: (total, range) => 
-                   `${range[0]}-${range[1]} of ${total} donations`,
-                 style: { marginTop: '16px' }
-               }}
-               scroll={{ x: 2230 }}
-               size="small"
-               bordered
-               style={{ borderRadius: '8px' }}
-             />
-           </Card>
-         </div>
-       )}
+              style={{ 
+                borderRadius: '12px', 
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                border: '1px solid #e8e8e8'
+              }}
+              styles={{
+                header: {
+                  background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
+                  borderBottom: '2px solid #e8e8e8'
+                }
+              }}
+            >
+              <Table
+                columns={columns}
+                dataSource={filteredData}
+                rowKey="id"
+                pagination={{
+                  pageSize: 10,
+                  showSizeChanger: true,
+                  showQuickJumper: true,
+                  showTotal: (total, range) => 
+                    `${range[0]}-${range[1]} of ${total} donations`,
+                  style: { marginTop: '16px' }
+                }}
+                scroll={{ x: 2230 }}
+                size="small"
+                bordered
+                style={{ borderRadius: '8px' }}
+              />
+            </Card>
+          </div>
+        )}
 
         {/* Loading State */}
         {loadingDonationRecords && (
