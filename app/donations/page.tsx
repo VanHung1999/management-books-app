@@ -322,9 +322,9 @@ export default function Donations() {
             updateBook({
               id: book?.id,
               values: {
-                num: book?.num + record.num,
+                num: Number(book?.num) + Number(record.num),
                 status: {
-                  available: book?.status.available + record.num
+                  available: Number(book?.status.available) + Number(record.num)
                 }
               }
             });
