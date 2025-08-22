@@ -230,8 +230,8 @@ export default function Donations() {
 
   // Filter data based on user role
   const filteredData = !loadingDonationRecords && currentUser?.role === "user" 
-    ? donationRecordData?.data?.filter(item => item.donationerName === currentUser.email) 
-    : donationRecordData?.data;
+  ? (donationRecordData?.data?.filter(item => item.donationerName === currentUser.email) || []).sort((a, b) => Number(b.id) - Number(a.id))
+  : (donationRecordData?.data || []).sort((a, b) => Number(b.id) - Number(a.id));
 
   // Calculate statistics
   const totalRecords = filteredData?.length || 0;
@@ -324,7 +324,8 @@ export default function Donations() {
               values: {
                 num: Number(book?.num) + Number(record.num),
                 status: {
-                  available: Number(book?.status.available) + Number(record.num)
+                  ...book?.status,
+                  available: Number(book?.status.available) + Number(record.num),
                 }
               }
             });

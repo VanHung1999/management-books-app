@@ -52,8 +52,8 @@ export default function LoanRecords() {
 
   // Filter data based on user role
   const filteredData = !isLoading && userData?.role === "user" 
-    ? loanRecords?.data?.filter(item => item.borrowerName === userData.email) 
-    : loanRecords?.data;
+    ? (loanRecords?.data?.filter(item => item.borrowerName === userData.email) || []).sort((a, b) => Number(b.id) - Number(a.id))
+    : (loanRecords?.data || []).sort((a, b) => Number(b.id) - Number(a.id));
 
   // Calculate statistics
   const totalRecords = filteredData?.length || 0;
