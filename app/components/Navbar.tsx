@@ -69,6 +69,10 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
     if (user && markAllAsReadByCategory && pathname === '/loanRecords') {
       markAllAsReadByCategory('loan');
     }
+
+    if (user && markAllAsReadByCategory && pathname === '/donations') {
+      markAllAsReadByCategory('donation');
+    }
   }, [user, markAllAsReadByCategory, pathname]);
 
   const hideOnPaths = ["/login", "/register", "/forgot-password"];

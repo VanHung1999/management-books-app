@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { LoanRecord } from '../interface/loanRecord';
+import { DonationRecord } from '../interface/donationRecord';
 import { User } from '../interface/user';
 import { useList } from '@refinedev/core';
 
@@ -16,35 +17,20 @@ export interface Notification {
   metadata?: Record<string, any>;
 }
 
-const getLoanNotifications = (currentUser: User, loanRecords: LoanRecord[]): Notification[] => {
-    const notificationsLoanRecords: Notification[] = [];
+const getAllNotifications = (currentUser: User, loanRecords: LoanRecord[], donationRecords: DonationRecord[]): Notification[] => {
+    const allNotifications: Notification[] = [];
 
-    // Helper function to create base notification
-    const createBaseNotification = (record: LoanRecord, type: Notification['type'], priority: Notification['priority']) => ({
-        id: `loan-${record.status}-${record.id}`,
-        type,
-        timestamp: record.borrowedAt || new Date(),
-        isRead: false,
-        category: 'loan' as const,
-        priority,
-        actionUrl: '/loanRecords',
-        metadata: {
-            loanRecordId: record.id,
-            bookTitle: record.bookTitle,
-            quantity: record.quantity,
-            status: record.status
-        }
-    });
-
-    // Notification configurations mapping
-    const notificationConfigs = {
+    // Loan notifications configuration
+    const loanNotificationConfigs = {
         delivered: {
             condition: (record: LoanRecord) => record.borrowerName === currentUser.email,
             title: '🚚 Book has been delivered',
             message: (record: LoanRecord) => `Book "${record.bookTitle}" (${record.quantity} books) has been delivered to you`,
             type: 'success' as const,
             priority: 'medium' as const,
-            timestamp: (record: LoanRecord) => record.deliveredAt || new Date()
+            timestamp: (record: LoanRecord) => record.deliveredAt || new Date(),
+            category: 'loan' as const,
+            actionUrl: '/loanRecords'
         },
         pending: {
             condition: (record: LoanRecord) => currentUser.role === 'admin',
@@ -52,7 +38,9 @@ const getLoanNotifications = (currentUser: User, loanRecords: LoanRecord[]): Not
             message: (record: LoanRecord) => `${record.borrowerName} has requested a loan for "${record.bookTitle}" (${record.quantity} books)`,
             type: 'info' as const,
             priority: 'medium' as const,
-            timestamp: (record: LoanRecord) => record.borrowedAt
+            timestamp: (record: LoanRecord) => record.borrowedAt,
+            category: 'loan' as const,
+            actionUrl: '/loanRecords'
         },
         returned: {
             condition: (record: LoanRecord) => currentUser.role === 'admin',
@@ -60,30 +48,103 @@ const getLoanNotifications = (currentUser: User, loanRecords: LoanRecord[]): Not
             message: (record: LoanRecord) => `${record.borrowerName} has returned "${record.bookTitle}" (${record.quantity} books)`,
             type: 'success' as const,
             priority: 'low' as const,
-            timestamp: (record: LoanRecord) => record.returnedAt || new Date()
+            timestamp: (record: LoanRecord) => record.returnedAt || new Date(),
+            category: 'loan' as const,
+            actionUrl: '/loanRecords'
         }
     };
 
+    // Donation notifications configuration
+    const donationNotificationConfigs = {
+        pending: {
+            condition: (record: DonationRecord) => currentUser.role === 'admin',
+            title: '📚 New book donation request',
+            message: (record: DonationRecord) => `${record.donationerName} has donated "${record.bookTitle}" (${record.num} books)`,
+            type: 'info' as const,
+            priority: 'medium' as const,
+            timestamp: (record: DonationRecord) => record.donationDate,
+            category: 'donation' as const,
+            actionUrl: '/donations'
+        },
+        confirmed: {
+            condition: (record: DonationRecord) => record.donationerName === currentUser.email,
+            title: '✅ Donation confirmed',
+            message: (record: DonationRecord) => `Your donation of "${record.bookTitle}" (${record.num} books) has been confirmed`,
+            type: 'success' as const,
+            priority: 'medium' as const,
+            timestamp: (record: DonationRecord) => record.confirmDate || new Date(),
+            category: 'donation' as const,
+            actionUrl: '/donations'
+        },
+        sent: {
+            condition: (record: DonationRecord) => currentUser.role === 'admin',
+            title: '📦 Donation sent',
+            message: (record: DonationRecord) => `Your donation of "${record.bookTitle}" (${record.num} books) has been sent`,
+            type: 'success' as const,
+            priority: 'low' as const,
+            timestamp: (record: DonationRecord) => record.sendDate || new Date(),
+            category: 'donation' as const,
+            actionUrl: '/donations'
+        }
+    };
+
+    // Process loan records
     loanRecords?.forEach((record: LoanRecord) => {
-        const config = notificationConfigs[record.status as keyof typeof notificationConfigs];
+        const config = loanNotificationConfigs[record.status as keyof typeof loanNotificationConfigs];
         
         if (config && config.condition(record)) {
             const notification: Notification = {
-                ...createBaseNotification(record, config.type, config.priority),
+                id: `loan-${record.status}-${record.id}`,
                 title: config.title,
                 message: config.message(record),
+                type: config.type,
                 timestamp: config.timestamp(record),
+                isRead: false,
+                category: config.category,
+                priority: config.priority,
+                actionUrl: config.actionUrl,
                 metadata: {
-                    ...createBaseNotification(record, config.type, config.priority).metadata,
+                    loanRecordId: record.id,
+                    bookTitle: record.bookTitle,
+                    quantity: record.quantity,
+                    status: record.status,
                     ...(config.condition.name === 'pending' || config.condition.name === 'returned' ? { borrowerName: record.borrowerName } : {})
                 }
             };
             
-            notificationsLoanRecords.push(notification);
+            allNotifications.push(notification);
         }
     });
 
-    return notificationsLoanRecords;
+    // Process donation records
+    donationRecords?.forEach((record: DonationRecord) => {
+        const config = donationNotificationConfigs[record.status as keyof typeof donationNotificationConfigs];
+        
+        if (config && config.condition(record)) {
+            const notification: Notification = {
+                id: `donation-${record.status}-${record.id}`,
+                title: config.title,
+                message: config.message(record),
+                type: config.type,
+                timestamp: config.timestamp(record),
+                isRead: false,
+                category: config.category,
+                priority: config.priority,
+                actionUrl: config.actionUrl,
+                metadata: {
+                    donationRecordId: record.id,
+                    bookTitle: record.bookTitle,
+                    num: record.num,
+                    status: record.status,
+                    donationerName: record.donationerName
+                }
+            };
+            
+            allNotifications.push(notification);
+        }
+    });
+
+    return allNotifications;
 };
 
 export const useNotifications = (currentUser: User | null): {
@@ -99,9 +160,13 @@ export const useNotifications = (currentUser: User | null): {
 } => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const { data: loanRecords, isLoading } = useList<LoanRecord>({
+  const { data: loanRecords, isLoading: isLoadingLoans } = useList<LoanRecord>({
     resource: 'loanRecords',
-});
+  });
+  
+  const { data: donationRecords, isLoading: isLoadingDonations } = useList<DonationRecord>({
+    resource: 'donationRecords',
+  });
   
 
   useEffect(() => {
@@ -115,9 +180,9 @@ export const useNotifications = (currentUser: User | null): {
       try {
         const allNotifications: Notification[] = [];
 
-        // Get loan notifications
-        const loanNotifications = getLoanNotifications(currentUser, loanRecords?.data || []);
-        allNotifications.push(...loanNotifications);
+        // Get all notifications (loan + donation)
+        const allNotificationsFromRecords = getAllNotifications(currentUser, loanRecords?.data || [], donationRecords?.data || []);
+        allNotifications.push(...allNotificationsFromRecords);
          
         // Sort by priority first, then by timestamp (newest first)
         allNotifications.sort((a, b) => {
@@ -140,7 +205,7 @@ export const useNotifications = (currentUser: User | null): {
     const interval = setInterval(loadNotifications, 30000);
 
     return () => clearInterval(interval);
-  }, [currentUser, loanRecords]);
+  }, [currentUser, loanRecords, donationRecords]);
 
   const addNotification = (notification: Omit<Notification, 'id' | 'timestamp' | 'isRead'>) => {
     const newNotification: Notification = {
@@ -189,7 +254,7 @@ export const useNotifications = (currentUser: User | null): {
       
       return updatedNotifications;
     });
-  }, [isLoading]);
+  }, [isLoadingLoans, isLoadingDonations]);
 
   const clearNotification = (notificationId: string) => {
     setNotifications((prev: Notification[]) => prev.filter(n => n.id !== notificationId));
