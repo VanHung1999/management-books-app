@@ -7,7 +7,6 @@ import { useLogout } from "@refinedev/core";
 import { 
   LogoutOutlined, 
   BookOutlined, 
-  GiftOutlined, 
   HomeOutlined,
   UserOutlined,
   FileTextOutlined,
@@ -218,85 +217,6 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
           {/* User Profile Section */}
           {user && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', minWidth: 0 }}>
-              {/* Donation Books Achievement */}
-              <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                background: 'linear-gradient(135deg, #fa8c16 0%, #ff9a56 100%)',
-                padding: '8px 16px',
-                borderRadius: '16px',
-                boxShadow: '0 4px 16px rgba(250, 140, 22, 0.3)',
-                border: '2px solid rgba(255, 255, 255, 0.3)',
-                position: 'relative',
-                overflow: 'hidden',
-                flexShrink: 0,
-                minHeight: '48px'
-              }}>
-                {/* Achievement Badge */}
-                <div style={{
-                  width: '28px',
-                  height: '28px',
-                  borderRadius: '50%',
-                  background: 'rgba(255, 255, 255, 0.2)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginRight: '12px',
-                  border: '2px solid rgba(255, 255, 255, 0.4)',
-                  flexShrink: 0
-                }}>
-                  <GiftOutlined style={{ 
-                    color: 'white', 
-                    fontSize: '16px',
-                    filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))'
-                  }} />
-                </div>
-                
-                {/* Achievement Content */}
-                <div style={{ 
-                  display: 'flex', 
-                  flexDirection: 'column', 
-                  alignItems: 'center', 
-                  justifyContent: 'center',
-                  minWidth: 0 
-                }}>
-                  <div style={{ 
-                    fontSize: '18px', 
-                    fontWeight: '700', 
-                    color: 'white',
-                    lineHeight: '1',
-                    textShadow: '0 2px 4px rgba(0,0,0,0.3)',
-                    marginBottom: '2px'
-                  }}>
-                    {user.booksDonated.length}
-                  </div>
-                  <div style={{ 
-                    fontSize: '10px', 
-                    color: 'rgba(255, 255, 255, 0.9)',
-                    fontWeight: '500',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.3px',
-                    whiteSpace: 'nowrap',
-                    lineHeight: '1'
-                  }}>
-                    Books Donated
-                  </div>
-                </div>
-                
-                {/* Achievement Sparkle Effect */}
-                <div style={{
-                  position: 'absolute',
-                  top: '-1px',
-                  right: '-1px',
-                  width: '12px',
-                  height: '12px',
-                  background: 'linear-gradient(45deg, #fff, #ffd700)',
-                  borderRadius: '50%',
-                  animation: 'sparkle 2s infinite',
-                  boxShadow: '0 0 8px rgba(255, 215, 0, 0.6)'
-                }} />
-              </div>
 
               {/* Notification Bell */}
               <Dropdown
