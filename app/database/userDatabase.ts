@@ -29,7 +29,7 @@ const writeUsers = (users: User[]) => {
 
 // Create a new user
 export const createUser = (
-  userData: Omit<User, 'id' | 'createdAt' | 'booksLoaned' | 'booksDonated' | 'role' | 'status'>
+  userData: Omit<User, 'id' | 'createdAt' | 'role' | 'status'>
 ): Promise<User | null> => {
   return new Promise((resolve, reject) => {
     if (typeof window !== 'undefined') {
@@ -39,8 +39,6 @@ export const createUser = (
               ...userData,
               id: String(users.length + 1),
               createdAt: new Date().toISOString().split('T')[0],
-              booksLoaned: [],
-              booksDonated: [],
               role: "user",
               status: "active"
           };

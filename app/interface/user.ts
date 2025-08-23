@@ -6,8 +6,6 @@ export interface User {
     name: string;
     role: 'admin' | 'user';
     createdAt: string;
-    booksLoaned: UserBookLoan[];
-    booksDonated: UserBookDonation[];
     status: 'active' | 'inactive';
   }
   
