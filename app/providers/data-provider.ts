@@ -78,19 +78,19 @@ export const dataProvider: DataProvider = {
   // POST /:resource - Create
   create: async ({ resource, variables }) => {
     if (resource === "users") {
-      const newUser = createUser(variables as Omit<User, "id" | "createdAt" | "booksLoaned" | "booksDonated" | "role" | "status">);
+      const newUser = await createUser(variables as Omit<User, "id" | "createdAt" | "booksLoaned" | "booksDonated" | "role" | "status">);
       return { data: newUser as any };
     }
     if (resource === "books") {
-      const newBook = createBook(variables as Omit<Book, "id" | "createdAt" | "updatedAt">);
+      const newBook = await createBook(variables as Omit<Book, "id" | "createdAt" | "updatedAt">);
       return { data: newBook as any };
     }
     if (resource === "loanRecords") {
-      const newLoanRecord = createLoanRecord(variables as Omit<LoanRecord, "id" | "delivererName" | "returnConfirmerName" | "borrowedAt" | "deliveredAt" | "receivedAt" | "returnedAt" | "returnConfirmedAt" | "status">);
+      const newLoanRecord = await createLoanRecord(variables as Omit<LoanRecord, "id" | "delivererName" | "returnConfirmerName" | "borrowedAt" | "deliveredAt" | "receivedAt" | "returnedAt" | "returnConfirmedAt" | "status">);
       return { data: newLoanRecord as any };
     }
     if (resource === "donationRecords") {
-      const newDonationRecord = createDonationRecord(variables as Omit<DonationRecord, "id" | "donationDate" | "status">);
+      const newDonationRecord = await createDonationRecord(variables as Omit<DonationRecord, "id" | "donationDate" | "status">);
       return { data: newDonationRecord as any };
     }
     throw new Error("Invalid resource");
@@ -99,19 +99,19 @@ export const dataProvider: DataProvider = {
   // PUT /:resource/:id - Update
   update: async ({ resource, id, variables }) => {
     if (resource === "users") {
-      const updatedUser = updateUser(id as string, variables as Partial<Pick<User, 'name' | 'password' | 'status' | 'role'>>);
+      const updatedUser = await updateUser(id as string, variables as Partial<Pick<User, 'name' | 'password' | 'status' | 'role'>>);
       return { data: updatedUser as any };
     }
     if (resource === "books") {
-      const updatedBook = updateBook(id as string, variables as Partial<Book>);
+      const updatedBook = await updateBook(id as string, variables as Partial<Book>);
       return { data: updatedBook as any };
     }
     if (resource === "loanRecords") {
-      const updatedLoanRecord = updateLoanRecord(id as string, variables as Partial<LoanRecord>);
+      const updatedLoanRecord = await updateLoanRecord(id as string, variables as Partial<LoanRecord>);
       return { data: updatedLoanRecord as any };
     }
     if (resource === "donationRecords") {
-      const updatedDonationRecord = updateDonationRecord(id as string, variables as Partial<DonationRecord>);
+      const updatedDonationRecord = await updateDonationRecord(id as string, variables as Partial<DonationRecord>);
       return { data: updatedDonationRecord as any };
     }
     throw new Error("Resource not found");
@@ -120,19 +120,19 @@ export const dataProvider: DataProvider = {
   // DELETE /:resource/:id - Delete
   deleteOne: async ({ resource, id }) => {
     if (resource === "users") {
-      const deletedUser = deleteUser(id as string);
+      const deletedUser = await deleteUser(id as string);
       return { data: deletedUser as any };
     }
     if (resource === "books") {
-      const deletedBook = deleteBook(id as string);
+      const deletedBook = await deleteBook(id as string);
       return { data: deletedBook as any };
     }
     if (resource === "loanRecords") {
-      const deletedLoanRecord = deleteLoanRecord(id as string);
+      const deletedLoanRecord = await deleteLoanRecord(id as string);
       return { data: deletedLoanRecord as any };
     }
     if (resource === "donationRecords") {
-      const deletedDonationRecord = deleteDonationRecord(id as string);
+      const deletedDonationRecord = await deleteDonationRecord(id as string);
       return { data: deletedDonationRecord as any };
     }
     throw new Error("Resource not found");

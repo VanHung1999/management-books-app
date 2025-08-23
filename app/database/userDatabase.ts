@@ -30,27 +30,30 @@ const writeUsers = (users: User[]) => {
 // Create a new user
 export const createUser = (
   userData: Omit<User, 'id' | 'createdAt' | 'booksLoaned' | 'booksDonated' | 'role' | 'status'>
-): User | null => {
-  if (typeof window !== 'undefined') {
-    try{
-        const users: User[] = readUsers();
-        const newUser: User = {
-            ...userData,
-            id: String(users.length + 1),
-            createdAt: new Date().toISOString().split('T')[0],
-            booksLoaned: [],
-            booksDonated: [],
-            role: "user",
-            status: "active"
-        };
-        users.push(newUser);
-        writeUsers(users);
-        return newUser;
-    } catch (error) {
-        throw new Error('Error creating user: ' + (error instanceof Error ? error.message : String(error)));
+): Promise<User | null> => {
+  return new Promise((resolve, reject) => {
+    if (typeof window !== 'undefined') {
+      try{
+          const users: User[] = readUsers();
+          const newUser: User = {
+              ...userData,
+              id: String(users.length + 1),
+              createdAt: new Date().toISOString().split('T')[0],
+              booksLoaned: [],
+              booksDonated: [],
+              role: "user",
+              status: "active"
+          };
+          users.push(newUser);
+          writeUsers(users);
+          resolve(newUser);
+      } catch (error) {
+          reject(new Error('Error creating user: ' + (error instanceof Error ? error.message : String(error))));
+      }
+    } else {
+      resolve(null);
     }
-  }
-  return null;
+  });
 };
 
 // Get all users from localStorage
@@ -81,13 +84,15 @@ export const getUserByEmail = (email: string): User | null => {
 export const updateUser = (
   id: string,
   updates: Partial<Pick<User, 'name' | 'password' | 'status' | 'role'>>
-): User | null => {
-  if (typeof window !== 'undefined') {
-    try{
+): Promise<User | null> => {
+  return new Promise((resolve, reject) => {
+    if (typeof window !== 'undefined') {
+      try {
         const users: User[] = readUsers();
         const userIndex = users.findIndex(user => user.id === id);
         if (userIndex === -1) {
-          throw new Error(`User not found with id: ${id}`);
+          reject(new Error(`User not found with id: ${id}`));
+          return;
         }
         const updatedUser: User = {
           ...users[userIndex],
@@ -95,31 +100,36 @@ export const updateUser = (
         };
         users[userIndex] = updatedUser;
         writeUsers(users);
-        return updatedUser;
-
-    } catch (error) {
-        throw new Error('Error updating user: ' + (error instanceof Error ? error.message : String(error)));
+        resolve(updatedUser);
+      } catch (error) {
+        reject(new Error('Error updating user: ' + (error instanceof Error ? error.message : String(error))));
+      }
+    } else {
+      resolve(null);
     }
-  }
-  return null;
+  });
 };
 
 // Delete user by id
-export const deleteUser = (id: string): User | null => {
-  if (typeof window !== 'undefined') {
-    try{
-        const users: User[] = readUsers();
-        const userIndex = users.findIndex(user => user.id === id);
-        if (userIndex === -1) {
-          throw new Error(`User not found with id: ${id}`);
-        }
-        const deletedUser = users[userIndex];
-        const remaining = users.filter((u) => u.id !== id);
-        writeUsers(remaining);
-        return deletedUser;
-    } catch (error) {
-        throw new Error('Error deleting user: ' + (error instanceof Error ? error.message : String(error)));
+export const deleteUser = (id: string): Promise<User | null> => {
+  return new Promise((resolve, reject) => {
+    if (typeof window !== 'undefined') {
+      try{
+          const users: User[] = readUsers();
+          const userIndex = users.findIndex(user => user.id === id);
+          if (userIndex === -1) {
+            reject(new Error(`User not found with id: ${id}`));
+            return;
+          }
+          const deletedUser = users[userIndex];
+          const remaining = users.filter((u) => u.id !== id);
+          writeUsers(remaining);
+          resolve(deletedUser);
+      } catch (error) {
+          reject(new Error('Error deleting user: ' + (error instanceof Error ? error.message : String(error))));
+      }
+    } else {
+      resolve(null);
     }
-  }
-  return null;
+  });
 };

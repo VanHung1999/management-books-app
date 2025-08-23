@@ -55,74 +55,85 @@ export const getBookById = (id: string): Book | null => {
 // Create a new book
 export const createBook = (
   bookData: Omit<Book, 'id' | 'ISBN' | 'createdAt' | 'updatedAt' | 'status'>
-): Book | null => {
-  if (typeof window !== 'undefined') {
-    try {
-      const books = getBooks();
-      const newBook: Book = {
-        ...bookData,
-        id: String(books.length + 1),
-        ISBN: generateIsbn13(),
-        createdAt: new Date().toISOString().split('T')[0],
-        updatedAt: new Date().toISOString().split('T')[0],
-        status: { available: bookData.num, loaned: 0, disabled: 0, renovated: 0 },
-      };
+): Promise<Book | null> => {
+  return new Promise((resolve, reject) => {
+    if (typeof window !== 'undefined') {
+      try {
+        const books = getBooks();
+        const newBook: Book = {
+          ...bookData,
+          id: String(books.length + 1),
+          ISBN: generateIsbn13(),
+          createdAt: new Date().toISOString().split('T')[0],
+          updatedAt: new Date().toISOString().split('T')[0],
+          status: { available: bookData.num, loaned: 0, disabled: 0, renovated: 0 },
+        };
 
-      const updatedBooks = [...books, newBook];
-      localStorage.setItem(BOOKS_STORAGE_KEY, JSON.stringify(updatedBooks));
-      return newBook;
-    } catch (error) {
-      throw new Error('Error creating book: ' + (error instanceof Error ? error.message : String(error)));
+        const updatedBooks = [...books, newBook];
+        localStorage.setItem(BOOKS_STORAGE_KEY, JSON.stringify(updatedBooks));
+        resolve(newBook);
+      } catch (error) {
+        reject(new Error('Error creating book: ' + (error instanceof Error ? error.message : String(error))));
+      }
+    } else {
+      resolve(null);
     }
-  }
-  return null;
+  });
 };
 
 // Update existing book
 export const updateBook = (
   id: string,
   updates: Partial<Book>
-): Book | null => {
-  if (typeof window !== 'undefined') {
-    try {
-      const books = getBooks();
-      const index = books.findIndex((b) => b.id === id);
-      if (index === -1) {
-        throw new Error(`Book not found with id: ${id}`);
+): Promise<Book | null> => {
+  return new Promise((resolve, reject) => {
+    if (typeof window !== 'undefined') {
+      try {
+        const books = getBooks();
+        const index = books.findIndex((b) => b.id === id);
+        if (index === -1) {
+          reject(new Error(`Book not found with id: ${id}`));
+          return;
+        }
+        const updatedBook: Book = {
+          ...books[index],
+          ...updates,
+          updatedAt: new Date().toISOString().split('T')[0],
+        };
+        const updatedBooks = [...books];
+        updatedBooks[index] = updatedBook;
+        localStorage.setItem(BOOKS_STORAGE_KEY, JSON.stringify(updatedBooks));
+        resolve(updatedBook);
+      } catch (error) {
+        reject(new Error('Error updating book: ' + (error instanceof Error ? error.message : String(error))));
       }
-      const updatedBook: Book = {
-        ...books[index],
-        ...updates,
-        updatedAt: new Date().toISOString().split('T')[0],
-      };
-      const updatedBooks = [...books];
-      updatedBooks[index] = updatedBook;
-      localStorage.setItem(BOOKS_STORAGE_KEY, JSON.stringify(updatedBooks));
-      return updatedBook;
-    } catch (error) {
-      throw new Error('Error updating book: ' + (error instanceof Error ? error.message : String(error)));
+    } else {
+      resolve(null);
     }
-  }
-  return null;
+  });
 };
 
 // Delete book by ID
-export const deleteBook = (id: string): Book | null => {
-  if (typeof window !== 'undefined') {
-    try {
-      const books = getBooks();
-      const index = books.findIndex((b) => b.id === id);
-      if (index === -1) {
-        throw new Error(`Book not found with id: ${id}`);
+export const deleteBook = (id: string): Promise<Book | null> => {
+  return new Promise((resolve, reject) => {
+    if (typeof window !== 'undefined') {
+      try {
+        const books = getBooks();
+        const index = books.findIndex((b) => b.id === id);
+        if (index === -1) {
+          reject(new Error(`Book not found with id: ${id}`));
+          return;
+        }
+        const deletedBook = books[index];
+        const updatedBooks = books.filter((b) => b.id !== id);
+        localStorage.setItem(BOOKS_STORAGE_KEY, JSON.stringify(updatedBooks));
+        resolve(deletedBook);
+      } catch (error) {
+        reject(new Error('Error deleting book: ' + (error instanceof Error ? error.message : String(error))));
       }
-      const deletedBook = books[index];
-      const updatedBooks = books.filter((b) => b.id !== id);
-      localStorage.setItem(BOOKS_STORAGE_KEY, JSON.stringify(updatedBooks));
-      return deletedBook;
-    } catch (error) {
-      throw new Error('Error deleting book: ' + (error instanceof Error ? error.message : String(error)));
+    } else {
+      resolve(null);
     }
-  }
-  return null;
+  });
 };
 
