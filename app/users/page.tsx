@@ -10,19 +10,17 @@ import {
   Button, 
   Modal, 
   Form, 
-  Input, 
   Select, 
-  message, 
   Tooltip,
   Row,
   Col,
   Statistic,
-  Skeleton
+  Skeleton,
+  App
 } from 'antd';
 import { 
   UserOutlined, 
   EditOutlined, 
-  PlusOutlined, 
   TeamOutlined,
   BookOutlined,
   GiftOutlined,
@@ -41,14 +39,17 @@ export default function Users() {
   const [form] = Form.useForm();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { message } = App.useApp();
+
 
   const { data: usersData, isLoading: loadingUsers, refetch } = useList<User>({
     resource: "users",
   });
 
-  const { mutate: updateUser } = useUpdate<User>({
+  const { mutateAsync: updateUser } = useUpdate<User>({
     resource: "users",
   });
+   
 
   // Filter and sort data - newest users first
   const filteredData = usersData?.data?.sort((a, b) => Number(b.id) - Number(a.id)) || [];
@@ -104,7 +105,7 @@ export default function Users() {
   const showModal = (user?: User) => {
     if (user) {
       form.setFieldsValue({
-        name: user.name,
+        _user: user,
         role: user.role,
         status: user.status
       });
@@ -114,19 +115,21 @@ export default function Users() {
     setIsModalVisible(true);
   };
 
-  const handleSubmit = async (values: any, record: User) => {
+
+
+  const handleSubmit = async (values: any, user: User) => {
     setIsLoading(true);
     try {
     // Update existing user
-    await updateUser({
-        id: record?.id,
+    const result = await updateUser({
+        id: user.id,
         values: {
-        name: values.name,
         role: values.role,
         status: values.status
         }
     });
-    message.success('User updated successfully!')
+    console.log(result);
+    message.success('User updated successfully!');
       
     setIsModalVisible(false);
     form.resetFields();
@@ -472,7 +475,7 @@ export default function Users() {
         </Card>
       </Card>
 
-      {/* Add/Edit User Modal */}
+      {/* Edit User Modal */}
       <Modal
         title={
           <div style={{ 
@@ -529,101 +532,16 @@ export default function Users() {
         <Form
           form={form}
           layout="vertical"
-          onFinish={(values) => handleSubmit(values, record)}
+          onFinish={(values) => {
+            const user = form.getFieldValue('_user');
+            handleSubmit(values, user);
+          }}
           initialValues={{
             role: 'user',
             status: 'active'
           }}
           size="large"
         >
-          {/* Personal Information Section */}
-          <div style={{ 
-            marginBottom: '24px',
-            padding: '20px',
-            background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
-            borderRadius: '12px',
-            border: '1px solid #e8e8e8'
-          }}>
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '8px',
-              marginBottom: '16px'
-            }}>
-              <UserOutlined style={{ color: '#1890ff', fontSize: '16px' }} />
-              <Text style={{ 
-                fontSize: '16px', 
-                fontWeight: '600', 
-                color: '#262626' 
-              }}>
-                Personal Information
-              </Text>
-            </div>
-            
-            <Row gutter={20}>
-              <Col span={12}>
-                <Form.Item
-                  name="name"
-                  label={
-                    <span style={{ fontWeight: '500', color: '#262626' }}>
-                      Full Name <span style={{ color: '#ff4d4f' }}>*</span>
-                    </span>
-                  }
-                  rules={[
-                    { required: true, message: 'Please enter the full name!' },
-                    { min: 2, message: 'Name must be at least 2 characters!' },
-                    { max: 100, message: 'Name must be less than 100 characters!' }
-                  ]}
-                >
-                  <Input 
-                    placeholder="Enter full name" 
-                    prefix={<UserOutlined style={{ color: '#bfbfbf' }} />}
-                    style={{ borderRadius: '8px' }}
-                  />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
-                  name="email"
-                  label={
-                    <span style={{ fontWeight: '500', color: '#262626' }}>
-                      Email Address <span style={{ color: '#ff4d4f' }}>*</span>
-                    </span>
-                  }
-                  rules={[
-                    { required: true, message: 'Please enter the email!' },
-                    { type: 'email', message: 'Please enter a valid email!' }
-                  ]}
-                >
-                  <Input 
-                    placeholder="Enter email address" 
-                    prefix={<span style={{ color: '#bfbfbf' }}>📧</span>}
-                    style={{ borderRadius: '8px' }}
-                  />
-                </Form.Item>
-              </Col>
-            </Row>
-
-              <Form.Item
-                name="password"
-                label={
-                  <span style={{ fontWeight: '500', color: '#262626' }}>
-                    Password <span style={{ color: '#ff4d4f' }}>*</span>
-                  </span>
-                }
-                rules={[
-                  { required: true, message: 'Please enter the password!' },
-                  { min: 6, message: 'Password must be at least 6 characters!' }
-                ]}
-              >
-                <Input.Password 
-                  placeholder="Enter password" 
-                  prefix={<span style={{ color: '#bfbfbf' }}>🔒</span>}
-                  style={{ borderRadius: '8px' }}
-                />
-              </Form.Item>
-          </div>
-
           {/* Account Settings Section */}
           <div style={{ 
             marginBottom: '32px',
