@@ -12,6 +12,10 @@ export const authProvider: AuthProvider = {
       if (user.data.password !== password) {
         throw new Error("Wrong password");
       }
+
+      if (user.data.status === "inactive") {
+        throw new Error("User is inactive. Please contact admin.");
+      }
       
       if (typeof window !== 'undefined') {
         localStorage.setItem("currentUser", JSON.stringify(user.data));
