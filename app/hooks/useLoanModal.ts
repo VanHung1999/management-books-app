@@ -47,7 +47,19 @@ export function useLoanModal() {
     }
 
     setIsSubmitting(true);
-    const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+    
+    // Safely get current user from localStorage
+    let currentUser;
+    try {
+      if (typeof window !== 'undefined') {
+        currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+      } else {
+        currentUser = {};
+      }
+    } catch (error) {
+      console.error('Error parsing user from localStorage:', error);
+      currentUser = {};
+    }
     
     try {
       // TODO: Add book borrowing logic here

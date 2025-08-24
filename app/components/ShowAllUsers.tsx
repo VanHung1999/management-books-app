@@ -917,7 +917,7 @@ export default function ShowAllUsers() {
               title={
                 <Space>
                   <GiftOutlined style={{ color: '#52c41a' }} />
-                  <span>Donations ({getUserDonations(selectedUser.email).length})</span>
+                  <span>Donations ({getUserDonations(selectedUser.email).length} {getUserDonations(selectedUser.email).length > 1 ? 'records' : 'record'})</span>
                 </Space>
               }
               style={{ marginBottom: '20px' }}
@@ -978,7 +978,7 @@ export default function ShowAllUsers() {
               title={
                 <Space>
                   <BookOutlined style={{ color: '#1890ff' }} />
-                  <span>Loans ({getUserLoans(selectedUser.email).length})</span>
+                  <span>Loans ({getUserLoans(selectedUser.email).length} {getUserLoans(selectedUser.email).length > 1 ? 'records' : 'record'})</span>
                 </Space>
               }
               size="small"

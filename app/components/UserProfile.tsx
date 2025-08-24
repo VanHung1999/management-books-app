@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   Card, 
   Typography, 
@@ -11,47 +11,46 @@ import {
   Table,
   Statistic,
   Avatar,
-  Divider,
-  Skeleton,
-  App
+  App,
+  Input,
+  Button,
+  message
 } from 'antd';
 import { 
   UserOutlined, 
   BookOutlined,
   GiftOutlined,
   CalendarOutlined,
-  MailOutlined,
-  CrownOutlined,
   CheckCircleOutlined,
-  CloseCircleOutlined
+  CloseCircleOutlined,
+  EyeOutlined,
+  EyeInvisibleOutlined,
+  EditOutlined,
+  SaveOutlined,
+  CloseOutlined
 } from '@ant-design/icons';
-import { useList } from '@refinedev/core';
+import { useList, useUpdate } from '@refinedev/core';
 import { User } from '../interface/user';
 import { DonationRecord } from '../interface/donationRecord';
 import { LoanRecord } from '../interface/loanRecord';
 
 const { Title, Text } = Typography;
+const { Password } = Input;
 
 interface UserProfileProps {
-  currentUserEmail: string;
+  currentUser: User;
 }
 
-export default function UserProfile({ currentUserEmail }: UserProfileProps) {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const { message } = App.useApp();
+export default function UserProfile({ currentUser }: UserProfileProps) {
+  const { message: appMessage } = App.useApp();
+  const [showPassword, setShowPassword] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [isEditingPassword, setIsEditingPassword] = useState(false);
+  const [editedName, setEditedName] = useState(currentUser.name);
+  const [editedPassword, setEditedPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
-  // Fetch current user data
-  const { data: usersData, isLoading: loadingUsers } = useList<User>({
-    resource: "users",
-    filters: [
-      {
-        field: "email",
-        operator: "eq",
-        value: currentUserEmail,
-      },
-    ],
-  });
+  const { mutateAsync: updateUser } = useUpdate<User>();
 
   // Fetch donations and loans data
   const { data: donationsData, isLoading: loadingDonations } = useList<DonationRecord>({
@@ -62,23 +61,16 @@ export default function UserProfile({ currentUserEmail }: UserProfileProps) {
     resource: "loanRecords",
   });
 
-  useEffect(() => {
-    if (usersData?.data && usersData.data.length > 0) {
-      setCurrentUser(usersData.data[0]);
-    }
-    setIsLoading(false);
-  }, [usersData]);
-
   // Get user's donations and loans
   const getUserDonations = () => {
     return donationsData?.data?.filter(
-      donation => donation.donationerName === currentUserEmail
+      donation => donation.donationerName === currentUser.email
     ) || [];
   };
 
   const getUserLoans = () => {
     return loansData?.data?.filter(
-      loan => loan.borrowerName === currentUserEmail
+      loan => loan.borrowerName === currentUser.email
     ) || [];
   };
 
@@ -107,21 +99,119 @@ export default function UserProfile({ currentUserEmail }: UserProfileProps) {
     });
   };
 
-  if (isLoading || loadingUsers) {
-    return (
-      <div style={{ padding: '24px' }}>
-        <Skeleton.Input active size="large" style={{ width: "100%", height: "400px" }} />
-      </div>
-    );
-  }
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
 
-  if (!currentUser) {
-    return (
-      <div style={{ padding: '24px', textAlign: 'center' }}>
-        <Text type="secondary">User not found or not authenticated.</Text>
-      </div>
-    );
-  }
+  // Handle name editing
+  const handleEditName = () => {
+    setIsEditingName(true);
+    setEditedName(currentUser.name);
+  };
+
+  const handleSaveName = async () => {
+    if (!editedName.trim()) {
+      appMessage.error('Tên không được để trống!');
+      return;
+    }
+
+    await updateUser({
+      resource: "users",
+      id: currentUser.id,
+      values: {
+        name: editedName.trim()
+      }
+    }, {
+      onSuccess: () => {
+        appMessage.success('Update name successfully!');
+        setIsEditingName(false);
+        
+        // Update local state
+        currentUser.name = editedName.trim();
+        
+        // Update localStorage so Navbar can reflect the change immediately
+        try {
+          if (typeof window !== 'undefined') {
+            const currentUserData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            currentUserData.name = editedName.trim();
+            localStorage.setItem('currentUser', JSON.stringify(currentUserData));
+            
+            // Dispatch custom event to notify Navbar to update
+            window.dispatchEvent(new CustomEvent('userUpdated'));
+          }
+        } catch (error) {
+          console.error('Error updating localStorage:', error);
+        }
+      },
+      onError: () => {
+        appMessage.error('Error updating name!');
+      }
+    });
+  };
+
+  const handleCancelName = () => {
+    setIsEditingName(false);
+    setEditedName(currentUser.name);
+  };
+
+  // Handle password editing
+  const handleEditPassword = () => {
+    setIsEditingPassword(true);
+    setEditedPassword('');
+    setConfirmPassword('');
+  };
+
+  const handleSavePassword = async () => {
+    if (!editedPassword.trim()) {
+      appMessage.error('Password cannot be empty!');
+      return;
+    }
+
+    if (editedPassword.length <= 6) {
+      appMessage.error('Password must be longer than 6 characters!');
+      return;
+    }
+
+    // Check if password contains both letters and numbers (letters/numbers only)
+    const hasLetters = /[a-zA-Z]/.test(editedPassword);
+    const hasNumbers = /[0-9]/.test(editedPassword);
+
+    if (!hasLetters || !hasNumbers) {
+      appMessage.error('Password must contain both letters and numbers!');
+      return;
+    }
+
+    if (editedPassword !== confirmPassword) {
+      appMessage.error('Confirm password does not match!');
+      return;
+    }
+
+    await updateUser({
+      resource: "users",
+      id: currentUser.id,
+      values: {
+        password: editedPassword.trim()
+      }
+    }, {
+      onSuccess: () => {
+        appMessage.success('Update password successfully!');
+        setIsEditingPassword(false);
+        setEditedPassword('');
+        setConfirmPassword('');
+        // Update local state
+        currentUser.password = editedPassword.trim();
+      },
+      onError: () => {
+        appMessage.error('Error updating password!');
+      }
+    });
+  };
+
+  const handleCancelPassword = () => {
+    setIsEditingPassword(false);
+    setEditedPassword('');
+    setConfirmPassword('');
+  };
 
   const userDonations = getUserDonations();
   const userLoans = getUserLoans();
@@ -204,7 +294,7 @@ export default function UserProfile({ currentUserEmail }: UserProfileProps) {
             border: '1px solid #f0f0f0',
             background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)'
           }}
-          bodyStyle={{ padding: '32px' }}
+          styles={{ body: { padding: '32px' } }}
         >
           <Row gutter={[32, 24]} align="middle">
             <Col span={6}>
@@ -248,7 +338,7 @@ export default function UserProfile({ currentUserEmail }: UserProfileProps) {
               <Row gutter={[24, 16]}>
                 <Col span={8}>
                   <Statistic
-                    title="Total Donations"
+                    title="Total Donations Record"
                     value={userDonations.length}
                     prefix={<GiftOutlined style={{ color: '#52c41a' }} />}
                     valueStyle={{ color: '#52c41a' }}
@@ -256,7 +346,7 @@ export default function UserProfile({ currentUserEmail }: UserProfileProps) {
                 </Col>
                 <Col span={8}>
                   <Statistic
-                    title="Total Loans"
+                    title="Total Loans Record"
                     value={userLoans.length}
                     prefix={<BookOutlined style={{ color: '#1890ff' }} />}
                     valueStyle={{ color: '#1890ff' }}
@@ -337,6 +427,7 @@ export default function UserProfile({ currentUserEmail }: UserProfileProps) {
                             status === 'received' ? 'green' : 
                             status === 'confirmed' ? 'blue' : 
                             status === 'pending' ? 'orange' : 
+                            status === "sent" ? 'purple' :
                             status === 'canceled' ? 'red' : 'default'
                           }>
                             {status}
@@ -416,6 +507,7 @@ export default function UserProfile({ currentUserEmail }: UserProfileProps) {
                             status === 'received' ? 'blue' : 
                             status === 'delivered' ? 'cyan' : 
                             status === 'pending' ? 'orange' : 
+                            status === 'returned' ? 'purple' :
                             status === 'canceled' ? 'red' : 'default'
                           }>
                             {status}
@@ -487,7 +579,8 @@ export default function UserProfile({ currentUserEmail }: UserProfileProps) {
             border: '1px solid #e8e8e8'
           }}>
             <Row gutter={[24, 16]}>
-              <Col span={8}>
+              {/* Full Name */}
+              <Col span={12}>
                 <div style={{
                   background: 'white',
                   padding: '16px',
@@ -495,7 +588,7 @@ export default function UserProfile({ currentUserEmail }: UserProfileProps) {
                   border: '1px solid #f0f0f0',
                   textAlign: 'center',
                   boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-                  height: '120px',
+                  height: '160px',
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'center'
@@ -516,18 +609,60 @@ export default function UserProfile({ currentUserEmail }: UserProfileProps) {
                     Full Name
                   </Text>
                   <div style={{ marginTop: '8px' }}>
-                    <Text style={{ 
-                      fontSize: '16px', 
-                      fontWeight: '600',
-                      color: '#262626'
-                    }}>
-                      {currentUser.name}
-                    </Text>
+                    {isEditingName ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <Input
+                          value={editedName}
+                          onChange={(e) => setEditedName(e.target.value)}
+                          size="small"
+                          style={{ textAlign: 'center' }}
+                        />
+                        <div style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>
+                          <Button
+                            type="primary"
+                            size="small"
+                            icon={<SaveOutlined />}
+                            onClick={handleSaveName}
+                            style={{ fontSize: '10px', padding: '0 8px' }}
+                          >
+                            Save
+                          </Button>
+                          <Button
+                            size="small"
+                            icon={<CloseOutlined />}
+                            onClick={handleCancelName}
+                            style={{ fontSize: '10px', padding: '0 8px' }}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                        <Text style={{ 
+                          fontSize: '16px', 
+                          fontWeight: '600',
+                          color: '#262626'
+                        }}>
+                          {currentUser.name}
+                        </Text>
+                        <Button
+                          type="text"
+                          size="small"
+                          icon={<EditOutlined />}
+                          onClick={handleEditName}
+                          style={{ fontSize: '10px', padding: '2px 4px' }}
+                        >
+                          Edit
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </Col>
-              
-              <Col span={8}>
+
+              {/* Password */}
+              <Col span={12}>
                 <div style={{
                   background: 'white',
                   padding: '16px',
@@ -535,7 +670,125 @@ export default function UserProfile({ currentUserEmail }: UserProfileProps) {
                   border: '1px solid #f0f0f0',
                   textAlign: 'center',
                   boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-                  height: '120px',
+                  height: '160px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center'
+                }}>
+                  <div style={{ marginBottom: '8px' }}>
+                    <div style={{
+                      background: 'linear-gradient(135deg, #fa8c16 0%, #d46b08 100%)',
+                      borderRadius: '50%',
+                      width: '32px',
+                      height: '32px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      margin: '0 auto'
+                    }}>
+                      <span style={{ color: 'white', fontSize: '16px' }}>🔒</span>
+                    </div>
+                  </div>
+                  <Text strong style={{ 
+                    color: '#8c8c8c', 
+                    fontSize: '12px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px'
+                  }}>
+                    Password
+                  </Text>
+                  <div style={{ marginTop: '8px' }}>
+                    {isEditingPassword ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <Password
+                          placeholder="Enter new password"
+                          value={editedPassword}
+                          onChange={(e) => setEditedPassword(e.target.value)}
+                          size="small"
+                          style={{ textAlign: 'center' }}
+                        />
+                        <Password
+                          placeholder="Confirm password"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          size="small"
+                          style={{ textAlign: 'center' }}
+                        />
+                        <div style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>
+                          <Button
+                            type="primary"
+                            size="small"
+                            icon={<SaveOutlined />}
+                            onClick={handleSavePassword}
+                            style={{ fontSize: '10px', padding: '0 8px' }}
+                          >
+                            Save
+                          </Button>
+                          <Button
+                            size="small"
+                            icon={<CloseOutlined />}
+                            onClick={handleCancelPassword}
+                            style={{ fontSize: '10px', padding: '0 8px' }}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                        <div style={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'center',
+                          gap: '8px'
+                        }}>
+                          <Text style={{ 
+                            fontSize: '14px',
+                            color: '#262626',
+                            fontWeight: '500',
+                            fontFamily: 'monospace'
+                          }}>
+                            {showPassword ? currentUser.password : '••••••••'}
+                          </Text>
+                          <Button
+                            type="text"
+                            size="small"
+                            icon={showPassword ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+                            onClick={togglePasswordVisibility}
+                            style={{
+                              padding: '2px 4px',
+                              minWidth: 'auto',
+                              height: 'auto'
+                            }}
+                          />
+                        </div>
+                        <Button
+                          type="text"
+                          size="small"
+                          icon={<EditOutlined />}
+                          onClick={handleEditPassword}
+                          style={{ fontSize: '10px', padding: '2px 4px' }}
+                        >
+                          Edit
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </Col>
+            </Row>
+
+            <Row gutter={[24, 16]} style={{ marginTop: '16px' }}>
+              {/* Email Address */}
+              <Col span={12}>
+                <div style={{
+                  background: 'white',
+                  padding: '16px',
+                  borderRadius: '8px',
+                  border: '1px solid #f0f0f0',
+                  textAlign: 'center',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                  height: '160px',
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'center'
@@ -574,7 +827,8 @@ export default function UserProfile({ currentUserEmail }: UserProfileProps) {
                 </div>
               </Col>
               
-              <Col span={8}>
+              {/* User Role */}
+              <Col span={12}>
                 <div style={{
                   background: 'white',
                   padding: '16px',
@@ -582,7 +836,7 @@ export default function UserProfile({ currentUserEmail }: UserProfileProps) {
                   border: '1px solid #f0f0f0',
                   textAlign: 'center',
                   boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-                  height: '120px',
+                  height: '160px',
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'center'

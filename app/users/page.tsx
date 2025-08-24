@@ -1,16 +1,34 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Switch } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Switch, message, Tooltip } from 'antd';
 import UserProfile from '../components/UserProfile';
 import ShowAllUsers from '../components/ShowAllUsers';
+import { User } from '../interface/user';
 
 export default function Users() {
   const [showAllUsers, setShowAllUsers] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
-  // Get current user email from localStorage
-  const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-  const currentUserEmail = currentUser.email;
+  // Get current user email from localStorage safely on client side
+  useEffect(() => {
+    try {
+      const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      setCurrentUser(user);
+    } catch (error) {
+      console.error('Error parsing user from localStorage:', error);
+      setCurrentUser(null);
+    }
+  }, []);
+
+  // Handle switch change with admin check
+  const handleSwitchChange = (checked: boolean) => {
+    if (currentUser?.role !== 'admin') {
+      message.warning('Only admin can view all users!');
+      return;
+    }
+    setShowAllUsers(checked);
+  };
 
   return (
     <div style={{ 
@@ -43,15 +61,21 @@ export default function Users() {
           }}>
             My Profile
           </span>
-          <Switch
-            checked={showAllUsers}
-            onChange={setShowAllUsers}
-            checkedChildren="All Users"
-            unCheckedChildren="Profile"
-            style={{
-              background: showAllUsers ? '#1890ff' : '#d9d9d9'
-            }}
-          />
+          <Tooltip 
+            title={currentUser?.role !== 'admin' ? 'Only admin can view all users' : ''}
+            placement="top"
+          >
+            <Switch
+              checked={showAllUsers}
+              onChange={handleSwitchChange}
+              checkedChildren="All Users"
+              unCheckedChildren="Profile"
+              style={{
+                background: showAllUsers ? '#1890ff' : '#d9d9d9'
+              }}
+              disabled={currentUser?.role === 'user'}
+            />
+          </Tooltip>
           <span style={{ 
             fontSize: '14px', 
             fontWeight: '500', 
@@ -62,9 +86,35 @@ export default function Users() {
         </div>
       </div>
 
+      {/* Admin Access Notice */}
+      {currentUser?.role !== 'admin' && (
+        <div style={{
+          background: '#fff7e6',
+          border: '1px solid #ffd591',
+          borderRadius: '8px',
+          padding: '16px',
+          marginBottom: '24px',
+          textAlign: 'center',
+          color: '#d46b08'
+        }}>
+          <strong>⚠️ Notice:</strong> Only admin can view all users. 
+          You can only view and edit your own profile.
+        </div>
+      )}
+
       {/* Show UserProfile when switch is off (default) */}
       {!showAllUsers ? (
-        <UserProfile currentUserEmail={currentUserEmail} />
+        currentUser ? (
+          <UserProfile currentUser={currentUser} />
+        ) : (
+          <div style={{ 
+            textAlign: 'center', 
+            padding: '40px 20px',
+            color: '#8c8c8c'
+          }}>
+            Loading user profile...
+          </div>
+        )
       ) : (
         /* Show All Users when switch is on */
         <ShowAllUsers />

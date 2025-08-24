@@ -49,18 +49,45 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
 
   // Load user from localStorage
   useEffect(() => {
-    const currentUser = localStorage.getItem('currentUser');
-    if (currentUser) {
-      try {
-        const userData = JSON.parse(currentUser);
-        setUser(userData);
-      } catch (error) {
-        console.error('Error parsing user data:', error);
-        // Clear invalid data
-        localStorage.removeItem('currentUser');
-        localStorage.removeItem('auth-token');
+    const loadUserFromStorage = () => {
+      const currentUser = localStorage.getItem('currentUser');
+      if (currentUser) {
+        try {
+          const userData = JSON.parse(currentUser);
+          setUser(userData);
+        } catch (error) {
+          console.error('Error parsing user data:', error);
+          // Clear invalid data
+          localStorage.removeItem('currentUser');
+          localStorage.removeItem('auth-token');
+        }
       }
-    }
+    };
+
+    // Load user initially
+    loadUserFromStorage();
+
+    // Listen for storage changes (when localStorage is updated from other tabs/windows)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'currentUser') {
+        loadUserFromStorage();
+      }
+    };
+
+    // Listen for custom events (when localStorage is updated from same tab)
+    const handleUserUpdate = () => {
+      loadUserFromStorage();
+    };
+
+    // Add event listeners
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('userUpdated', handleUserUpdate);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('userUpdated', handleUserUpdate);
+    };
   }, []);
 
   // Auto mark all loan notifications as read when user visits /loanRecords page
