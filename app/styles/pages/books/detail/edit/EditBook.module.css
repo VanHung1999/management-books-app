@@ -1,0 +1,403 @@
+/* Edit Book Page Styles */
+
+/* Main Container */
+.mainContainer {
+  background-color: #fafafa;
+  min-height: 100vh;
+  padding: 0;
+}
+
+/* Loading Container */
+.loadingContainer {
+  padding: 32px;
+  max-width: 1000px;
+  margin: 0 auto;
+  background-color: #fafafa;
+  min-height: 100vh;
+}
+
+.loadingContent {
+  text-align: center;
+}
+
+.loadingIcon {
+  font-size: 48px;
+  color: #d9d9d9;
+}
+
+.loadingTitle {
+  color: #8c8c8c;
+  margin: 16px 0;
+}
+
+/* Error Container */
+.errorContainer {
+  padding: 32px;
+  max-width: 1000px;
+  margin: 0 auto;
+  background-color: #fafafa;
+  min-height: 100vh;
+}
+
+.errorContent {
+  text-align: center;
+}
+
+.errorIcon {
+  font-size: 48px;
+  color: #d9d9d9;
+}
+
+.errorTitle {
+  color: #8c8c8c;
+  margin: 16px 0;
+}
+
+.errorButton {
+  margin-top: 16px;
+}
+
+/* Header Section */
+.headerSection {
+  background-color: white;
+  border-bottom: 1px solid #f0f0f0;
+  padding: 24px 0;
+  margin-bottom: 32px;
+}
+
+.headerContent {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+.backButton {
+  font-size: 16px;
+  height: auto;
+  padding: 12px 20px;
+  color: #1890ff;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.backButton:hover {
+  background-color: rgba(24, 144, 255, 0.1) !important;
+  transform: translateX(-4px);
+}
+
+/* Main Content */
+.mainContent {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 32px 32px 32px;
+}
+
+/* Book Info Card */
+.bookInfoCard {
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  margin-bottom: 24px;
+  border: none;
+}
+
+.bookInfoHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.bookInfoIcon {
+  font-size: 24px;
+  color: #1890ff;
+}
+
+.bookInfoTitle {
+  margin: 0 0 8px 0;
+  color: #1f1f1f;
+}
+
+.bookInfoSubtitle {
+  color: #8c8c8c;
+}
+
+/* Status Management Card */
+.statusManagementCard {
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  margin-bottom: 24px;
+  border: none;
+}
+
+.cardTitle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f1f1f;
+}
+
+.cardTitleIcon {
+  color: #1890ff;
+}
+
+.statusInfo {
+  margin-bottom: 20px;
+}
+
+.statusInfoText {
+  font-size: 16px;
+  color: #1f1f1f;
+}
+
+.statusWarning {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background-color: #fff2f0;
+  border: 1px solid #ffccc7;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.statusWarningIcon {
+  color: #ff4d4f;
+}
+
+.statusWarningText {
+  color: #ff4d4f;
+  font-size: 14px;
+}
+
+.statusCardsContainer {
+  margin-bottom: 20px;
+}
+
+.statusCard {
+  text-align: center;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid;
+  transition: all 0.3s ease;
+}
+
+.statusCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.statusCardAvailable {
+  background-color: #f6ffed;
+  border-color: #b7eb8f;
+}
+
+.statusCardLoaned {
+  background-color: #fff7e6;
+  border-color: #ffd591;
+}
+
+.statusCardDisabled {
+  background-color: #fff2f0;
+  border-color: #ffccc7;
+}
+
+.statusCardRenovated {
+  background-color: #f0f8ff;
+  border-color: #91d5ff;
+}
+
+.statusNumber {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.statusNumberAvailable {
+  color: #52c41a;
+}
+
+.statusNumberLoaned {
+  color: #fa8c16;
+}
+
+.statusNumberDisabled {
+  color: #ff4d4f;
+}
+
+.statusNumberRenovated {
+  color: #1890ff;
+}
+
+.statusLabel {
+  color: inherit;
+}
+
+.statusLabelAvailable {
+  color: #52c41a;
+}
+
+.statusLabelLoaned {
+  color: #fa8c16;
+}
+
+.statusLabelDisabled {
+  color: #ff4d4f;
+}
+
+.statusLabelRenovated {
+  color: #1890ff;
+}
+
+.editStatusButton {
+  border-radius: 8px;
+}
+
+.editStatusButtonContainer {
+  text-align: center;
+  margin-top: 20px;
+}
+
+/* Status Form */
+.statusForm {
+  margin-top: 20px;
+}
+
+.formRow {
+  margin-bottom: 20px;
+}
+
+.inputField {
+  width: 100%;
+}
+
+.validationInfo {
+  padding: 16px;
+  background-color: #f6ffed;
+  border-radius: 8px;
+  border: 1px solid #b7eb8f;
+  margin-bottom: 20px;
+}
+
+.validationText {
+  color: #52c41a;
+  font-size: 14px;
+}
+
+.formActions {
+  margin-bottom: 0;
+  text-align: center;
+}
+
+.formActionsSpace {
+  gap: 16px;
+}
+
+.cancelButton {
+  border-radius: 8px;
+}
+
+.updateStatusButton {
+  border-radius: 8px;
+}
+
+/* Edit Form Card */
+.editFormCard {
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  margin-bottom: 24px;
+  border: none;
+}
+
+.descriptionTextArea {
+  font-size: 16px;
+  border-radius: 8px;
+  resize: vertical;
+}
+
+.updateDescriptionButton {
+  height: 44px;
+  padding: 0 24px;
+  font-size: 16px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.updateDescriptionButtonContainer {
+  margin-bottom: 0;
+  text-align: right;
+}
+
+/* Current Description Preview */
+.currentDescriptionCard {
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  margin-bottom: 24px;
+  border: none;
+  margin-top: 24px;
+}
+
+.currentDescriptionContent {
+  padding: 16px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.currentDescriptionText {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #1f1f1f;
+  white-space: pre-wrap;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .mainContent {
+    padding: 0 16px 16px 16px;
+  }
+  
+  .headerContent {
+    padding: 0 16px;
+  }
+  
+  .bookInfoHeader {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+  
+  .statusCardsContainer {
+    margin-bottom: 16px;
+  }
+  
+  .formActionsSpace {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .updateDescriptionButtonContainer {
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .bookInfoTitle {
+    font-size: 18px;
+  }
+  
+  .cardTitle {
+    font-size: 16px;
+  }
+  
+  .statusNumber {
+    font-size: 20px;
+  }
+  
+  .updateDescriptionButton {
+    height: 40px;
+    padding: 0 20px;
+    font-size: 14px;
+  }
+}

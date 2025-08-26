@@ -2,11 +2,11 @@
 
 import React, { useState } from "react";
 import { Link, useList } from "@refinedev/core";
-import { Card, List, Skeleton, Pagination, Select, Button, message } from "antd";
+import { Card, List, Skeleton, Pagination, Select, Button } from "antd";
 import { getCategories } from "../database/categoryDatabase";
 import LoanModal from "../components/LoanModal";
 import { useLoanModal } from "../hooks/useLoanModal";
-import styles from "../styles/pages/Books.module.css";
+import styles from "../styles/pages/books/Books.module.css";
 
 export default function Books() {
 
@@ -163,7 +163,7 @@ export default function Books() {
                   { value: "name", label: "📖 Search by Name" },
                   { value: "author", label: "✍️ Search by Author" },
                 ]}
-                style={{ width: '100%' }}
+                className={styles.fullWidthSelect}
                 placeholder="Select search type"
                 size="large"
               />
@@ -246,33 +246,17 @@ export default function Books() {
         </div>
 
         {/* Page Size and Total Info */}
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center',
-          padding: '20px',
-          backgroundColor: 'white',
-          borderRadius: '12px',
-          border: '1px solid #e8e8e8',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
-        }}>
-          <div style={{ 
-            fontSize: '16px', 
-            fontWeight: '600',
-            color: '#262626',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}>
-            <span style={{ fontSize: '18px' }}>📈</span>
-            Total Books: <span style={{ color: '#1890ff' }}>{totalBooks}</span>
+        <div className={styles.paginationSection}>
+          <div className={styles.paginationInfo}>
+            <span className={styles.statsNumber}>📈</span>
+            Total Books: <span className={styles.totalBooks}>{totalBooks}</span>
             {selectedCategory !== "all" && (
-              <span style={{ color: '#52c41a', marginLeft: '8px' }}>
+              <span className={styles.availableBooks}>
                 in <strong>{selectedCategory}</strong>
               </span>
             )}
             {searchQuery !== "" && searchType !== "none" && (
-              <span style={{ color: '#fa8c16', marginLeft: '8px' }}>
+              <span className={styles.loanedBooks}>
                 matching "<strong>{searchQuery}</strong>" {
                   searchType === "name" ? "in name" :
                   searchType === "author" ? "in author" :
@@ -282,16 +266,8 @@ export default function Books() {
             )}
           </div>
           
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '12px',
-            padding: '12px 16px',
-            backgroundColor: '#f8f9fa',
-            borderRadius: '8px',
-            border: '1px solid #e8e8e8'
-          }}>
-            <span style={{ fontSize: '14px', color: '#595959' }}>📄 Items per page:</span>
+          <div className={styles.pageSizeContainer}>
+            <span className={styles.paginationText}>📄 Items per page:</span>
             <Select
               value={pageSize}
               onChange={(value) => handlePageChange(1, value)}
@@ -303,7 +279,7 @@ export default function Books() {
                 { value: 25, label: '25 items' },
                 { value: 30, label: '30 items' },
               ]}
-              style={{ width: '120px' }}
+              className={styles.pageSizeSelect}
               size="small"
             />
           </div>
@@ -324,37 +300,16 @@ export default function Books() {
             }}
             dataSource={currentBooks}
             renderItem={(book) => (
-              <List.Item key={book.id} style={{ padding: '8px' }}>
+              <List.Item key={book.id} className={styles.bookItem}>
                 <Card 
                   title={
-                    <Link to={`/books/${book.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                      <div style={{ 
-                        fontSize: '16px', 
-                        fontWeight: '600', 
-                        color: '#1f1f1f',
-                        textAlign: 'center',
-                        lineHeight: '1.4',
-                        cursor: 'pointer',
-                        transition: 'color 0.3s ease'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.color = '#1890ff'}
-                      onMouseLeave={(e) => e.currentTarget.style.color = '#1f1f1f'}
-                      >
+                    <Link to={`/books/${book.id}`} className={styles.bookLink}>
+                      <div className={styles.bookTitle}>
                         {book.name}
                       </div>
                     </Link>
                   }
-                  style={{ 
-                    width: '100%',
-                    minHeight: '480px',
-                    height: 'auto',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    borderRadius: '12px',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                    transition: 'all 0.3s ease',
-                    cursor: 'pointer'
-                  }}
+                  className={styles.bookCard}
                   styles={{
                     body: {
                       flex: 1,
@@ -367,27 +322,15 @@ export default function Books() {
                       padding: '16px 16px 8px 16px',
                       borderBottom: '1px solid #f0f0f0'
                     }
-                  }}
+                  }}                 
                   hoverable
                 >
-                  <div style={{ 
-                    textAlign: 'center', 
-                    marginBottom: '12px',
-                    padding: '6px'
-                  }}>
+                  <div className={styles.bookImageContainer}>
                     <Link to={`/books/${book.id}`}>
                       <img 
                         src={book.coverImage} 
                         alt={book.name} 
-                        style={{ 
-                          width: '120px', 
-                          height: '160px', 
-                          objectFit: 'cover',
-                          borderRadius: '8px',
-                          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                          cursor: 'pointer',
-                          transition: 'all 0.3s ease'
-                        }}
+                        className={styles.bookImage}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.transform = 'scale(1.05)';
                           e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.25)';
@@ -399,70 +342,28 @@ export default function Books() {
                       />
                     </Link>
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '0 6px' }}>
-                    <div style={{ 
-                      flex: 1, 
-                      display: 'flex', 
-                      flexDirection: 'column', 
-                      gap: '6px',
-                      padding: '0 6px',
-                      marginBottom: '4px'
-                    }}>
-                      <div style={{ 
-                          textAlign: 'center', 
-                          fontSize: '12px', 
-                          color: '#666',
-                          padding: '6px',
-                          backgroundColor: '#f8f9fa',
-                          borderRadius: '6px'
-                      }}>
-                        <div style={{ marginBottom: '3px' }}>
-                          <strong style={{ color: '#1890ff' }}>Category:</strong> {book.category}
+                  <div className={styles.bookContent}>
+                    <div className={styles.bookDetails}>
+                      <div className={styles.bookInfo}>
+                        <div className={styles.bookCategory}>
+                          <strong className={styles.bookCategoryLabel}>Category:</strong> {book.category}
                         </div>
-                        <div>
-                          <strong style={{ color: '#1890ff' }}>Author:</strong> {book.author}
+                        <div className={styles.bookAuthor}>
+                          <strong className={styles.bookAuthorLabel}>Author:</strong> {book.author}
                         </div>
                       </div>
-                      <div style={{ 
-                          textAlign: 'center',
-                          padding: '6px',
-                          backgroundColor: '#e6f7ff',
-                          borderRadius: '6px',
-                          border: '1px solid #91d5ff'
-                      }}>
-                        <strong style={{ color: '#1890ff', fontSize: '13px' }}>
+                      <div className={styles.bookStatus}>
+                        <strong className={styles.bookQuantity}>
                           Available: {book.status.available} (Total: {book.num})
                         </strong>
                       </div>
                     </div>
                   </div>
-                  <div style={{ 
-                      padding: '4px 6px 6px 6px',
-                      borderTop: '1px solid #f0f0f0'
-                  }}>
+                  <div className={styles.bookActions}>
                       <Button 
                        type="primary"
                        size="middle"
-                       style={{
-                         width: '100%',
-                         height: '36px',
-                         borderRadius: '8px',
-                         fontSize: '13px',
-                         fontWeight: '600',
-                         background: book.status.available > 0 
-                           ? 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)'
-                           : 'linear-gradient(135deg, #d9d9d9 0%, #bfbfbf 100%)',
-                         border: 'none',
-                         boxShadow: book.status.available > 0 
-                           ? '0 4px 12px rgba(24, 144, 255, 0.3)'
-                           : '0 4px 12px rgba(0, 0, 0, 0.1)',
-                         transition: 'all 0.3s ease',
-                         display: 'flex',
-                         alignItems: 'center',
-                         justifyContent: 'center',
-                         gap: '6px',
-                         cursor: book.status.available > 0 ? 'pointer' : 'not-allowed'
-                       }}
+                       className={`${styles.bookButton} ${book.status.available > 0 ? styles.bookButtonAvailable : styles.bookButtonDisabled}`}
                        onClick={() => book.status.available > 0 && handleOpenLoansModal(book)}
                        disabled={isSubmitting || book.status.available <= 0}
                        onMouseEnter={(e) => {
@@ -487,12 +388,7 @@ export default function Books() {
           />
           
           {/* Pagination */}
-          <div style={{ 
-            marginTop: '32px', 
-            display: 'flex', 
-            justifyContent: 'center',
-            padding: '16px'
-          }}>
+          <div className={styles.paginationContainer}>
             <Pagination
               current={currentPage}
               total={totalBooks}
@@ -503,22 +399,12 @@ export default function Books() {
                 `${range[0]}-${range[1]} of ${total} items`
               }
               onChange={handlePageChange}
-              style={{ 
-                backgroundColor: 'white',
-                padding: '16px',
-                borderRadius: '8px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-              }}
+              className={styles.paginationComponent}
             />
           </div>
         </>
       ) : (
-        <div style={{ 
-          textAlign: 'center', 
-          padding: '100px 50px',
-          color: '#666',
-          fontSize: '16px'
-        }}>
+        <div className={styles.emptyState}>
           <p>No books available</p>
         </div>
       )}

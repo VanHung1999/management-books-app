@@ -7,6 +7,7 @@ import { ArrowLeftOutlined, SaveOutlined, BookOutlined, ExclamationCircleOutline
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Book } from "@/app/interface/book";
+import styles from "../../../styles/pages/books/detail/edit/EditBook.module.css";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -101,10 +102,10 @@ export default function EditBook() {
 
   if (isBookLoading) {
     return (
-      <div style={{ padding: '32px', maxWidth: '1000px', margin: '0 auto', backgroundColor: '#fafafa', minHeight: '100vh' }}>
-        <div style={{ textAlign: 'center' }}>
-          <BookOutlined style={{ fontSize: '48px', color: '#d9d9d9' }} />
-          <Title level={3} style={{ color: '#8c8c8c', margin: '16px 0' }}>Loading...</Title>
+      <div className={styles.loadingContainer}>
+        <div className={styles.loadingContent}>
+          <BookOutlined className={styles.loadingIcon} />
+          <Title level={3} className={styles.loadingTitle}>Loading...</Title>
         </div>
       </div>
     );
@@ -112,35 +113,43 @@ export default function EditBook() {
 
   if (!bookData?.data) {
     return (
-      <div style={{ padding: '32px', maxWidth: '1000px', margin: '0 auto', backgroundColor: '#fafafa', minHeight: '100vh' }}>
-        <div style={{ textAlign: 'center' }}>
-          <BookOutlined style={{ fontSize: '48px', color: '#d9d9d9' }} />
-          <Title level={3} style={{ color: '#8c8c8c', margin: '16px 0' }}>Book not found</Title>
-          <Link href="/books"><Button type="primary">Back to books</Button></Link>
+      <div className={styles.errorContainer}>
+        <div className={styles.errorContent}>
+          <BookOutlined className={styles.errorIcon} />
+          <Title level={3} className={styles.errorTitle}>Book not found</Title>
+          <Link href="/books"><Button type="primary" className={styles.errorButton}>Back to books</Button></Link>
         </div>
       </div>
     );
   }
   
   const renderStatusCard = (type: 'available' | 'loaned' | 'disabled' | 'renovated', value: number, label: string) => {
-    const statusColors = {
-      available: { bg: '#f6ffed', border: '#b7eb8f', color: '#52c41a' },
-      loaned: { bg: '#fff7e6', border: '#ffd591', color: '#fa8c16' },
-      disabled: { bg: '#fff2f0', border: '#ffccc7', color: '#ff4d4f' },
-      renovated: { bg: '#f0f8ff', border: '#91d5ff', color: '#1890ff' }
+    const statusClassMap = {
+      available: styles.statusCardAvailable,
+      loaned: styles.statusCardLoaned,
+      disabled: styles.statusCardDisabled,
+      renovated: styles.statusCardRenovated
+    };
+    
+    const numberClassMap = {
+      available: styles.statusNumberAvailable,
+      loaned: styles.statusNumberLoaned,
+      disabled: styles.statusNumberDisabled,
+      renovated: styles.statusNumberRenovated
+    };
+    
+    const labelClassMap = {
+      available: styles.statusLabelAvailable,
+      loaned: styles.statusLabelLoaned,
+      disabled: styles.statusLabelDisabled,
+      renovated: styles.statusLabelRenovated
     };
     
     return (
       <Col xs={12} sm={6}>
-        <div style={{ 
-          textAlign: 'center', 
-          padding: '16px', 
-          borderRadius: '8px',
-          backgroundColor: statusColors[type].bg,
-          border: `1px solid ${statusColors[type].border}` 
-        }}>
-          <div style={{ fontSize: '24px', fontWeight: 'bold', color: statusColors[type].color }}>{value}</div>
-          <Text style={{ color: statusColors[type].color }}>{label}</Text>
+        <div className={`${styles.statusCard} ${statusClassMap[type]}`}>
+          <div className={`${styles.statusNumber} ${numberClassMap[type]}`}>{value}</div>
+          <Text className={`${styles.statusLabel} ${labelClassMap[type]}`}>{label}</Text>
         </div>
       </Col>
     );
@@ -150,7 +159,7 @@ export default function EditBook() {
     <Col xs={12} sm={6}>
       <Form.Item label={label} name={name} rules={[{ required: true, message: 'Required!' }, { type: 'number', min: 0, message: 'Must be >= 0!' }]}>
         <InputNumber
-          style={{ width: '100%' }}
+          className={styles.inputField}
           min={0}
           max={max}
           placeholder={label}
@@ -161,44 +170,44 @@ export default function EditBook() {
   );
 
   return (
-    <div style={{ backgroundColor: '#fafafa', minHeight: '100vh', padding: '0' }}>
-      <div style={{ backgroundColor: 'white', borderBottom: '1px solid #f0f0f0', padding: '24px 0', marginBottom: '32px' }}>
-        <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 32px' }}>
+    <div className={styles.mainContainer}>
+      <div className={styles.headerSection}>
+        <div className={styles.headerContent}>
           <Link href={`/books/${id}`}>
-            <Button type="text" icon={<ArrowLeftOutlined />} style={{ fontSize: '16px', height: 'auto', padding: '12px 20px', color: '#1890ff', borderRadius: '8px', transition: 'all 0.3s ease' }}>
+            <Button type="text" icon={<ArrowLeftOutlined />} className={styles.backButton}>
               Back to book detail
             </Button>
           </Link>
         </div>
       </div>
 
-      <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 32px 32px 32px' }}>
+      <div className={styles.mainContent}>
         {/* Book Info Card */}
-        <Card style={{ borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', marginBottom: '24px', border: 'none' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px' }}>
-            <BookOutlined style={{ fontSize: '24px', color: '#1890ff' }} />
+        <Card className={styles.bookInfoCard}>
+          <div className={styles.bookInfoHeader}>
+            <BookOutlined className={styles.bookInfoIcon} />
             <div>
-              <Title level={3} style={{ margin: '0 0 8px 0', color: '#1f1f1f' }}>{stateBookData?.name}</Title>
-              <Text style={{ color: '#8c8c8c' }}>Author: {stateBookData?.author} • Category: {stateBookData?.category}</Text>
+              <Title level={3} className={styles.bookInfoTitle}>{stateBookData?.name}</Title>
+              <Text className={styles.bookInfoSubtitle}>Author: {stateBookData?.author} • Category: {stateBookData?.category}</Text>
             </div>
           </div>
         </Card>
 
         {/* Status Management Card */}
         <Card 
-          title={<div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '18px', fontWeight: '600', color: '#1f1f1f' }}>
-            <BookOutlined style={{ color: '#1890ff' }} />Book Status Management
+          title={<div className={styles.cardTitle}>
+            <BookOutlined className={styles.cardTitleIcon} />Book Status Management
           </div>}
-          style={{ borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', marginBottom: '24px', border: 'none' }}
+          className={styles.statusManagementCard}
         >
-          <div style={{ marginBottom: '20px' }}>
-            <Text strong style={{ fontSize: '16px', color: '#1f1f1f' }}>
+          <div className={styles.statusInfo}>
+            <Text strong className={styles.statusInfoText}>
               Total Copies (num): {stateBookData?.num} • Current Total: {currentTotal}
             </Text>
             {currentTotal !== stateBookData?.num && (
-              <div style={{ marginTop: '8px', padding: '8px 12px', backgroundColor: '#fff2f0', border: '1px solid #ffccc7', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <ExclamationCircleOutlined style={{ color: '#ff4d4f' }} />
-                <Text style={{ color: '#ff4d4f', fontSize: '14px' }}>
+              <div className={styles.statusWarning}>
+                <ExclamationCircleOutlined className={styles.statusWarningIcon} />
+                <Text className={styles.statusWarningText}>
                   Warning: Current total ({currentTotal}) doesn't match total copies ({stateBookData?.num})
                 </Text>
               </div>
@@ -207,14 +216,14 @@ export default function EditBook() {
 
           {!isEditingStatus ? (
             <div>
-              <Row gutter={[16, 16]}>
+              <Row gutter={[16, 16]} className={styles.statusCardsContainer}>
                 {renderStatusCard('available', stateBookData?.status?.available || 0, 'Available')}
                 {renderStatusCard('loaned', stateBookData?.status?.loaned || 0, 'Loaned')}
                 {renderStatusCard('disabled', stateBookData?.status?.disabled || 0, 'Disabled')}
                 {renderStatusCard('renovated', stateBookData?.status?.renovated || 0, 'Renovated')}
               </Row>
-              <div style={{ textAlign: 'center', marginTop: '20px' }}>
-                <Button type="primary" onClick={() => setIsEditingStatus(true)} style={{ borderRadius: '8px' }}>
+              <div className={styles.editStatusButtonContainer}>
+                <Button type="primary" onClick={() => setIsEditingStatus(true)} className={styles.editStatusButton}>
                   Edit Status
                 </Button>
               </div>
@@ -224,6 +233,7 @@ export default function EditBook() {
               form={statusForm}
               layout="vertical"
               onFinish={onStatusFinish}
+              className={styles.statusForm}
               initialValues={{
                 available: stateBookData?.status?.available || 0,
                 loaned: stateBookData?.status?.loaned || 0,
@@ -231,7 +241,7 @@ export default function EditBook() {
                 renovated: stateBookData?.status?.renovated || 0,
               }}
             >
-              <Row gutter={[16, 16]}>
+              <Row gutter={[16, 16]} className={styles.formRow}>
                 {renderInputField('available', 'Available', stateBookData?.num || 0, (value) => {
                   const currentValues = statusForm.getFieldsValue();
                   updateCurrentTotal(value || 0, currentValues.loaned || 0, currentValues.disabled || 0, currentValues.renovated || 0);
@@ -239,7 +249,7 @@ export default function EditBook() {
                  <Col xs={12} sm={6}>
                    <Form.Item label="Loaned" name="loaned">
                      <InputNumber
-                       style={{ width: '100%' }}
+                       className={styles.inputField}
                        value={stateBookData?.status?.loaned || 0}
                        disabled={true}
                        placeholder="Loaned (read-only)"
@@ -256,8 +266,8 @@ export default function EditBook() {
                 })}
               </Row>
 
-                <div style={{ padding: '16px', backgroundColor: '#f6ffed', borderRadius: '8px', border: '1px solid #b7eb8f', marginBottom: '20px' }}>
-                 <Text style={{ color: '#52c41a', fontSize: '14px' }}>
+                <div className={styles.validationInfo}>
+                 <Text className={styles.validationText}>
                    <strong>Validation Rules:</strong><br/>
                    • Total must equal {stateBookData?.num} copies (Current: {currentTotal})<br/>
                    • All values must be &gt;= 0<br/>
@@ -266,8 +276,8 @@ export default function EditBook() {
                  </Text>
                </div>
 
-              <Form.Item style={{ marginBottom: '0', textAlign: 'center' }}>
-                <Space size="middle">
+              <Form.Item className={styles.formActions}>
+                <Space size="middle" className={styles.formActionsSpace}>
                   <Button onClick={() => {
                     setIsEditingStatus(false);
                     statusForm.resetFields();
@@ -275,8 +285,8 @@ export default function EditBook() {
                       const total = stateBookData.status.available + stateBookData.status.loaned + stateBookData.status.disabled + stateBookData.status.renovated;
                       setCurrentTotal(total);
                     }
-                  }}>Cancel</Button>
-                  <Button type="primary" htmlType="submit" loading={isUpdating} style={{ borderRadius: '8px' }}>
+                  }} className={styles.cancelButton}>Cancel</Button>
+                  <Button type="primary" htmlType="submit" loading={isUpdating} className={styles.updateStatusButton}>
                     {isUpdating ? 'Updating...' : 'Update Status'}
                   </Button>
                 </Space>
@@ -287,10 +297,10 @@ export default function EditBook() {
 
         {/* Edit Form Card */}
         <Card 
-          title={<div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '18px', fontWeight: '600', color: '#1f1f1f' }}>
-            <BookOutlined style={{ color: '#1890ff' }} />Edit book description
+          title={<div className={styles.cardTitle}>
+            <BookOutlined className={styles.cardTitleIcon} />Edit book description
           </div>}
-          style={{ borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', marginBottom: '24px', border: 'none' }}
+          className={styles.editFormCard}
         >
           <Form form={form} layout="vertical" onFinish={onFinish} initialValues={{ description: stateBookData?.description || '' }}>
             <Form.Item
@@ -304,11 +314,11 @@ export default function EditBook() {
               <TextArea
                 rows={6}
                 placeholder="Enter book description..."
-                style={{ fontSize: '16px', borderRadius: '8px', resize: 'vertical' }}
+                className={styles.descriptionTextArea}
               />
             </Form.Item>
 
-            <Form.Item style={{ marginBottom: '0', textAlign: 'right' }}>
+            <Form.Item className={styles.updateDescriptionButtonContainer}>
               <Space size="middle">
                 <Button
                   type="primary"
@@ -316,7 +326,7 @@ export default function EditBook() {
                   size="large"
                   icon={<SaveOutlined />}
                   loading={isUpdating}
-                  style={{ height: '44px', padding: '0 24px', fontSize: '16px', borderRadius: '8px', fontWeight: '600' }}
+                  className={styles.updateDescriptionButton}
                 >
                   {isUpdating ? 'Updating...' : 'Update description'}
                 </Button>
@@ -327,9 +337,9 @@ export default function EditBook() {
 
         {/* Current Description Preview */}
         {stateBookData?.description && (
-          <Card title="Current description" style={{ borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', marginBottom: '24px', border: 'none', marginTop: '24px' }}>
-            <div style={{ padding: '16px', backgroundColor: '#f8f9fa', borderRadius: '8px', border: '1px solid #e9ecef' }}>
-              <Text style={{ fontSize: '16px', lineHeight: '1.6', color: '#1f1f1f', whiteSpace: 'pre-wrap' }}>
+          <Card title="Current description" className={styles.currentDescriptionCard}>
+            <div className={styles.currentDescriptionContent}>
+              <Text className={styles.currentDescriptionText}>
                 {stateBookData?.description}
               </Text>
             </div>

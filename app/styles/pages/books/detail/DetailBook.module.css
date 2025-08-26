@@ -1,0 +1,484 @@
+/* Detail Book Page Styles */
+
+/* Loading Container */
+.loadingContainer {
+  padding: 32px;
+  max-width: 1400px;
+  margin: 0 auto;
+  background-color: #fafafa;
+  min-height: 100vh;
+}
+
+.loadingSkeleton {
+  height: 700px;
+}
+
+/* Error Container */
+.errorContainer {
+  padding: 48px;
+  text-align: center;
+  max-width: 1400px;
+  margin: 0 auto;
+  background-color: #fafafa;
+  min-height: 100vh;
+}
+
+.errorIcon {
+  font-size: 64px;
+  color: #d9d9d9;
+  margin-bottom: 16px;
+}
+
+.errorTitle {
+  color: #8c8c8c;
+  margin: 16px 0;
+}
+
+.errorText {
+  color: #8c8c8c;
+  font-size: 16px;
+}
+
+.errorButton {
+  margin-top: 16px;
+}
+
+/* Main Container */
+.mainContainer {
+    background-color: #fafafa;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+/* Header Section */
+.headerSection {
+  background-color: white;
+  border-bottom: 1px solid #f0f0f0;
+  padding: 24px 0;
+  margin-bottom: 32px;
+}
+
+.headerContent {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+.backButton {
+  font-size: 16px;
+  height: auto;
+  padding: 12px 20px;
+  color: #1890ff;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.backButton:hover {
+  background-color: rgba(24, 144, 255, 0.1) !important;
+  transform: translateX(-4px);
+}
+
+/* Main Content */
+.mainContent {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 32px 32px 32px;
+}
+
+/* Main Book Card */
+.mainBookCard {
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  margin-bottom: 32px;
+  border: none;
+  overflow: hidden;
+}
+
+.mainBookCardBody {
+  padding: 0;
+}
+
+/* Book Header */
+.bookHeader {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  padding: 40px 40px 0 40px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.bookCoverContainer {
+  text-align: center;
+}
+
+.bookCoverWrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.bookCover {
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.3);
+  object-fit: cover;
+  transition: transform 0.3s ease;
+  display: block;
+}
+
+.bookCoverContainer img {
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.3);
+  object-fit: cover;
+  transition: transform 0.3s ease;
+  display: block;
+}
+
+.bookCover:hover {
+  transform: translateY(-8px);
+}
+
+.bookBadge {
+  background-color: #52c41a;
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.bookDetails {
+  margin-bottom: 32px;
+}
+
+.bookTitle {
+  margin: 0 0 20px 0;
+  color: white !important;
+  font-size: 36px;
+  line-height: 1.2;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.bookTitle.ant-typography {
+  color: white !important;
+}
+
+.bookTags {
+  margin-bottom: 24px;
+}
+
+.bookTag {
+  font-size: 14px !important;
+  padding: 8px 16px !important;
+  border-radius: 20px !important;
+  border: none !important;
+  background-color: rgba(255,255,255,0.2) !important;
+  color: white !important;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.bookTag:hover {
+  background-color: rgba(255,255,255,0.3) !important;
+  transform: translateY(-2px);
+}
+
+.bookTag .anticon {
+  color: white !important;
+}
+
+/* Override Ant Design Tag styles */
+.bookTag.ant-tag {
+  color: white !important;
+  background-color: rgba(255,255,255,0.2) !important;
+  border-color: rgba(255,255,255,0.3) !important;
+}
+
+.bookTag.ant-tag:hover {
+  background-color: rgba(255,255,255,0.3) !important;
+  border-color: rgba(255,255,255,0.5) !important;
+}
+
+.bookDescription {
+  font-size: 16px;
+  line-height: 1.7;
+  color: rgba(255,255,255,0.9) !important;
+  margin-bottom: 0;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.bookDescription.ant-typography {
+  color: rgba(255,255,255,0.9) !important;
+}
+
+/* Book Status Section */
+.bookStatusSection {
+  padding: 40px;
+}
+
+.statusTitle {
+  margin: 0 0 24px 0;
+  color: #1f1f1f;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.statusCard {
+  text-align: center;
+  border-radius: 12px;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.statusCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2) !important;
+}
+
+.statusCardAvailable {
+  background-color: #f6ffed;
+  border-color: #b7eb8f;
+  box-shadow: 0 4px 12px rgba(82, 196, 26, 0.15);
+}
+
+.statusCardLoaned {
+  background-color: #fff7e6;
+  border-color: #ffd591;
+  box-shadow: 0 4px 12px rgba(255, 213, 145, 0.15);
+}
+
+.statusCardDisabled {
+  background-color: #fff2f0;
+  border-color: #ffccc7;
+  box-shadow: 0 4px 12px rgba(255, 204, 203, 0.15);
+}
+
+.statusCardRenovated {
+  background-color: #f0f8ff;
+  border-color: #91d5ff;
+  box-shadow: 0 4px 12px rgba(145, 213, 255, 0.15);
+}
+
+.statusNumber {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.statusNumberAvailable {
+  color: #52c41a;
+}
+
+.statusNumberLoaned {
+  color: #fa8c16;
+}
+
+.statusNumberDisabled {
+  color: #ff4d4f;
+}
+
+.statusNumberRenovated {
+  color: #1890ff;
+}
+
+.statusLabel {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.statusLabelAvailable {
+  color: #52c41a;
+}
+
+.statusLabelLoaned {
+  color: #fa8c16;
+}
+
+.statusLabelDisabled {
+  color: #ff4d4f;
+}
+
+.statusLabelRenovated {
+  color: #1890ff;
+}
+
+/* Additional Information Card */
+.additionalInfoCard {
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  border: none;
+  margin-bottom: 32px;
+}
+
+.additionalInfoCardBody {
+  padding: 32px;
+}
+
+.cardTitle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f1f1f;
+}
+
+.cardTitleIcon {
+  background-color: #1890ff;
+  color: white;
+}
+
+.infoItem {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.infoItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  border-color: #1890ff;
+}
+
+.infoItemIcon {
+  font-size: 18px;
+}
+
+.infoItemIconPrimary {
+  background-color: #1890ff;
+  color: white;
+}
+
+.infoItemIconSuccess {
+  background-color: #52c41a;
+  color: white;
+}
+
+.infoItemLabel {
+  font-size: 14px;
+  color: #8c8c8c;
+}
+
+.infoItemValue {
+  font-size: 16px;
+  color: #1f1f1f;
+}
+
+.divider {
+  margin: 32px 0;
+}
+
+/* Action Section */
+.actionSection {
+  text-align: center;
+  padding: 40px;
+  background-color: white;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+}
+
+.actionTitle {
+  margin: 0 0 24px 0;
+  color: #1f1f1f;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.actionButton {
+  height: 52px;
+  padding: 0 36px;
+  font-size: 16px;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.actionButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2) !important;
+}
+
+.loanButton {
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  border: none;
+  box-shadow: 0 4px 12px rgba(82, 196, 26, 0.3);
+}
+
+.loanButtonDisabled {
+  background: #d9d9d9;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.editButton {
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+}
+
+.backToListButton {
+  border: 2px solid #d9d9d9;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .mainContent {
+    padding: 0 16px 16px 16px;
+  }
+  
+  .bookHeader {
+    padding: 24px 24px 0 24px;
+  }
+  
+  .bookTitle {
+    font-size: 28px;
+  }
+  
+  .bookStatusSection {
+    padding: 24px;
+  }
+  
+  .additionalInfoCardBody {
+    padding: 24px;
+  }
+  
+  .actionSection {
+    padding: 24px;
+  }
+  
+  .actionButton {
+    height: 48px;
+    padding: 0 24px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .bookTitle {
+    font-size: 24px;
+  }
+  
+  .bookHeader {
+    padding: 20px 20px 0 20px;
+  }
+  
+  .bookStatusSection {
+    padding: 20px;
+  }
+  
+  .additionalInfoCardBody {
+    padding: 20px;
+  }
+  
+  .actionSection {
+    padding: 20px;
+  }
+}
