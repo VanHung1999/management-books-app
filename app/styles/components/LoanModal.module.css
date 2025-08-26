@@ -1,0 +1,693 @@
+/* Loan Modal Component Styles */
+.loanModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--spacing-lg);
+  animation: fadeIn var(--transition-fast) ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.loanModalContent {
+  background: var(--background-white);
+  border-radius: var(--border-radius-xl);
+  box-shadow: var(--shadow-xl);
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow: hidden;
+  animation: slideUp var(--transition-normal) ease-out;
+  border: 1px solid var(--border-light);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.loanModalHeader {
+  background: var(--gradient-primary);
+  color: white;
+  padding: var(--spacing-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.loanModalHeader::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 50%, rgba(255,255,255,0.1) 100%);
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% { transform: translateX(-100%); }
+  50% { transform: translateX(100%); }
+}
+
+.loanModalTitle {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  margin: 0;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.loanModalTitleIcon {
+  font-size: var(--font-size-lg);
+}
+
+.loanModalSubtitle {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: var(--font-size-sm);
+  margin: var(--spacing-xs) 0 0 0;
+  position: relative;
+  z-index: 1;
+}
+
+.closeButton {
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  backdrop-filter: blur(10px);
+}
+
+.closeButton:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.closeButtonIcon {
+  font-size: var(--font-size-md);
+}
+
+.loanModalBody {
+  padding: var(--spacing-xl);
+  overflow-y: auto;
+  max-height: calc(90vh - 120px);
+}
+
+.bookInfo {
+  background: var(--background-light);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  border: 1px solid var(--border-light);
+}
+
+.bookInfoHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.bookCover {
+  width: 60px;
+  height: 80px;
+  background: var(--gradient-primary);
+  border-radius: var(--border-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.bookCoverPlaceholder {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--border-radius-md);
+}
+
+.bookDetails {
+  flex: 1;
+  min-width: 0;
+}
+
+.bookTitle {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-xs);
+  line-height: 1.3;
+}
+
+.bookAuthor {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--spacing-xs);
+  font-style: italic;
+}
+
+.bookCategory {
+  display: inline-block;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: rgba(24, 144, 255, 0.1);
+  color: var(--primary-color);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+}
+
+.bookStats {
+  display: flex;
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--border-light);
+}
+
+.bookStat {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.bookStatIcon {
+  color: var(--primary-color);
+}
+
+.loanForm {
+  margin-bottom: var(--spacing-lg);
+}
+
+.formGroup {
+  margin-bottom: var(--spacing-lg);
+}
+
+.formLabel {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.formInput {
+  width: 100%;
+  height: 48px;
+  padding: 0 var(--spacing-md);
+  border: 2px solid var(--border-light);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-md);
+  transition: all var(--transition-fast);
+  background: var(--background-white);
+}
+
+.formInput:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.1);
+}
+
+.formInput:hover {
+  border-color: var(--primary-color);
+}
+
+.formInput.error {
+  border-color: var(--error-color);
+  box-shadow: 0 0 0 3px rgba(255, 77, 79, 0.1);
+}
+
+.formError {
+  color: var(--error-color);
+  font-size: var(--font-size-sm);
+  margin-top: var(--spacing-xs);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.formErrorIcon {
+  font-size: var(--font-size-sm);
+}
+
+.quantitySelector {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  background: var(--background-light);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-md);
+  border: 1px solid var(--border-light);
+}
+
+.quantityButton {
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--border-color);
+  background: var(--background-white);
+  color: var(--text-primary);
+  border-radius: var(--border-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+}
+
+.quantityButton:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  transform: scale(1.05);
+}
+
+.quantityButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.quantityButton:disabled:hover {
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.quantityDisplay {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  min-width: 60px;
+  text-align: center;
+}
+
+.quantityInfo {
+  flex: 1;
+  text-align: center;
+}
+
+.quantityLabel {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.quantityAvailable {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--success-color);
+}
+
+.loanModalFooter {
+  padding: var(--spacing-lg);
+  background: var(--background-light);
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: flex-end;
+}
+
+.cancelButton {
+  height: 44px;
+  padding: 0 var(--spacing-lg);
+  border: 2px solid var(--border-color);
+  background: var(--background-white);
+  color: var(--text-primary);
+  border-radius: var(--border-radius-md);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.cancelButton:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.confirmButton {
+  height: 44px;
+  padding: 0 var(--spacing-lg);
+  background: var(--gradient-primary);
+  border: none;
+  color: white;
+  border-radius: var(--border-radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.confirmButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left var(--transition-slow);
+}
+
+.confirmButton:hover::before {
+  left: 100%;
+}
+
+.confirmButton:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.confirmButton:active {
+  transform: translateY(0);
+}
+
+.confirmButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.confirmButton:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.confirmButton:disabled::before {
+  display: none;
+}
+
+/* Loading States */
+.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.loadingSpinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s ease-in-out infinite;
+  margin-right: var(--spacing-sm);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .loanModal {
+    padding: var(--spacing-md);
+  }
+  
+  .loanModalContent {
+    max-width: 100%;
+    max-height: 95vh;
+  }
+  
+  .loanModalHeader {
+    padding: var(--spacing-md);
+  }
+  
+  .loanModalTitle {
+    font-size: var(--font-size-lg);
+  }
+  
+  .loanModalSubtitle {
+    font-size: var(--font-size-xs);
+  }
+  
+  .loanModalBody {
+    padding: var(--spacing-lg);
+    max-height: calc(95vh - 100px);
+  }
+  
+  .bookInfo {
+    padding: var(--spacing-md);
+  }
+  
+  .bookInfoHeader {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--spacing-sm);
+  }
+  
+  .bookStats {
+    justify-content: center;
+    gap: var(--spacing-md);
+  }
+  
+  .quantitySelector {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+  
+  .loanModalFooter {
+    padding: var(--spacing-md);
+    flex-direction: column;
+  }
+  
+  .cancelButton,
+  .confirmButton {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .loanModal {
+    padding: var(--spacing-sm);
+  }
+  
+  .loanModalHeader {
+    padding: var(--spacing-sm);
+  }
+  
+  .loanModalTitle {
+    font-size: var(--font-size-md);
+  }
+  
+  .loanModalSubtitle {
+    font-size: var(--font-size-xs);
+  }
+  
+  .loanModalBody {
+    padding: var(--spacing-md);
+  }
+  
+  .bookInfo {
+    padding: var(--spacing-sm);
+  }
+  
+  .bookCover {
+    width: 50px;
+    height: 70px;
+    font-size: var(--font-size-md);
+  }
+  
+  .bookTitle {
+    font-size: var(--font-size-md);
+  }
+  
+  .bookAuthor {
+    font-size: var(--font-size-xs);
+  }
+  
+  .formInput {
+    height: 44px;
+    font-size: var(--font-size-sm);
+  }
+  
+  .quantityButton {
+    width: 36px;
+    height: 36px;
+    font-size: var(--font-size-md);
+  }
+  
+  .quantityDisplay {
+    font-size: var(--font-size-lg);
+  }
+  
+  .cancelButton,
+  .confirmButton {
+    height: 44px;
+    font-size: var(--font-size-sm);
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .loanModalContent {
+    background: #2a2a2a;
+    border-color: #333;
+  }
+  
+  .bookInfo {
+    background: #333;
+    border-color: #444;
+  }
+  
+  .formInput {
+    background: #333;
+    border-color: #444;
+    color: white;
+  }
+  
+  .formInput:focus,
+  .formInput:hover {
+    background: #2a2a2a;
+    border-color: var(--primary-color);
+  }
+  
+  .quantitySelector {
+    background: #333;
+    border-color: #444;
+  }
+  
+  .quantityButton {
+    background: #2a2a2a;
+    border-color: #444;
+    color: white;
+  }
+  
+  .quantityButton:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+  }
+  
+  .loanModalFooter {
+    background: #333;
+    border-top-color: #444;
+  }
+  
+  .cancelButton {
+    background: #2a2a2a;
+    border-color: #444;
+    color: white;
+  }
+  
+  .cancelButton:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .loanModalContent {
+    border-width: 3px;
+  }
+  
+  .formInput {
+    border-width: 3px;
+  }
+  
+  .quantityButton {
+    border-width: 3px;
+  }
+  
+  .cancelButton,
+  .confirmButton {
+    border-width: 3px;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .loanModal,
+  .loanModalContent,
+  .loanModalHeader::before,
+  .confirmButton::before {
+    animation: none;
+  }
+  
+  .confirmButton:hover,
+  .cancelButton:hover,
+  .quantityButton:hover,
+  .formInput:hover {
+    transform: none;
+  }
+}
+
+/* Focus States */
+.closeButton:focus,
+.formInput:focus,
+.quantityButton:focus,
+.cancelButton:focus,
+.confirmButton:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* Print Styles */
+@media print {
+  .loanModal {
+    position: static;
+    background: white;
+    padding: 0;
+  }
+  
+  .loanModalContent {
+    box-shadow: none;
+    border: 1px solid #ccc;
+    background: white;
+  }
+  
+  .loanModalHeader {
+    background: #f0f0f0;
+    color: black;
+  }
+  
+  .closeButton {
+    display: none;
+  }
+  
+  .cancelButton,
+  .confirmButton {
+    background: #f0f0f0;
+    color: black;
+    border: 1px solid #ccc;
+  }
+}
+

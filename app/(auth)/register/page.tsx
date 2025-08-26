@@ -2,7 +2,7 @@
  
 import { Button, Card, Form, Input, message } from "antd";
 import { LockOutlined, MailOutlined, UserOutlined } from "@ant-design/icons";
-import styles from "../login/login.module.css";
+import styles from "../../styles/pages/auth/Register.module.css";
 import { useRouter } from "next/navigation";
 import { useDataProvider, useForm } from "@refinedev/core";
 import Link from "next/link";
@@ -29,18 +29,15 @@ export default function Register() {
   }, [mutation.isSuccess, mutation.isError, mutation.error, router]);
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, flexDirection: "column" }}>
+    <div className={styles.container}>
       <div className={styles.header}>
         <h1 className={styles.title}>Management Books System</h1>
       </div>
       <Card
         title={
-          <div style={{ textAlign: "center", color: "blue", fontWeight: "bold", fontSize: "24px" }}>Register</div>
+          <div className={styles.cardTitle}>Register</div>
         }
-        style={{ width: 420, marginTop: 16, textAlign: "center",
-                 border: "2px solid rgb(77, 119, 255)",
-                 boxShadow: "0 0 10px rgba(77, 119, 255, 0.5)",
-        }}
+        className={styles.registerCard}
       >
       <Form
         form={form}
@@ -49,7 +46,7 @@ export default function Register() {
         onFinish={onFinish}
         autoComplete="off"
         disabled={mutation.isPending}
-        className={styles.loginForm}
+        className={styles.registerForm}
       >
         <Form.Item
           label="Email"
@@ -151,7 +148,7 @@ export default function Register() {
           <Button
             type="primary"
             htmlType="submit"
-            className={styles.loginButton}
+            className={styles.registerButton}
             size="large"
             block
             loading={mutation.isPending}
@@ -160,7 +157,7 @@ export default function Register() {
           </Button>
         </Form.Item>
         </Form>
-        <div className={styles.actionsContainer} style={{ width: "100%" }}>
+        <div className={styles.actionsContainer}>
           <Link className={styles.link} href="/login">Back to Login</Link>
           <Link className={styles.link} href="/forgot-password">Forgot password</Link>
         </div>

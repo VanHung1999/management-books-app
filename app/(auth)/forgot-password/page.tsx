@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useDataProvider, useUpdate} from "@refinedev/core";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import styles from "../login/login.module.css";
+import styles from "../../styles/pages/auth/ForgotPassword.module.css";
 import { User } from "@/app/interface/user";
 
 export default function ForgotPassword() {
@@ -65,34 +65,26 @@ export default function ForgotPassword() {
     }, [status, router]);
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", 
-                  justifyContent: "center", padding: 24, flexDirection: "column",
-                  borderRadius: "10px",
-
-                  margin: "20px",
-    }}>
+    <div className={styles.container}>
       <div className={styles.header}>
         <h1 className={styles.title}>Management Books System</h1>
       </div>
       <Card
         title={
           status === "enterEmail"
-            ? <div style={{ textAlign: "center", color: "blue", fontWeight: "bold", fontSize: "24px" }}>Forgot Password</div>
+            ? <div className={`${styles.cardTitle} ${styles.cardTitleEnterEmail}`}>Forgot Password</div>
             : status === "verifyOtp"
-            ? <div style={{ textAlign: "center", color: "red", fontWeight: "bold", fontSize: "24px" }}>Verify OTP</div>
-            : <div style={{ textAlign: "center", color: "green", fontWeight: "bold", fontSize: "24px" }}>Success</div>
+            ? <div className={`${styles.cardTitle} ${styles.cardTitleVerifyOtp}`}>Verify OTP</div>
+            : <div className={`${styles.cardTitle} ${styles.cardTitleSuccess}`}>Success</div>
         }
-        style={{ width: 420, marginTop: 16, textAlign: "center",
-          border: "2px solid rgb(77, 119, 255)",
-          boxShadow: "0 0 10px rgba(77, 119, 255, 0.5)",
-        }}
+        className={styles.forgotPasswordCard}
       >
         {alert && (
-          <Alert showIcon type={alert.type} message={alert.text} style={{ marginBottom: 16 }} />
+          <Alert showIcon type={alert.type} message={alert.text} className={styles.alert} />
         )}
 
         {status === "enterEmail" && (
-          <Form form={form} onFinish={onSubmitEmail} layout="vertical">
+          <Form form={form} onFinish={onSubmitEmail} layout="vertical" className={styles.form}>
             <Form.Item
               name="email"
               label="Email"
@@ -101,10 +93,10 @@ export default function ForgotPassword() {
                 { type: "email", message: "Please enter a valid email" },
               ]}
             >
-              <Input placeholder="Enter your email" />
+              <Input placeholder="Enter your email" className={styles.input} />
             </Form.Item>
             <Form.Item>
-              <Button type="primary" htmlType="submit" block>
+              <Button type="primary" htmlType="submit" block className={styles.submitButton}>
                 Send OTP
               </Button>
             </Form.Item>
@@ -112,15 +104,15 @@ export default function ForgotPassword() {
         )}
 
         {status === "verifyOtp" && (
-          <Form form={oTpform} layout="vertical" onFinish={onSubmitOtp} autoComplete="off">
+          <Form form={oTpform} layout="vertical" onFinish={onSubmitOtp} autoComplete="off" className={styles.form}>
             <Form.Item label="Email" hidden>
-              <Input value={email} disabled />
+              <Input value={email} disabled className={styles.input} />
             </Form.Item>
             <Form.Item name="otp" label="OTP" rules={[{ required: true, message: "Please enter your OTP" }]}>
-              <Input placeholder="Enter your OTP" maxLength={6} />
+              <Input placeholder="Enter your OTP" maxLength={6} className={styles.input} />
             </Form.Item>
             <Form.Item>
-              <Button type="primary" htmlType="submit" block>
+              <Button type="primary" htmlType="submit" block className={styles.submitButton}>
                 Verify & Reset Password
               </Button>
             </Form.Item>
@@ -129,13 +121,13 @@ export default function ForgotPassword() {
 
         {status === "done" && (
           <div>
-            <h3 style={{ marginBottom: 8 }}>Password reset successful</h3>
-            <p>Your password has been reset to 12345678. Please log in with the new password.</p>
+            <h3 className={styles.successMessage}>Password reset successful</h3>
+            <p className={styles.successText}>Your password has been reset to 12345678. Please log in with the new password.</p>
             <p>Redirecting to login page...</p>
           </div>
         )}
 
-        <div className={styles.actionsContainer} style={{ width: "100%" }}>
+        <div className={styles.actionsContainer}>
           <Link className={styles.link} href="/login">Back to login</Link>
           <Link className={styles.link} href="/register">Create account</Link>
         </div>

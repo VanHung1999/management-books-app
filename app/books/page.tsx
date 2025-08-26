@@ -6,6 +6,7 @@ import { Card, List, Skeleton, Pagination, Select, Button, message } from "antd"
 import { getCategories } from "../database/categoryDatabase";
 import LoanModal from "../components/LoanModal";
 import { useLoanModal } from "../hooks/useLoanModal";
+import styles from "../styles/pages/Books.module.css";
 
 export default function Books() {
 
@@ -34,7 +35,7 @@ export default function Books() {
   } = useLoanModal();
 
   // Filter books by category and search query
-  const filteredBooks = data?.data?.filter(book => {
+  const filteredBooks = data?.data?.filter(book => {  
     const matchesCategory = selectedCategory === "all" || book.category === selectedCategory;
     
     let matchesSearch = true;
@@ -103,28 +104,22 @@ export default function Books() {
   
   if (isLoading) {
     return (
-      <div style={{ 
-        minHeight: "100vh", 
-        padding: "24px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "16px"
-      }}>
-        <Skeleton.Input active size="large" style={{ width: "200px", height: "32px" }} />
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "16px" }}>
+      <div className={styles.loadingContainer}>
+        <Skeleton.Input active size="large" className={styles.loadingTitle} />
+        <div className={styles.loadingGrid}>
           {[...Array(12)].map((_, index) => (
             <Skeleton key={index} active>
-              <div style={{ height: "480px", padding: "16px" }}>
-                <Skeleton.Input active size="large" style={{ width: "80%", height: "24px", marginBottom: "16px" }} />
-                <Skeleton.Image active style={{ width: "120px", height: "160px", margin: "0 auto 12px" }} />
-                <div style={{ padding: '0 8px' }}>
-                  <Skeleton.Input active size="small" style={{ width: "70%", height: "12px", marginBottom: "4px" }} />
-                  <Skeleton.Input active size="small" style={{ width: "65%", height: "12px", marginBottom: "8px" }} />
-                  <Skeleton.Input active size="small" style={{ width: "60%", height: "16px", marginBottom: "8px" }} />
-                  <Skeleton.Input active size="small" style={{ width: "40%", height: "12px", marginBottom: "4px" }} />
-                  <Skeleton.Input active size="small" style={{ width: "50%", height: "12px", marginBottom: "4px" }} />
-                  <Skeleton.Input active size="small" style={{ width: "45%", height: "12px", marginBottom: "4px" }} />
-                  <Skeleton.Input active size="small" style={{ width: "55%", height: "12px" }} />
+              <div className={styles.loadingCard}>
+                <Skeleton.Input active size="large" className={styles.loadingCardTitle} />
+                <Skeleton.Image active className={styles.loadingCardImage} />
+                <div className={styles.loadingCardContent}>
+                  <Skeleton.Input active size="small" className={styles.loadingCardTextSmall} />
+                  <Skeleton.Input active size="small" className={styles.loadingCardTextMedium} />
+                  <Skeleton.Input active size="small" className={styles.loadingCardTextLarge} />
+                  <Skeleton.Input active size="small" className={styles.loadingCardTextXSmall} />
+                  <Skeleton.Input active size="small" className={styles.loadingCardTextHalf} />
+                  <Skeleton.Input active size="small" className={styles.loadingCardTextHalf2} />
+                  <Skeleton.Input active size="small" className={styles.loadingCardTextHalf3} />
                 </div>
               </div>
             </Skeleton>
@@ -135,74 +130,31 @@ export default function Books() {
   }
 
   return (
-    <div style={{ padding: '24px' }}>
+    <div className={styles.container}>
       {/* Enhanced Filters and Tools Section */}
-      <div style={{ 
-        marginBottom: '32px',
-        padding: '24px',
-        backgroundColor: '#fafafa',
-        borderRadius: '16px',
-        border: '1px solid #e8e8e8',
-        boxShadow: '0 2px 12px rgba(0,0,0,0.08)'
-      }}>
+      <div className={styles.filtersSection}>
         {/* Header */}
-        <div style={{ 
-          marginBottom: '24px',
-          textAlign: 'center'
-        }}>
-          <h2 style={{ 
-            margin: '0 0 8px 0',
-            fontSize: '24px',
-            fontWeight: '700',
-            color: '#262626',
-            letterSpacing: '0.5px'
-          }}>
+        <div className={styles.filtersHeader}>
+          <h2 className={styles.filtersTitle}>
             📚 Book Management Tools
           </h2>
-          <p style={{ 
-            margin: '0',
-            fontSize: '14px',
-            color: '#8c8c8c',
-            fontStyle: 'italic'
-          }}>
+          <p className={styles.filtersSubtitle}>
             Search, filter, and organize your book collection
           </p>
         </div>
 
         {/* Main Tools Grid */}
-        <div style={{ 
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-          gap: '20px',
-          marginBottom: '24px'
-        }}>
+        <div className={styles.filtersRow}>
           {/* Search Section */}
-          <div style={{ 
-            padding: '20px',
-            backgroundColor: 'linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%)',
-            borderRadius: '12px',
-            border: '2px solid #b7eb8f',
-            boxShadow: '0 4px 16px rgba(82, 196, 26, 0.15)',
-            transition: 'all 0.3s ease'
-          }}>
-            <div style={{ 
-              display: 'flex',
-              alignItems: 'center',
-              marginBottom: '16px',
-              gap: '8px'
-            }}>
-              <span style={{ fontSize: '20px' }}>🔍</span>
-              <h3 style={{ 
-                margin: '0',
-                fontSize: '18px',
-                fontWeight: '600',
-                color: '#52c41a'
-              }}>
+          <div className={styles.filtersColumnSearchToolsContainer}>
+            <div className={styles.filterColumnHeader}>
+              <span className={styles.searchIcon}>🔍</span>
+              <h3 className={styles.searchTitle}>
                 Search Books
               </h3>
             </div>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div className={styles.filtesColumnSelectBoxContainer}>
               <Select
                 value={searchType}
                 onChange={handleSearchTypeChange}
@@ -226,14 +178,8 @@ export default function Books() {
                   "Search by book name or author..."
                 }
                 disabled={searchType === "none"}
+                className={styles.searchInput}
                 style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  border: '2px solid #d9d9d9',
-                  borderRadius: '8px',
-                  fontSize: '14px',
-                  outline: 'none',
-                  transition: 'all 0.3s ease',
                   opacity: searchType === "none" ? 0.6 : 1,
                   backgroundColor: searchType === "none" ? '#f5f5f5' : 'white'
                 }}
@@ -252,27 +198,10 @@ export default function Books() {
           </div>
 
           {/* Sort Section */}
-          <div style={{ 
-            padding: '20px',
-            background: 'linear-gradient(135deg, #fff7e6 0%, #ffe7ba 100%)',
-            borderRadius: '12px',
-            border: '2px solid #ffd591',
-            boxShadow: '0 4px 16px rgba(250, 140, 22, 0.15)',
-            transition: 'all 0.3s ease'
-          }}>
-            <div style={{ 
-              display: 'flex',
-              alignItems: 'center',
-              marginBottom: '16px',
-              gap: '8px'
-            }}>
-              <span style={{ fontSize: '20px' }}>📊</span>
-              <h3 style={{ 
-                margin: '0',
-                fontSize: '18px',
-                fontWeight: '600',
-                color: '#fa8c16'
-              }}>
+          <div className={styles.filtesColumnSortContainer}>
+            <div className={styles.filterColumnHeader}>
+              <span className={styles.sortIcon}>📊</span>
+              <h3 className={styles.sortTitle}>
                 Sort by Name
               </h3>
             </div>
@@ -284,34 +213,17 @@ export default function Books() {
                 { value: "asc", label: "⬆️ A → Z (Ascending)" },
                 { value: "desc", label: "⬇️ Z → A (Descending)" }
               ]}
-              style={{ width: '100%' }}
+              className={styles.sortSelect}
               placeholder="Select sort order"
               size="large"
             />
           </div>
 
           {/* Category Filter Section */}
-          <div style={{ 
-            padding: '20px',
-            background: 'linear-gradient(135deg, #f0f8ff 0%, #d6e4ff 100%)',
-            borderRadius: '12px',
-            border: '2px solid #91d5ff',
-            boxShadow: '0 4px 16px rgba(24, 144, 255, 0.15)',
-            transition: 'all 0.3s ease'
-          }}>
-            <div style={{ 
-              display: 'flex',
-              alignItems: 'center',
-              marginBottom: '16px',
-              gap: '8px'
-            }}>
-              <span style={{ fontSize: '20px' }}>🏷️</span>
-              <h3 style={{ 
-                margin: '0',
-                fontSize: '18px',
-                fontWeight: '600',
-                color: '#1890ff'
-              }}>
+          <div className={styles.filtesColumnCategoryContainer}>
+            <div className={styles.filterColumnHeader}>
+              <span className={styles.categoryIcon}>🏷️</span>
+              <h3 className={styles.categoryTitle}>
                 Filter by Category
               </h3>
             </div>
@@ -326,7 +238,7 @@ export default function Books() {
                   label: `📚 ${cat}` 
                 }))
               ]}
-              style={{ width: '100%' }}
+              className={styles.categorySelect}
               placeholder="Select category"
               size="large"
             />

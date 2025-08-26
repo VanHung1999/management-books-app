@@ -6,6 +6,7 @@ import { BookOutlined, UserOutlined, SwapOutlined, GiftOutlined, ClockCircleOutl
 import { useRouter } from 'next/navigation';
 import { User } from './interface/user';
 import { Book } from './interface/book';
+import styles from './styles/pages/Home.module.css';
 
 const { Title, Text } = Typography;
 
@@ -51,11 +52,7 @@ export default function Home() {
   };
 
   return (
-    <div style={{ 
-      padding: '24px',
-      minHeight: '100vh',
-      backgroundColor: '#f8fafc'
-    }}>
+    <div className={styles.container}>
       {/* Welcome Section */}
       <div style={{ 
         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -65,54 +62,47 @@ export default function Home() {
         color: 'white',
         textAlign: 'center'
       }}>
-        <Title level={2} style={{ color: 'white', marginBottom: '8px' }}>
+        <Title level={2} className={styles.welcomeTitle}>
           {getGreeting()}, {currentUser?.name || 'User'}! 👋
         </Title>
-        <Text style={{ color: 'rgba(255,255,255,0.9)', fontSize: '16px' }}>
+        <Text className={styles.welcomeText}>
           Welcome to the Book Management System
         </Text>
         {currentUser?.role && (
-          <div style={{ 
-            marginTop: '16px',
-            marginLeft: '16px',
-            background: 'rgba(255,255,255,0.2)',
-            padding: '8px 16px',
-            borderRadius: '20px',
-            display: 'inline-block'
-          }}>
+          <div className={styles.roleBadge}>
             Role: <strong>{currentUser.role.toUpperCase()}</strong>
           </div>
         )}
       </div>
 
       {/* Quick Stats */}
-      <Row gutter={[16, 16]} style={{ marginBottom: '32px' }}>
+      <Row gutter={[16, 16]} className={styles.statsRow}>
         <Col xs={24} sm={12} lg={8}>
-          <Card>
+          <Card className={styles.statCard}>
             <Statistic
               title="Total Titles"
               value={stats.totalTitles}
-              prefix={<BookOutlined style={{ color: '#1890ff' }} />}
+              prefix={<BookOutlined className={styles.statIcon} />}
               valueStyle={{ color: '#1890ff' }}
             />
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={8}>
-          <Card>
+          <Card className={styles.statCard}>
             <Statistic
               title="Total Books"
               value={stats.totalBooks}
-              prefix={<UserOutlined style={{ color: '#52c41a' }} />}
+              prefix={<UserOutlined className={styles.statIcon} />}
               valueStyle={{ color: '#52c41a' }}
             />
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={8}>
-          <Card>
+          <Card className={styles.statCard}>
             <Statistic
               title="Total Users"
               value={stats.totalUsers}
-              prefix={<UserOutlined style={{ color: '#52c41a' }} />}
+              prefix={<UserOutlined className={styles.statIcon} />}
               valueStyle={{ color: '#52c41a' }}
             />
           </Card>
@@ -120,14 +110,14 @@ export default function Home() {
       </Row>
 
       {/* Quick Actions */}
-      <Row gutter={[16, 16]} style={{ marginBottom: '32px' }}>
+      <Row gutter={[16, 16]} className={styles.actionsRow}>
         <Col xs={24} md={12}>
           <Card 
             title="Quick Actions" 
             extra={<ClockCircleOutlined />}
-            style={{ height: '100%' }}
+            className={styles.actionCard}
           >
-            <Space direction="vertical" style={{ width: '100%' }}>
+            <Space direction="vertical" className={styles.actionSpace}>
               <Button 
                 type="primary" 
                 block 
@@ -169,9 +159,9 @@ export default function Home() {
         <Col xs={24} md={12}>
           <Card 
             title="Recent Activity" 
-            style={{ height: '100%' }}
+            className={styles.activityCard}
           >
-            <div style={{ padding: '16px 0' }}>
+            <div className={styles.activityContent}>
               <div>
                 <Text strong>🎯 System status</Text>
                 <br />
@@ -183,11 +173,11 @@ export default function Home() {
       </Row>  
 
       {/* Features Overview */}
-      <Card title="System Features">
+      <Card title="System Features" className={styles.featuresCard}>
         <Row gutter={[16, 16]}>
           <Col xs={24} sm={12} md={8}>
-            <div style={{ textAlign: 'center', padding: '16px' }}>
-              <BookOutlined style={{ fontSize: '32px', color: '#1890ff', marginBottom: '16px' }} />
+            <div className={styles.featureItem}>
+              <BookOutlined className={styles.featureIcon} />
               <Title level={4}>Book Management</Title>
               <Text type="secondary">
                 Add, edit, and organize books with categories and detailed information
@@ -195,8 +185,8 @@ export default function Home() {
             </div>
           </Col>
           <Col xs={24} sm={12} md={8}>
-            <div style={{ textAlign: 'center', padding: '16px' }}>
-              <SwapOutlined style={{ fontSize: '32px', color: '#52c41a', marginBottom: '16px' }} />
+            <div className={styles.featureItem}>
+              <SwapOutlined className={styles.featureIcon} />
               <Title level={4}>Loan System</Title>
               <Text type="secondary">
                 Track book loans, returns, and manage borrowing history
@@ -204,8 +194,8 @@ export default function Home() {
             </div>
           </Col>
           <Col xs={24} sm={12} md={8}>
-            <div style={{ textAlign: 'center', padding: '16px' }}>
-              <GiftOutlined style={{ fontSize: '32px', color: '#faad14', marginBottom: '16px' }} />
+            <div className={styles.featureItem}>
+              <GiftOutlined className={styles.featureIcon} />
               <Title level={4}>Donations</Title>
               <Text type="secondary">
                 Accept and manage book donations from users

@@ -1,0 +1,114 @@
+/* Home Page Styles */
+.container {
+  padding: 24px;
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+.welcomeSection {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 32px;
+  color: white;
+  text-align: center;
+}
+
+.welcomeTitle {
+  color: white !important;
+  margin-bottom: 8px !important;
+}
+
+.welcomeText {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-size: 16px !important;
+}
+
+.roleBadge {
+  margin-top: 16px;
+  margin-left: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 8px 16px;
+  border-radius: 20px;
+  display: inline-block;
+}
+
+.statsRow {
+  margin-bottom: 32px;
+}
+
+.statCard {
+  height: 100%;
+}
+
+.statIcon {
+  color: #1890ff;
+}
+
+.actionsRow {
+  margin-bottom: 32px;
+}
+
+.actionCard {
+  height: 100%;
+}
+
+.actionSpace {
+  width: 100%;
+}
+
+.activityCard {
+  height: 100%;
+}
+
+.activityContent {
+  padding: 16px 0;
+}
+
+.featuresCard {
+  margin-top: 32px;
+}
+
+.featureItem {
+  text-align: center;
+  padding: 16px;
+}
+
+.featureIcon {
+  font-size: 32px;
+  color: #1890ff;
+  margin-bottom: 16px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+  
+  .welcomeSection {
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+  
+  .statsRow {
+    margin-bottom: 24px;
+  }
+  
+  .actionsRow {
+    margin-bottom: 24px;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .container {
+    background-color: #1f1f1f;
+  }
+  
+  .statCard {
+    background-color: #2f2f2f;
+    border-color: #404040;
+  }
+}
+
