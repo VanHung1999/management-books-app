@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { Switch, message, Tooltip } from 'antd';
-import UserProfile from '../components/UserProfile';
-import ShowAllUsers from '../components/ShowAllUsers';
-import { User } from '../interface/user';
+import UserProfile from '../components/users/UserProfile';
+import ShowAllUsers from '../components/users/ShowAllUsers';
+import { User } from '../types/user';
 import styles from '../styles/pages/users/Users.module.css';
 
 export default function Users() {

@@ -1,5 +1,5 @@
-import { Book } from "../interface/book";
-import {fetchRealBooks} from "../dataInitial/books";
+import { Book } from "../../types/book";
+import { fetchRealBooks } from "../dataInitial/books";
 
 const BOOKS_STORAGE_KEY = 'management-books-data';
 

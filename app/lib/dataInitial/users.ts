@@ -1,4 +1,4 @@
-import { User } from "../interface/user";
+import { User } from "../../types/user";
 
 export const usersInitial: User[] = [
   {

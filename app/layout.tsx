@@ -1,5 +1,5 @@
-import RefineWrapper from "./components/RefineWrapper";
-import Navbar from "./components/Navbar";
+import RefineWrapper from "./providers/RefineWrapper";
+import Navbar from "./components/layout/Navbar";
 import "./globals.css";
 
 export default function RootLayout({

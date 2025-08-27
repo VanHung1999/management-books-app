@@ -1,7 +1,7 @@
 import React from 'react';
 import { Modal, Button, InputNumber } from 'antd';
-import { Book } from '../interface/book';
-import styles from '../styles/components/LoanModal.module.css';
+import { Book } from '../../types/book';
+import styles from '../../styles/components/books/LoanModal.module.css';
 
 interface LoanModalProps {
   isVisible: boolean;

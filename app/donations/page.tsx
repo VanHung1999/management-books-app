@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Form, Input, Select, Button, Card, Typography, Space, Row, Col, Table, Tag, Tooltip, Skeleton, App } from 'antd';
-import { getCategories } from '../database/categoryDatabase';
+import { getCategories } from '../lib/database/categoryBookService';
 import { PlusOutlined, DeleteOutlined, GiftOutlined, UserOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, TeamOutlined, CloseOutlined } from '@ant-design/icons';
 import { useCreate, useList, useUpdate } from '@refinedev/core';
-import { User } from '../interface/user';
-import { DonationRecord } from '../interface/donationRecord';
-import { Book } from '../interface/book';
+import { User } from '../types/user';
+import { DonationRecord } from '../types/donationRecord';
+import { Book } from '../types/book';
 import type { ColumnsType } from "antd/es/table";
 import { 
   renderDonationActionButton, 
@@ -16,7 +16,7 @@ import {
   renderDonationSingleAction,
   DONATION_ACTION_CONFIGS,
   DONATION_STATUS_CONFIGS
-} from '../components/DonationActionComponents';
+} from '../components/donations/DonationActionComponents';
 import styles from '../../app/styles/pages/donations/Donations.module.css';
 
 const { Title, Text } = Typography;

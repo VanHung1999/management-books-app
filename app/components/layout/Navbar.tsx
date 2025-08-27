@@ -14,8 +14,8 @@ import {
   BellOutlined
 } from "@ant-design/icons";
 import { useState, useEffect } from "react";
-import { useNotifications } from "../hooks/useNotifications";
-import styles from "../styles/components/Navbar.module.css";
+import { useNotifications } from "../../hooks/useNotifications";
+import styles from "../../styles/components/layout/Navbar.module.css";
 
 const { Header } = Layout;
 const { Text, Title } = Typography;

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { message } from 'antd';
-import { Book } from '../interface/book';
+import { Book } from '../types/book';
 import { useUpdate, BaseRecord, useCreate } from '@refinedev/core';
 
 export function useLoanModal() {

@@ -6,7 +6,7 @@ import { useDataProvider, useUpdate} from "@refinedev/core";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import styles from "../../styles/pages/auth/ForgotPassword.module.css";
-import { User } from "@/app/interface/user";
+import { User } from "@/app/types/user";
 
 export default function ForgotPassword() {
     const [form] = Form.useForm();

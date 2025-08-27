@@ -1,4 +1,4 @@
-import { getBooks } from "./bookDatabase";
+import { getBooks } from "./bookService";
 
 export const getCategories = (): string[] => {
     const books = getBooks();

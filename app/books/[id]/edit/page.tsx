@@ -6,7 +6,7 @@ import { Input, Button, Card, Form, Typography, Space, InputNumber, Row, Col, Ap
 import { ArrowLeftOutlined, SaveOutlined, BookOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Book } from "@/app/interface/book";
+import { Book } from "@/app/types/book";
 import styles from "../../../styles/pages/books/detail/edit/EditBook.module.css";
 
 const { Title, Text } = Typography;

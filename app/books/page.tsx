@@ -3,8 +3,8 @@
 import React, { useState } from "react";
 import { Link, useList } from "@refinedev/core";
 import { Card, List, Skeleton, Pagination, Select, Button } from "antd";
-import { getCategories } from "../database/categoryDatabase";
-import LoanModal from "../components/LoanModal";
+import { getCategories } from "../lib/database/categoryBookService";
+import LoanModal from "../components/books/LoanModal";
 import { useLoanModal } from "../hooks/useLoanModal";
 import styles from "../styles/pages/books/Books.module.css";
 

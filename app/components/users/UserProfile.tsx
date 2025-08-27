@@ -30,10 +30,10 @@ import {
   CloseOutlined
 } from '@ant-design/icons';
 import { useList, useUpdate } from '@refinedev/core';
-import { User } from '../interface/user';
-import { DonationRecord } from '../interface/donationRecord';
-import { LoanRecord } from '../interface/loanRecord';
-import styles from '../styles/components/UserProfile.module.css';
+import { User } from '../../types/user';
+import { DonationRecord } from '../../types/donationRecord';
+import { LoanRecord } from '../../types/loanRecord';
+import styles from '../../styles/components/users/UserProfile.module.css';
 
 const { Title, Text } = Typography;
 const { Password } = Input;

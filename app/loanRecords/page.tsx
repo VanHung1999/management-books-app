@@ -5,8 +5,8 @@ import { Skeleton, Table, Tag, Space, Typography, Card, Tooltip} from "antd";
 import { BookOutlined, UserOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, TeamOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { useEffect, useState } from "react";
-import { LoanRecord } from "../interface/loanRecord";
-import { Book } from "../interface/book";
+import { LoanRecord } from "../types/loanRecord";
+import { Book } from "../types/book";
 import { 
   renderActionButton, 
   renderStatusDisplay, 
@@ -14,7 +14,7 @@ import {
   renderSingleAction,
   ACTION_CONFIGS,
   STATUS_CONFIGS
-} from "../components/LoanActionComponents";
+} from "../components/loanRecords/LoanActionComponents";
 import styles from "../styles/pages/loanRecords/LoanRecords.module.css";
 
 const { Title, Text } = Typography;

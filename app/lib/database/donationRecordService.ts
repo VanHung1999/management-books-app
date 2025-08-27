@@ -1,4 +1,4 @@
-import { DonationRecord } from "../interface/donationRecord";
+import { DonationRecord } from "../../types/donationRecord";
 
 const DONATION_RECORDS_STORAGE_KEY = 'donation-records-data';
 

@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card, Row, Col, Statistic, Button, Typography, Space, Divider } from 'antd';
+import { Card, Row, Col, Statistic, Button, Typography, Space } from 'antd';
 import { BookOutlined, UserOutlined, SwapOutlined, GiftOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import { useRouter } from 'next/navigation';
-import { User } from './interface/user';
-import { Book } from './interface/book';
+import { User } from './types/user';
+import { Book } from './types/book';
 import styles from './styles/pages/Home.module.css';
 
 const { Title, Text } = Typography;

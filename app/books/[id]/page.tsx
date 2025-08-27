@@ -5,8 +5,8 @@ import { useParams } from "next/navigation";
 import { Card, Row, Col, Tag, Divider, Skeleton, Button, Space, Typography, Badge, Avatar, } from "antd";
 import { ArrowLeftOutlined, BookOutlined, UserOutlined, CalendarOutlined, TagOutlined, BarcodeOutlined, FileTextOutlined, ClockCircleOutlined, EditOutlined, HomeOutlined } from '@ant-design/icons';
 import Link from "next/link";
-import LoanModal from "../../components/LoanModal";
-import { Book } from "../../interface/book";
+import LoanModal from "../../components/books/LoanModal";
+import { Book } from "../../types/book";
 import { useLoanModal } from "../../hooks/useLoanModal";
 import styles from "../../styles/pages/books/detail/DetailBook.module.css";
 

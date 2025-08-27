@@ -29,11 +29,11 @@ import {
   CalendarOutlined
 } from '@ant-design/icons';
 import { useList, useUpdate } from '@refinedev/core';
-import { User } from '../interface/user';
+import { User } from '../../types/user';
 import type { ColumnsType } from "antd/es/table";
-import { LoanRecord } from '../interface/loanRecord';
-import { DonationRecord } from '../interface/donationRecord';
-import styles from '../styles/components/ShowAllUsers.module.css';
+import { LoanRecord } from '../../types/loanRecord';
+import { DonationRecord } from '../../types/donationRecord';
+import styles from '../../styles/components/users/ShowAllUsers.module.css';
 
 const { Title, Text } = Typography;
 const { Option } = Select;

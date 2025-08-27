@@ -1,4 +1,4 @@
-import { Book } from "@/app/interface/book";
+import { Book } from "@/app/types/book";
 import { categoriesInitial } from "./category-book";
 
 // Helper function to generate random status

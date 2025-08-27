@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, Typography } from 'antd';
-import styles from '../styles/components/DonationActionComponents.module.css';
+import styles from '../../styles/components/donations/DonationActionComponents.module.css';
 
 const { Text } = Typography;
 

@@ -1,4 +1,4 @@
-import { LoanRecord } from "../interface/loanRecord";
+import { LoanRecord } from "../../types/loanRecord";
 
 export const LOAN_RECORDS_STORAGE_KEY = 'loan-records-data';
 

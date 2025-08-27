@@ -1,12 +1,12 @@
 import { DataProvider } from "@refinedev/core";
-import { Book } from "@/app/interface/book";
-import { User } from "@/app/interface/user";
-import { createUser, getUsers, getUserByEmail, updateUser, deleteUser } from "@/app/database/userDatabase";
-import { getBooks, getBookById, createBook, updateBook, deleteBook } from "@/app/database/bookDatabase";
-import { createLoanRecord, deleteLoanRecord, getLoanRecordById, getLoanRecords, updateLoanRecord } from "@/app/database/loanRecorDatabase";
-import { LoanRecord } from "../interface/loanRecord";
-import { createDonationRecord, deleteDonationRecord, getDonationRecordById, getDonationRecords, updateDonationRecord } from "@/app/database/donationRecordDatabase";
-import { DonationRecord } from "../interface/donationRecord";
+import { Book } from "@/app/types/book";
+import { User } from "@/app/types/user";
+import { createUser, getUsers, getUserByEmail, updateUser, deleteUser } from "@/app/lib/database/userService";
+import { getBooks, getBookById, createBook, updateBook, deleteBook } from "@/app/lib/database/bookService";
+import { createLoanRecord, deleteLoanRecord, getLoanRecordById, getLoanRecords, updateLoanRecord } from "@/app/lib/database/loanRecordService";
+import { LoanRecord } from "../types/loanRecord";
+import { createDonationRecord, deleteDonationRecord, getDonationRecordById, getDonationRecords, updateDonationRecord } from "@/app/lib/database/donationRecordService";
+import { DonationRecord } from "../types/donationRecord";
 
 export const dataProvider: DataProvider = {
   

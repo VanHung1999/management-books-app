@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
-import { initializeUserDatabase } from "../database/userDatabase";
-import { initializeBookDatabase } from "../database/bookDatabase";
+import { initializeUserDatabase } from "../database/userService";
+import { initializeBookDatabase } from "../database/bookService";
 
 export default function DatabaseInitializer() {
   useEffect(() => {

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { LoanRecord } from '../interface/loanRecord';
-import { DonationRecord } from '../interface/donationRecord';
-import { User } from '../interface/user';
+import { LoanRecord } from '../types/loanRecord';
+import { DonationRecord } from '../types/donationRecord';
+import { User } from '../types/user';
 import { useList } from '@refinedev/core';
 
 export interface Notification {

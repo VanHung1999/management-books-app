@@ -1,4 +1,4 @@
-import { User } from "../interface/user";
+import { User } from "../../types/user";
 import { usersInitial } from "../dataInitial/users";
 
 const USERS_STORAGE_KEY = 'management-users-data';

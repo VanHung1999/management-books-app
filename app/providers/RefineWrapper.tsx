@@ -3,9 +3,9 @@
 import { Refine } from "@refinedev/core";
 import { ConfigProvider, App } from "antd";
 import routerBindings from "@refinedev/nextjs-router";
-import { dataProvider } from "../providers/data-provider";
-import { authProvider } from "../providers/auth-provider";
-import DatabaseInitializer from "./DatabaseInitializer";
+import { dataProvider } from "./data-provider";
+import { authProvider } from "./auth-provider";
+import DatabaseInitializer from "../lib/components/DatabaseInitializer";
 
 export default function RefineWrapper({ children }: { children: React.ReactNode }) {
   return (
