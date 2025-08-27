@@ -15,6 +15,7 @@ import {
 } from "@ant-design/icons";
 import { useState, useEffect } from "react";
 import { useNotifications } from "../hooks/useNotifications";
+import styles from "../styles/components/Navbar.module.css";
 
 const { Header } = Layout;
 const { Text, Title } = Typography;
@@ -120,10 +121,10 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
     {
       key: 'profile',
       label: (
-        <div style={{ padding: '8px 0' }}>
-          <div style={{ fontWeight: 600, color: '#1f1f1f' }}>{user?.name}</div>
-          <div style={{ fontSize: '12px', color: '#8c8c8c' }}>{user?.email}</div>
-          <div style={{ fontSize: '11px', color: '#bfbfbf', textTransform: 'capitalize' }}>{user?.role}</div>
+        <div className={styles.userMenuItem}>
+          <div className={styles.userMenuItemHeader}>{user?.name}</div>
+          <div className={styles.userMenuItemEmail}>{user?.email}</div>
+          <div className={styles.userMenuItemRole}>{user?.role}</div>
         </div>
       ),
       disabled: true,
@@ -139,7 +140,7 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
           danger 
           icon={<LogoutOutlined />}   
           onClick={() => logout()}
-          style={{ width: '100%', textAlign: 'left', height: 'auto', padding: '8px 12px' }}
+          className={styles.logoutButton}
         >
           Logout
         </Button>
@@ -150,90 +151,27 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Layout>
-        <Header style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'space-between',
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          padding: '0 24px',
-          borderBottom: 'none',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-          position: 'sticky',
-          top: 0,
-          zIndex: 1000,
-          height: '72px',
-          overflow: 'hidden'
-        }}>
+        <Header className={styles.navbarHeader}>
           {/* Logo and Brand */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '24px', minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '10px',
-                background: 'rgba(255,255,255,0.2)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.3)',
-                flexShrink: 0
-              }}>
-                <BookOutlined style={{ fontSize: '20px', color: 'white' }} />
+          <div className={styles.logoSection}>
+            <div className={styles.logoContainer}>
+              <div className={styles.logoIcon}>
+                <BookOutlined />
               </div>
-              <Title level={4} style={{ 
-                margin: 0, 
-                color: 'black', 
-                fontSize: '18px',
-                fontWeight: '700',
-                textShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                whiteSpace: 'nowrap'
-              }}>
+              <Title level={4} className={styles.brandTitle}>
                 Management Books System
               </Title>
             </div>
             
             {/* Navigation Menu */}
-            <nav style={{ 
-              display: 'flex', 
-              gap: '6px',
-              background: 'rgba(255,255,255,0.1)',
-              padding: '6px 12px',
-              borderRadius: '12px',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255,255,255,0.2)',
-              flexShrink: 0
-            }}>
+            <nav className={styles.navMenu}>
               {navItems.map((item) => (
                 <Button
                   key={item.key}
                   type="text"
                   href={item.key}
                   icon={item.icon}
-                  style={{ 
-                    color: pathname === item.key ? 'white' : 'rgba(255,255,255,0.8)',
-                    background: pathname === item.key ? 'rgba(255,255,255,0.2)' : 'transparent',
-                    border: 'none',
-                    borderRadius: '8px',
-                    height: '32px',
-                    padding: '0 12px',
-                    fontWeight: pathname === item.key ? '600' : '400',
-                    transition: 'all 0.3s ease',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    fontSize: '13px'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (pathname !== item.key) {
-                      e.currentTarget.style.background = 'rgba(255,255,255,0.15)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (pathname !== item.key) {
-                      e.currentTarget.style.background = 'transparent';
-                    }
-                  }}
+                  className={`${styles.navButton} ${pathname === item.key ? styles.navButtonActive : ''}`}
                 >
                   {item.label}
                 </Button>
@@ -243,7 +181,7 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
 
           {/* User Profile Section */}
           {user && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', minWidth: 0 }}>
+            <div className={styles.userSection}>
 
               {/* Notification Bell */}
               <Dropdown
@@ -251,31 +189,16 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
                   items: [{
                     key: 'notifications',
                     label: (
-                      <div style={{
-                       minWidth: '320px',
-                       maxHeight: '400px',
-                       overflow: 'auto',
-                       background: 'white',
-                       borderRadius: '8px',
-                       boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
-                       padding: '16px'
-                      }}>
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          marginBottom: '16px',
-                          borderBottom: '1px solid #f0f0f0',
-                          paddingBottom: '12px'
-                        }}>
-                          <Text strong style={{ fontSize: '16px' }}>🔔 Notifications</Text>
+                      <div className={styles.notificationDropdown}>
+                        <div className={styles.notificationHeader}>
+                          <Text strong className={styles.notificationTitle}>🔔 Notifications</Text>
                           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                             {unreadCount > 0 && (
                               <Button 
                                 type="link" 
                                 size="small"
                                 onClick={markAllAsRead}
-                                style={{ padding: '0', height: 'auto' }}
+                                className={styles.markAllReadButton}
                               >
                                 Mark all as read
                               </Button>
@@ -284,12 +207,8 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
                         </div>
                         
                         {notifications.length === 0 ? (
-                          <div style={{
-                            textAlign: 'center',
-                            padding: '20px',
-                            color: '#8c8c8c'
-                          }}>
-                            <BellOutlined style={{ fontSize: '24px', marginBottom: '8px' }} />
+                          <div className={styles.noNotifications}>
+                            <BellOutlined className={styles.noNotificationsIcon} />
                             <div>No notifications</div>
                           </div>
                         ) : (
@@ -323,100 +242,52 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
                               return (
                                 <div
                                   key={notification.id}
-                                  style={{
-                                    padding: '12px',
-                                    border: `1px solid ${categoryColor}20`,
-                                    borderRadius: '6px',
-                                    marginBottom: '8px',
-                                    background: notification.isRead ? '#fafafa' : '#fff',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s ease',
-                                    position: 'relative'
-                                  }}
+                                  className={`${styles.notificationItem} ${notification.isRead ? styles.notificationItemRead : styles.notificationItemUnread}`}
                                   onClick={() => {
                                     markAsRead(notification.id);
                                     if (notification.actionUrl) {
                                       window.location.href = notification.actionUrl;
                                     }
                                   }}
-                                  onMouseEnter={(e) => {
-                                    e.currentTarget.style.background = notification.isRead ? '#f5f5f5' : `${categoryColor}08`;
-                                  }}
-                                  onMouseLeave={(e) => {
-                                    e.currentTarget.style.background = notification.isRead ? '#fafafa' : '#fff';
-                                  }}
+                                  style={{
+                                    '--category-color-08': `${categoryColor}08`
+                                  } as React.CSSProperties}
                                 >
                                   {/* Priority indicator */}
-                                  <div style={{
-                                    position: 'absolute',
-                                    left: '0',
-                                    top: '0',
-                                    bottom: '0',
-                                    width: '4px',
-                                    background: priorityColor,
-                                    borderTopLeftRadius: '6px',
-                                    borderBottomLeftRadius: '6px'
-                                  }} />
+                                  <div 
+                                    className={styles.notificationPriority}
+                                    style={{ background: priorityColor }}
+                                  />
 
-                                  <div style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'flex-start',
-                                    marginBottom: '4px',
-                                    marginLeft: '8px'
-                                  }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                      <div style={{
-                                        width: '20px',
-                                        height: '20px',
-                                        borderRadius: '50%',
-                                        background: `${categoryColor}20`,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        fontSize: '12px',
-                                        color: categoryColor
-                                      }}>
+                                  <div className={styles.notificationHeaderRow}>
+                                    <div className={styles.notificationCategory}>
+                                      <div 
+                                        className={styles.categoryIcon}
+                                        style={{ 
+                                          background: `${categoryColor}20`,
+                                          color: categoryColor
+                                        }}
+                                      >
                                         {notification.category.charAt(0).toUpperCase()}
                                       </div>
-                                      <Text strong style={{ 
-                                        fontSize: '13px',
-                                        color: notification.isRead ? '#8c8c8c' : '#262626'
-                                      }}>
+                                      <Text strong className={`${styles.notificationTitleText} ${notification.isRead ? styles.notificationTitleTextRead : styles.notificationTitleTextUnread}`}>
                                         {notification.title}
                                       </Text>
                                     </div>
                                     {!notification.isRead && (
-                                      <div style={{
-                                        width: '8px',
-                                        height: '8px',
-                                        borderRadius: '50%',
-                                        background: priorityColor,
-                                        flexShrink: 0
-                                      }} />
+                                      <div 
+                                        className={styles.unreadIndicator}
+                                        style={{ background: priorityColor }}
+                                      />
                                     )}
                                   </div>
                                   
-                                  <Text style={{ 
-                                    fontSize: '12px',
-                                    color: notification.isRead ? '#8c8c8c' : '#595959',
-                                    lineHeight: '1.4',
-                                    marginLeft: '28px'
-                                  }}>
+                                  <Text className={`${styles.notificationMessage} ${notification.isRead ? styles.notificationMessageRead : styles.notificationMessageUnread}`}>
                                     {notification.message}
                                   </Text>
 
-                                  <div style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    marginTop: '8px',
-                                    marginLeft: '28px'
-                                  }}>
-                                    <Text style={{ 
-                                      fontSize: '11px',
-                                      color: '#bfbfbf'
-                                    }}>
+                                  <div className={styles.notificationFooter}>
+                                    <Text className={styles.notificationTimestamp}>
                                       {new Date(notification.timestamp).toLocaleString('vi-VN', {
                                         month: 'short',
                                         day: 'numeric',
@@ -424,7 +295,7 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
                                         minute: '2-digit'
                                       })}
                                     </Text>
-                                    <div style={{ display: 'flex', gap: '4px' }}>
+                                    <div className={styles.notificationActions}>
                                       <Button
                                         type="text"
                                         size="small"
@@ -433,11 +304,7 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
                                           e.stopPropagation();
                                           clearNotification(notification.id);
                                         }}
-                                        style={{ 
-                                          padding: '0', 
-                                          height: 'auto',
-                                          fontSize: '11px'
-                                        }}
+                                        className={styles.clearButton}
                                       >
                                         Clear
                                       </Button>
@@ -448,13 +315,8 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
                             })}
                             
                             {notifications.length > 5 && (
-                              <div style={{
-                                textAlign: 'center',
-                                padding: '12px',
-                                borderTop: '1px solid #f0f0f0',
-                                marginTop: '12px'
-                              }}>
-                                <Text style={{ color: '#8c8c8c', fontSize: '12px' }}>
+                              <div className={styles.moreNotifications}>
+                                <Text className={styles.moreNotificationsText}>
                                   +{notifications.length - 5} more notifications
                                 </Text>
                               </div>
@@ -470,36 +332,13 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
                 overlayStyle={{ minWidth: '320px' }}
               >
                 <Tooltip title="Notifications" placement="bottom">
-                  <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    cursor: 'pointer',
-                    padding: '6px',
-                    borderRadius: '6px',
-                    transition: 'all 0.3s ease',
-                    flexShrink: 0
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                  }}
-                  >
+                  <div className={styles.notificationBell}>
                     <Badge 
                        count={unreadCount} 
                        size="default" 
-                       style={{ 
-                         '--antd-badge-color': '#ff4d4f',
-                         '--antd-badge-size': '20px'
-                       } as any}
+                       className={styles.notificationBadge}
                      >
-                       <BellOutlined 
-                         style={{ 
-                           color: 'rgba(255,255,255,0.9)', 
-                           fontSize: '20px' 
-                         }} 
-                       />
+                       <BellOutlined className={styles.notificationIcon} />
                      </Badge>
                   </div>
                 </Tooltip>
@@ -512,51 +351,17 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
                 trigger={['click']}
                 overlayStyle={{ minWidth: '200px' }}
               >
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  padding: '6px 12px',
-                  background: 'rgba(255,255,255,0.15)',
-                  borderRadius: '16px',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  backdropFilter: 'blur(10px)',
-                  flexShrink: 0
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.25)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.15)';
-                }}
-                >
+                <div className={styles.userDropdown}>
                   <Avatar 
                     size={32} 
                     icon={<UserOutlined />}
-                    style={{ 
-                      background: 'rgba(255,255,255,0.2)',
-                      border: '2px solid rgba(255,255,255,0.3)',
-                      flexShrink: 0
-                    }}
+                    className={styles.userAvatar}
                   />
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', minWidth: 0 }}>
-                    <Text style={{ 
-                      color: 'white', 
-                      fontSize: '13px', 
-                      fontWeight: '600',
-                      lineHeight: '1.2',
-                      whiteSpace: 'nowrap'
-                    }}>
+                  <div className={styles.userInfo}>
+                    <Text className={styles.userName}>
                       {user.name}
                     </Text>
-                    <Text style={{ 
-                      color: 'rgba(255,255,255,0.8)', 
-                      fontSize: '11px',
-                      lineHeight: '1.2',
-                      whiteSpace: 'nowrap'
-                    }}>
+                    <Text className={styles.userRole}>
                       {user.role}
                     </Text>
                   </div>
@@ -566,11 +371,7 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
           )}
         </Header>
         
-        <div style={{ 
-          padding: '32px', 
-          minHeight: 'calc(100vh - 72px)',
-          background: '#f8fafc'
-        }}>
+        <div className={styles.contentContainer}>
           {children}
         </div>
       </Layout>

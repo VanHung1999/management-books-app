@@ -1,0 +1,319 @@
+/* Loan Records Page Styles */
+
+/* Main Container */
+.loanRecordsContainer {
+  padding: 24px;
+}
+
+/* Enhanced Header Section */
+.headerSection {
+  margin-bottom: 32px;
+  padding: 24px;
+  background-color: #fafafa;
+  border-radius: 16px;
+  border: 1px solid #e8e8e8;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.headerContent {
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.headerTitle {
+  margin: 0 0 8px 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #262626;
+  letter-spacing: 0.5px;
+}
+
+.headerSubtitle {
+  margin: 0;
+  font-size: 14px;
+  color: #8c8c8c;
+  font-style: italic;
+}
+
+/* Statistics Cards Grid */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+/* Statistics Card Base */
+.statCard {
+  padding: 20px;
+  border-radius: 12px;
+  border: 2px solid;
+  box-shadow: 0 4px 16px;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.statCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px;
+}
+
+/* Total Transactions Card */
+.totalTransactionsCard {
+  background: linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%);
+  border-color: #b7eb8f;
+  box-shadow: 0 4px 16px rgba(82, 196, 26, 0.15);
+}
+
+.totalTransactionsCard .statCardTitle {
+  color: #52c41a;
+}
+
+.totalTransactionsCard .statCardValue {
+  color: #52c41a;
+}
+
+/* Processing Records Card */
+.processingRecordsCard {
+  background: linear-gradient(135deg, #fff7e6 0%, #ffe7ba 100%);
+  border-color: #ffd591;
+  box-shadow: 0 4px 16px rgba(250, 140, 22, 0.15);
+  cursor: help;
+  position: relative;
+}
+
+.processingRecordsCard .statCardTitle {
+  color: #fa8c16;
+}
+
+.processingRecordsCard .statCardValue {
+  color: #fa8c16;
+}
+
+.processingRecordsCard .hoverHint {
+  font-size: 12px;
+  color: #d48806;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+/* Completed Card */
+.completedCard {
+  background: linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%);
+  border-color: #b7eb8f;
+  box-shadow: 0 4px 16px rgba(82, 196, 26, 0.15);
+}
+
+.completedCard .statCardTitle {
+  color: #52c41a;
+}
+
+.completedCard .statCardValue {
+  color: #52c41a;
+}
+
+/* Canceled Card */
+.canceledCard {
+  background: linear-gradient(135deg, #fff2f0 0%, #ffccc7 100%);
+  border-color: #ffbb96;
+  box-shadow: 0 4px 16px rgba(255, 77, 79, 0.15);
+}
+
+.canceledCard .statCardTitle {
+  color: #ff4d4f;
+}
+
+.canceledCard .statCardValue {
+  color: #ff4d4f;
+}
+
+/* Statistics Card Content */
+.statCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  gap: 8px;
+}
+
+.statCardIcon {
+  font-size: 20px;
+}
+
+.statCardTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.statCardValue {
+  font-size: 32px;
+  font-weight: 700;
+}
+
+/* Main Table Card */
+.tableCard {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e8e8e8;
+}
+
+.tableCardHeader {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-bottom: 2px solid #e8e8e8;
+}
+
+/* Table Header Content */
+.tableHeaderContent {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.tableHeaderIcon {
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.tableHeaderIcon svg {
+  font-size: 20px;
+}
+
+.tableHeaderText h4 {
+  margin: 0;
+  color: #262626;
+}
+
+.tableHeaderText p {
+  color: #8c8c8c;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Table Styles */
+.loanRecordsTable {
+  border-radius: 8px;
+}
+
+.loanRecordsTable .ant-table-pagination {
+  margin-top: 16px;
+}
+
+/* Loading Skeleton */
+.loadingContainer {
+  min-height: 100vh;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.loadingTitle {
+  width: 200px;
+  height: 32px;
+}
+
+.loadingGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.loadingCard {
+  height: 120px;
+  padding: 16px;
+}
+
+/* Table Column Styles */
+.borrowerIcon {
+  color: #1890ff;
+}
+
+.bookIcon {
+  color: #52c41a;
+}
+
+.quantityTag {
+  border-radius: 6px;
+}
+
+.calendarIcon {
+  color: #722ed1;
+}
+
+.statusTag {
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+/* Tooltip Styles */
+.tooltipContent {
+  text-align: left;
+}
+
+.tooltipTitle {
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+/* Pagination Styles */
+.paginationStyle {
+  margin-top: 16px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .loanRecordsContainer {
+    padding: 16px;
+  }
+  
+  .headerSection {
+    padding: 16px;
+    margin-bottom: 24px;
+  }
+  
+  .statsGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .statCard {
+    padding: 16px;
+  }
+  
+  .headerTitle {
+    font-size: 20px;
+  }
+  
+  .statCardValue {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 480px) {
+  .loanRecordsContainer {
+    padding: 12px;
+  }
+  
+  .headerSection {
+    padding: 12px;
+  }
+  
+  .headerTitle {
+    font-size: 18px;
+  }
+  
+  .statCard {
+    padding: 12px;
+  }
+  
+  .statCardValue {
+    font-size: 24px;
+  }
+}

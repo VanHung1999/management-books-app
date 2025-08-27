@@ -33,6 +33,7 @@ import { useList, useUpdate } from '@refinedev/core';
 import { User } from '../interface/user';
 import { DonationRecord } from '../interface/donationRecord';
 import { LoanRecord } from '../interface/loanRecord';
+import styles from '../styles/components/UserProfile.module.css';
 
 const { Title, Text } = Typography;
 const { Password } = Input;
@@ -217,19 +218,10 @@ export default function UserProfile({ currentUser }: UserProfileProps) {
   const userLoans = getUserLoans();
 
   return (
-    <div style={{ 
-      padding: '24px',
-      minHeight: '100vh',
-      backgroundColor: '#f8fafc'
-    }}>
+    <div className={styles.mainContainer}>
       {/* Main Container Card */}
       <Card
-        style={{
-          borderRadius: '16px',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-          border: '1px solid #e8e8e8',
-          overflow: 'hidden'
-        }}
+        className={styles.mainCard}
         styles={{
           header: {
             background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -243,42 +235,15 @@ export default function UserProfile({ currentUser }: UserProfileProps) {
           }
         }}
         title={
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center',
-            gap: '16px',
-            color: 'white'
-          }}>
-            <div style={{
-              background: 'rgba(255,255,255,0.2)',
-              borderRadius: '50%',
-              width: '48px',
-              height: '48px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backdropFilter: 'blur(10px)'
-            }}>
-              <UserOutlined style={{ fontSize: '24px', color: 'white' }} />
+          <div className={styles.headerContent}>
+            <div className={styles.headerIcon}>
+              <UserOutlined />
             </div>
-            <div>
-              <h1 style={{ 
-                margin: '0 0 4px 0',
-                fontSize: '28px',
-                fontWeight: '700',
-                color: 'white',
-                letterSpacing: '0.5px',
-                textAlign: 'center'
-              }}>
+            <div className={styles.headerText}>
+              <h1 className={styles.headerTitle}>
                 My Profile
               </h1>
-              <p style={{ 
-                margin: '0',
-                fontSize: '16px',
-                color: 'rgba(255,255,255,0.9)',
-                fontWeight: '400'
-              }}>
+              <p className={styles.headerSubtitle}>
                 View your personal information and activity history
               </p>
             </div>
@@ -287,13 +252,7 @@ export default function UserProfile({ currentUser }: UserProfileProps) {
       >
         {/* User Profile Header */}
         <Card 
-          style={{ 
-            marginBottom: '32px',
-            borderRadius: '12px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-            border: '1px solid #f0f0f0',
-            background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)'
-          }}
+          className={styles.profileHeaderCard}
           styles={{ body: { padding: '32px' } }}
         >
           <Row gutter={[32, 24]} align="middle">
@@ -302,22 +261,12 @@ export default function UserProfile({ currentUser }: UserProfileProps) {
                 <Avatar 
                   size={80} 
                   icon={<UserOutlined />}
-                  style={{
-                    background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
-                    border: '4px solid white',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-                  }}
+                  className={styles.profileAvatar}
                 />
                 <div style={{ marginTop: '16px' }}>
                   <Tag 
                     color={getRoleColor(currentUser.role)}
-                    style={{
-                      fontSize: '14px',
-                      fontWeight: '600',
-                      padding: '6px 16px',
-                      borderRadius: '20px',
-                      border: 'none'
-                    }}
+                    className={styles.profileRoleTag}
                   >
                     {currentUser.role === 'admin' ? 'Administrator' : 'Regular User'}
                   </Tag>
@@ -327,10 +276,10 @@ export default function UserProfile({ currentUser }: UserProfileProps) {
             
             <Col span={18}>
               <div style={{ marginBottom: '24px' }}>
-                <Title level={2} style={{ margin: '0 0 8px 0', color: '#262626' }}>
+                <Title level={2} className={styles.profileName}>
                   {currentUser.name}
                 </Title>
-                <Text style={{ fontSize: '16px', color: '#8c8c8c' }}>
+                <Text className={styles.profileEmail}>
                   {currentUser.email}
                 </Text>
               </div>
@@ -372,9 +321,9 @@ export default function UserProfile({ currentUser }: UserProfileProps) {
         </Card>
 
         {/* User Activity History */}
-        <div style={{ marginBottom: '32px' }}>
-          <Title level={3} style={{ marginBottom: '24px', color: '#262626' }}>
-            <CalendarOutlined style={{ marginRight: '12px', color: '#1890ff' }} />
+        <div className={styles.activityHistorySection}>
+          <Title level={3} className={styles.activityHistoryTitle}>
+            <CalendarOutlined className={styles.activityHistoryTitleIcon} />
             Activity History
           </Title>
           
@@ -384,15 +333,11 @@ export default function UserProfile({ currentUser }: UserProfileProps) {
               <Card 
                 title={
                   <Space>
-                    <GiftOutlined style={{ color: '#52c41a' }} />
+                    <GiftOutlined className={styles.activityCardTitleIcon} />
                     <span>My Donations ({userDonations.length})</span>
                   </Space>
                 }
-                style={{ 
-                  borderRadius: '12px',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-                  border: '1px solid #f0f0f0'
-                }}
+                className={styles.activityCard}
                 size="small"
               >
                 {userDonations.length > 0 ? (
@@ -445,14 +390,10 @@ export default function UserProfile({ currentUser }: UserProfileProps) {
                     ]}
                   />
                 ) : (
-                  <div style={{ 
-                    textAlign: 'center', 
-                    padding: '40px 20px',
-                    color: '#8c8c8c'
-                  }}>
-                    <GiftOutlined style={{ fontSize: '48px', marginBottom: '16px' }} />
-                    <div>No donations yet</div>
-                    <Text type="secondary">Start donating books to help others!</Text>
+                  <div className={styles.emptyState}>
+                    <GiftOutlined className={styles.emptyStateIcon} />
+                    <div className={styles.emptyStateText}>No donations yet</div>
+                    <Text className={styles.emptyStateSubtext}>Start donating books to help others!</Text>
                   </div>
                 )}
               </Card>
@@ -463,15 +404,11 @@ export default function UserProfile({ currentUser }: UserProfileProps) {
               <Card 
                 title={
                   <Space>
-                    <BookOutlined style={{ color: '#1890ff' }} />
+                    <BookOutlined className={styles.activityCardTitleIconLoans} />
                     <span>My Loans ({userLoans.length})</span>
                   </Space>
                 }
-                style={{ 
-                  borderRadius: '12px',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-                  border: '1px solid #f0f0f0'
-                }}
+                className={styles.activityCard}
                 size="small"
               >
                 {userLoans.length > 0 ? (
@@ -525,14 +462,10 @@ export default function UserProfile({ currentUser }: UserProfileProps) {
                     ]}
                   />
                 ) : (
-                  <div style={{ 
-                    textAlign: 'center', 
-                    padding: '40px 20px',
-                    color: '#8c8c8c'
-                  }}>
-                    <BookOutlined style={{ fontSize: '48px', marginBottom: '16px' }} />
-                    <div>No loans yet</div>
-                    <Text type="secondary">Start borrowing books from the library!</Text>
+                  <div className={styles.emptyState}>
+                    <BookOutlined className={styles.emptyStateIcon} />
+                    <div className={styles.emptyStateText}>No loans yet</div>
+                    <Text className={styles.emptyStateSubtext}>Start borrowing books from the library!</Text>
                   </div>
                 )}
               </Card>
@@ -543,87 +476,43 @@ export default function UserProfile({ currentUser }: UserProfileProps) {
         {/* Account Information */}
         <Card 
           title={
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '8px',
-              fontSize: '16px',
-              fontWeight: '600'
-            }}>
-              <div style={{
-                background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
-                borderRadius: '50%',
-                width: '24px',
-                height: '24px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white'
-              }}>
-                <UserOutlined style={{ fontSize: '14px' }} />
+            <div className={styles.accountInfoCardTitle}>
+              <div className={styles.accountInfoCardIcon}>
+                <UserOutlined />
               </div>
               <span>Account Information</span>
             </div>
           }
-          style={{ 
-            borderRadius: '12px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-            border: '1px solid #f0f0f0'
-          }}
+          className={styles.accountInfoCard}
           size="small"
         >
-          <div style={{
-            background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
-            padding: '20px',
-            borderRadius: '8px',
-            border: '1px solid #e8e8e8'
-          }}>
+          <div className={styles.accountInfoContent}>
             <Row gutter={[24, 16]}>
               {/* Full Name */}
               <Col span={12}>
-                <div style={{
-                  background: 'white',
-                  padding: '16px',
-                  borderRadius: '8px',
-                  border: '1px solid #f0f0f0',
-                  textAlign: 'center',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-                  height: '160px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center'
-                }}>
-                  <div style={{ marginBottom: '8px' }}>
-                    <UserOutlined style={{ 
-                      fontSize: '20px', 
-                      color: '#1890ff',
-                      marginBottom: '4px'
-                    }} />
+                <div className={styles.infoItem}>
+                  <div className={styles.infoItemIcon}>
+                    <UserOutlined />
                   </div>
-                  <Text strong style={{ 
-                    color: '#8c8c8c', 
-                    fontSize: '12px',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px'
-                  }}>
+                  <Text className={styles.infoItemLabel}>
                     Full Name
                   </Text>
-                  <div style={{ marginTop: '8px' }}>
+                  <div className={styles.infoItemValue}>
                     {isEditingName ? (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <div className={styles.editForm}>
                         <Input
                           value={editedName}
                           onChange={(e) => setEditedName(e.target.value)}
                           size="small"
-                          style={{ textAlign: 'center' }}
+                          className={styles.editInput}
                         />
-                        <div style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>
+                        <div className={styles.editButtons}>
                           <Button
                             type="primary"
                             size="small"
                             icon={<SaveOutlined />}
                             onClick={handleSaveName}
-                            style={{ fontSize: '10px', padding: '0 8px' }}
+                            className={styles.editButton}
                           >
                             Save
                           </Button>
@@ -631,19 +520,15 @@ export default function UserProfile({ currentUser }: UserProfileProps) {
                             size="small"
                             icon={<CloseOutlined />}
                             onClick={handleCancelName}
-                            style={{ fontSize: '10px', padding: '0 8px' }}
+                            className={styles.editButtonCancel}
                           >
                             Cancel
                           </Button>
                         </div>
                       </div>
                     ) : (
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                        <Text style={{ 
-                          fontSize: '16px', 
-                          fontWeight: '600',
-                          color: '#262626'
-                        }}>
+                      <div className={styles.displayContainer}>
+                        <Text className={styles.infoItemValueText}>
                           {currentUser.name}
                         </Text>
                         <Button
@@ -651,7 +536,7 @@ export default function UserProfile({ currentUser }: UserProfileProps) {
                           size="small"
                           icon={<EditOutlined />}
                           onClick={handleEditName}
-                          style={{ fontSize: '10px', padding: '2px 4px' }}
+                          className={styles.editButtonSmall}
                         >
                           Edit
                         </Button>
@@ -663,64 +548,37 @@ export default function UserProfile({ currentUser }: UserProfileProps) {
 
               {/* Password */}
               <Col span={12}>
-                <div style={{
-                  background: 'white',
-                  padding: '16px',
-                  borderRadius: '8px',
-                  border: '1px solid #f0f0f0',
-                  textAlign: 'center',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-                  height: '160px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center'
-                }}>
-                  <div style={{ marginBottom: '8px' }}>
-                    <div style={{
-                      background: 'linear-gradient(135deg, #fa8c16 0%, #d46b08 100%)',
-                      borderRadius: '50%',
-                      width: '32px',
-                      height: '32px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      margin: '0 auto'
-                    }}>
-                      <span style={{ color: 'white', fontSize: '16px' }}>🔒</span>
-                    </div>
+                <div className={styles.infoItem}>
+                  <div className={styles.passwordIcon}>
+                    <span>🔒</span>
                   </div>
-                  <Text strong style={{ 
-                    color: '#8c8c8c', 
-                    fontSize: '12px',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px'
-                  }}>
+                  <Text className={styles.infoItemLabel}>
                     Password
                   </Text>
-                  <div style={{ marginTop: '8px' }}>
+                  <div className={styles.infoItemValue}>
                     {isEditingPassword ? (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <div className={styles.editForm}>
                         <Password
                           placeholder="Enter new password"
                           value={editedPassword}
                           onChange={(e) => setEditedPassword(e.target.value)}
                           size="small"
-                          style={{ textAlign: 'center' }}
+                          className={styles.editInput}
                         />
                         <Password
                           placeholder="Confirm password"
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
                           size="small"
-                          style={{ textAlign: 'center' }}
+                          className={styles.editInput}
                         />
-                        <div style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>
+                        <div className={styles.editButtons}>
                           <Button
                             type="primary"
                             size="small"
                             icon={<SaveOutlined />}
                             onClick={handleSavePassword}
-                            style={{ fontSize: '10px', padding: '0 8px' }}
+                            className={styles.editButton}
                           >
                             Save
                           </Button>
@@ -728,26 +586,16 @@ export default function UserProfile({ currentUser }: UserProfileProps) {
                             size="small"
                             icon={<CloseOutlined />}
                             onClick={handleCancelPassword}
-                            style={{ fontSize: '10px', padding: '0 8px' }}
+                            className={styles.editButtonCancel}
                           >
                             Cancel
                           </Button>
                         </div>
                       </div>
                     ) : (
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                        <div style={{ 
-                          display: 'flex', 
-                          alignItems: 'center', 
-                          justifyContent: 'center',
-                          gap: '8px'
-                        }}>
-                          <Text style={{ 
-                            fontSize: '14px',
-                            color: '#262626',
-                            fontWeight: '500',
-                            fontFamily: 'monospace'
-                          }}>
+                      <div className={styles.displayContainer}>
+                        <div className={styles.passwordDisplay}>
+                          <Text className={styles.passwordText}>
                             {showPassword ? currentUser.password : '••••••••'}
                           </Text>
                           <Button
@@ -755,11 +603,7 @@ export default function UserProfile({ currentUser }: UserProfileProps) {
                             size="small"
                             icon={showPassword ? <EyeInvisibleOutlined /> : <EyeOutlined />}
                             onClick={togglePasswordVisibility}
-                            style={{
-                              padding: '2px 4px',
-                              minWidth: 'auto',
-                              height: 'auto'
-                            }}
+                            className={styles.passwordToggleButton}
                           />
                         </div>
                         <Button
@@ -767,7 +611,7 @@ export default function UserProfile({ currentUser }: UserProfileProps) {
                           size="small"
                           icon={<EditOutlined />}
                           onClick={handleEditPassword}
-                          style={{ fontSize: '10px', padding: '2px 4px' }}
+                          className={styles.editButtonSmall}
                         >
                           Edit
                         </Button>
@@ -781,46 +625,15 @@ export default function UserProfile({ currentUser }: UserProfileProps) {
             <Row gutter={[24, 16]} style={{ marginTop: '16px' }}>
               {/* Email Address */}
               <Col span={12}>
-                <div style={{
-                  background: 'white',
-                  padding: '16px',
-                  borderRadius: '8px',
-                  border: '1px solid #f0f0f0',
-                  textAlign: 'center',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-                  height: '160px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center'
-                }}>
-                  <div style={{ marginBottom: '8px' }}>
-                    <div style={{
-                      background: 'linear-gradient(135deg, #52c41a 0%, #389e0d 100%)',
-                      borderRadius: '50%',
-                      width: '32px',
-                      height: '32px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      margin: '0 auto'
-                    }}>
-                      <span style={{ color: 'white', fontSize: '16px' }}>✉️</span>
-                    </div>
+                <div className={styles.infoItem}>
+                  <div className={styles.emailIcon}>
+                    <span>✉️</span>
                   </div>
-                  <Text strong style={{ 
-                    color: '#8c8c8c', 
-                    fontSize: '12px',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px'
-                  }}>
+                  <Text className={styles.infoItemLabel}>
                     Email Address
                   </Text>
-                  <div style={{ marginTop: '8px' }}>
-                    <Text copyable style={{ 
-                      fontSize: '14px',
-                      color: '#1890ff',
-                      fontWeight: '500'
-                    }}>
+                  <div className={styles.infoItemValue}>
+                    <Text copyable className={styles.infoItemValueEmail}>
                       {currentUser.email}
                     </Text>
                   </div>
@@ -829,41 +642,14 @@ export default function UserProfile({ currentUser }: UserProfileProps) {
               
               {/* User Role */}
               <Col span={12}>
-                <div style={{
-                  background: 'white',
-                  padding: '16px',
-                  borderRadius: '8px',
-                  border: '1px solid #f0f0f0',
-                  textAlign: 'center',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-                  height: '160px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center'
-                }}>
-                  <div style={{ marginBottom: '8px' }}>
-                    <div style={{
-                      background: 'linear-gradient(135deg, #722ed1 0%, #531dab 100%)',
-                      borderRadius: '50%',
-                      width: '32px',
-                      height: '32px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      margin: '0 auto'
-                    }}>
-                      <span style={{ color: 'white', fontSize: '16px' }}>👑</span>
-                    </div>
+                <div className={styles.infoItem}>
+                  <div className={styles.roleIcon}>
+                    <span>👑</span>
                   </div>
-                  <Text strong style={{ 
-                    color: '#8c8c8c', 
-                    fontSize: '12px',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px'
-                  }}>
+                  <Text className={styles.infoItemLabel}>
                     User Role
                   </Text>
-                  <div style={{ marginTop: '8px' }}>
+                  <div className={styles.infoItemValue}>
                     <Tag 
                       color={getRoleColor(currentUser.role)}
                       style={{

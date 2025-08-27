@@ -1,0 +1,211 @@
+/* LoanActionComponents Styles */
+
+/* Action Button */
+.actionButton {
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  height: 32px;
+}
+
+/* Status Display Container */
+.statusDisplayContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  gap: 4px;
+}
+
+.statusDisplayBadge {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 2px solid;
+}
+
+.statusDisplayText {
+  font-style: italic;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.statusDisplayDescription {
+  font-size: 11px;
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* Action Container */
+.actionContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  gap: 8px;
+}
+
+.actionButtonsRow {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.actionDescription {
+  font-size: 11px;
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* Single Action */
+.singleActionContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  gap: 4px;
+}
+
+.singleActionDescription {
+  font-size: 11px;
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* Predefined Action Button Styles */
+.actionButtonDelivered {
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+  box-shadow: 0 2px 8px rgba(82, 196, 26, 0.3);
+  min-width: 80px;
+}
+
+.actionButtonCanceled {
+  background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);
+  box-shadow: 0 2px 8px rgba(255, 77, 79, 0.3);
+  min-width: 80px;
+}
+
+.actionButtonReceived {
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
+  min-width: 100px;
+}
+
+.actionButtonReturned {
+  background: linear-gradient(135deg, #fa8c16 0%, #ffa940 100%);
+  box-shadow: 0 2px 8px rgba(250, 140, 22, 0.3);
+  min-width: 100px;
+}
+
+.actionButtonCompleted {
+  background: linear-gradient(135deg, #722ed1 0%, #9254de 100%);
+  box-shadow: 0 2px 8px rgba(114, 46, 209, 0.3);
+  min-width: 100px;
+}
+
+/* Predefined Status Display Styles */
+.statusDisplayCompleted {
+  background: linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%);
+  border-color: #b7eb8f;
+  color: #52c41a;
+}
+
+.statusDisplayCanceled {
+  background: linear-gradient(135deg, #fff2f0 0%, #ffccc7 100%);
+  border-color: #ffbb96;
+  color: #ff4d4f;
+}
+
+.statusDisplayWaiting {
+  background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+  border-color: #d9d9d9;
+  color: #8c8c8c;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .actionButton {
+    height: 28px;
+    font-size: 12px;
+  }
+  
+  .actionButtonDelivered,
+  .actionButtonCanceled {
+    min-width: 70px;
+  }
+  
+  .actionButtonReceived,
+  .actionButtonReturned,
+  .actionButtonCompleted {
+    min-width: 80px;
+  }
+  
+  .statusDisplayBadge {
+    padding: 6px 12px;
+  }
+  
+  .statusDisplayText {
+    font-size: 12px;
+  }
+  
+  .statusDisplayDescription,
+  .actionDescription,
+  .singleActionDescription {
+    font-size: 10px;
+  }
+  
+  .actionContainer,
+  .singleActionContainer {
+    gap: 6px;
+  }
+  
+  .actionButtonsRow {
+    gap: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .actionButton {
+    height: 24px;
+    font-size: 11px;
+  }
+  
+  .actionButtonDelivered,
+  .actionButtonCanceled {
+    min-width: 60px;
+  }
+  
+  .actionButtonReceived,
+  .actionButtonReturned,
+  .actionButtonCompleted {
+    min-width: 70px;
+  }
+  
+  .statusDisplayBadge {
+    padding: 4px 8px;
+  }
+  
+  .statusDisplayText {
+    font-size: 11px;
+  }
+  
+  .statusDisplayDescription,
+  .actionDescription,
+  .singleActionDescription {
+    font-size: 9px;
+  }
+  
+  .actionContainer,
+  .singleActionContainer {
+    gap: 4px;
+  }
+  
+  .actionButtonsRow {
+    gap: 4px;
+  }
+}

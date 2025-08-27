@@ -1,0 +1,584 @@
+/* Donations Page Styles */
+
+/* Main Container */
+.donationsContainer {
+  padding: 24px;
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+/* Donation Form Section */
+.donationFormSection {
+  margin-bottom: 32px;
+  padding: 24px;
+  background-color: #fafafa;
+  border-radius: 16px;
+  border: 1px solid #e8e8e8;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.sectionHeader {
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.sectionTitle {
+  margin: 0 0 8px 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #262626;
+  letter-spacing: 0.5px;
+}
+
+.sectionSubtitle {
+  margin: 0;
+  font-size: 14px;
+  color: #8c8c8c;
+  font-style: italic;
+}
+
+/* Book Card Styles */
+.bookCard {
+  margin-bottom: 24px;
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+}
+
+.bookCardTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #262626;
+  font-weight: 600;
+}
+
+.bookCardIcon {
+  font-size: 18px;
+}
+
+.removeButton {
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+/* Checkbox Styles */
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.checkboxInput {
+  width: 16px;
+  height: 16px;
+}
+
+.checkboxText {
+  font-size: 14px;
+  color: #333;
+}
+
+/* File Upload Styles */
+.fileUploadContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fileUploadDivider {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.fileUploadDividerText {
+  font-size: 12px;
+  color: #8c8c8c;
+}
+
+.fileInputWrapper {
+  position: relative;
+}
+
+.fileInput {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.fileUploadButton {
+  background: #f0f0f0;
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-size: 12px;
+  color: #595959;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.fileName {
+  font-size: 11px;
+  color: #8c8c8c;
+  margin-left: 8px;
+  font-style: italic;
+}
+
+/* Image Preview Styles */
+.imagePreviewContainer {
+  margin-top: 8px;
+  position: relative;
+}
+
+.previewImage {
+  width: 100px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #d9d9d9;
+}
+
+.removeImageButton {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #ff4d4f;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Form Actions */
+.formActions {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.addBookButton {
+  width: 200px;
+}
+
+.submitButton {
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+  border: none;
+  padding: 0 40px;
+  height: 48px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.resetButton {
+  padding: 0 40px;
+  height: 48px;
+  font-size: 16px;
+}
+
+/* Donation Record Management Section */
+.donationRecordSection {
+  margin-bottom: 32px;
+  padding: 24px;
+  background-color: #fafafa;
+  border-radius: 16px;
+  border: 1px solid #e8e8e8;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Statistics Cards Grid */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+/* Statistics Card Base */
+.statCard {
+  padding: 20px;
+  border-radius: 12px;
+  border: 2px solid;
+  box-shadow: 0 4px 16px;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.statCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px;
+}
+
+/* Total Donations Card */
+.totalDonationsCard {
+  background: linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%);
+  border-color: #b7eb8f;
+  box-shadow: 0 4px 16px rgba(82, 196, 26, 0.15);
+}
+
+.totalDonationsCard .statCardTitle {
+  color: #52c41a;
+}
+
+.totalDonationsCard .statCardValue {
+  color: #52c41a;
+}
+
+/* Processing Records Card */
+.processingRecordsCard {
+  background: linear-gradient(135deg, #fff7e6 0%, #ffe7ba 100%);
+  border-color: #ffd591;
+  box-shadow: 0 4px 16px rgba(250, 140, 22, 0.15);
+  cursor: help;
+  position: relative;
+}
+
+.processingRecordsCard .statCardTitle {
+  color: #fa8c16;
+}
+
+.processingRecordsCard .statCardValue {
+  color: #fa8c16;
+}
+
+.processingRecordsCard .hoverHint {
+  font-size: 12px;
+  color: #d48806;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+/* Received Card */
+.receivedCard {
+  background: linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%);
+  border-color: #b7eb8f;
+  box-shadow: 0 4px 16px rgba(82, 196, 26, 0.15);
+}
+
+.receivedCard .statCardTitle {
+  color: #52c41a;
+}
+
+.receivedCard .statCardValue {
+  color: #52c41a;
+}
+
+/* Canceled Card */
+.canceledCard {
+  background: linear-gradient(135deg, #fff2f0 0%, #ffccc7 100%);
+  border-color: #ffbb96;
+  box-shadow: 0 4px 16px rgba(255, 77, 79, 0.15);
+}
+
+.canceledCard .statCardTitle {
+  color: #ff4d4f;
+}
+
+.canceledCard .statCardValue {
+  color: #ff4d4f;
+}
+
+/* Statistics Card Content */
+.statCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  gap: 8px;
+}
+
+.statCardIcon {
+  font-size: 20px;
+}
+
+.statCardTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.statCardValue {
+  font-size: 32px;
+  font-weight: 700;
+}
+
+/* Table Section */
+.tableSection {
+  margin-bottom: 32px;
+  padding: 24px;
+  background-color: #fafafa;
+  border-radius: 16px;
+  border: 1px solid #e8e8e8;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Table Card */
+.tableCard {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e8e8e8;
+}
+
+.tableCardHeader {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-bottom: 2px solid #e8e8e8;
+}
+
+/* Table Header Content */
+.tableHeaderIcon {
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.tableHeaderIcon svg {
+  font-size: 20px;
+}
+
+.tableHeaderText h4 {
+  margin: 0;
+  color: #262626;
+}
+
+.tableHeaderText p {
+  color: #8c8c8c;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Table Styles */
+.donationsTable {
+  border-radius: 8px;
+}
+
+.donationsTable .ant-table-pagination {
+  margin-top: 16px;
+}
+
+/* Table Column Styles */
+.donorIcon {
+  color: #1890ff;
+}
+
+.bookTitleIcon {
+  color: #52c41a;
+}
+
+.categoryTag {
+  border-radius: 6px;
+}
+
+.quantityTag {
+  border-radius: 6px;
+}
+
+.calendarIcon {
+  color: #722ed1;
+}
+
+.statusTag {
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+/* Notes Column */
+.notesText {
+  display: block;
+  word-break: break-word;
+  white-space: normal;
+}
+
+.notesPlaceholder {
+  font-style: italic;
+}
+
+/* Cover Image Styles */
+.coverImage {
+  width: 50px;
+  height: 65px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 2px solid #e8e8e8;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.coverImage:hover {
+  transform: scale(1.05);
+}
+
+.noImagePlaceholder {
+  width: 100px;
+  height: 65px;
+  background: #f5f5f5;
+  border-radius: 6px;
+  border: 2px dashed #d9d9d9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8c8c8c;
+  font-size: 10px;
+}
+
+/* Tooltip Styles */
+.tooltipContent {
+  text-align: left;
+}
+
+.tooltipTitle {
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+/* Loading State */
+.loadingContainer {
+  margin-top: 0;
+}
+
+.loadingTitle {
+  width: 200px;
+  height: 32px;
+  margin-bottom: 24px;
+}
+
+.loadingGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.loadingCard {
+  height: 120px;
+  padding: 16px;
+}
+
+.loadingTable {
+  width: 100%;
+  height: 400px;
+}
+
+/* Image Preview Modal */
+.imagePreviewModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.imagePreviewContent {
+  position: relative;
+}
+
+.fullSizeImage {
+  max-width: 90vw;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.closePreviewButton {
+  position: absolute;
+  top: -40px;
+  right: 0;
+  color: white;
+  font-size: 24px;
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .donationsContainer {
+    padding: 16px;
+  }
+  
+  .donationFormSection,
+  .donationRecordSection,
+  .tableSection {
+    padding: 16px;
+    margin-bottom: 24px;
+  }
+  
+  .statsGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .statCard {
+    padding: 16px;
+  }
+  
+  .sectionTitle {
+    font-size: 20px;
+  }
+  
+  .statCardValue {
+    font-size: 28px;
+  }
+  
+  .submitButton,
+  .resetButton {
+    padding: 0 24px;
+    height: 40px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .donationsContainer {
+    padding: 12px;
+  }
+  
+  .donationFormSection,
+  .donationRecordSection,
+  .tableSection {
+    padding: 12px;
+  }
+  
+  .sectionTitle {
+    font-size: 18px;
+  }
+  
+  .statCard {
+    padding: 12px;
+  }
+  
+  .statCardValue {
+    font-size: 24px;
+  }
+  
+  .submitButton,
+  .resetButton {
+    padding: 0 16px;
+    height: 36px;
+    font-size: 12px;
+  }
+}

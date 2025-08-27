@@ -1,0 +1,623 @@
+/* ShowAllUsers Component Styles */
+
+/* Main Card */
+.mainCard {
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e8e8e8;
+  overflow: hidden;
+}
+
+.mainCardHeader {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-bottom: none;
+  padding: 24px 32px;
+  margin: 0;
+  align-content: center;
+}
+
+.mainCardBody {
+  padding: 32px;
+}
+
+/* Header Content */
+.headerContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: white;
+}
+
+.headerIcon {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+}
+
+.headerIcon svg {
+  font-size: 24px;
+  color: white;
+}
+
+.headerText {
+  text-align: center;
+}
+
+.headerTitle {
+  margin: 0 0 4px 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
+.headerSubtitle {
+  margin: 0;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 400;
+}
+
+/* Statistics Cards Grid */
+.statsGrid {
+  margin-bottom: 32px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.statCard {
+  text-align: center;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f0f0f0;
+}
+
+/* Table Section */
+.tableCard {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e8e8e8;
+}
+
+.tableCardHeader {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-bottom: 2px solid #e8e8e8;
+}
+
+.tableHeaderContent {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.tableHeaderIcon {
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.tableHeaderIcon svg {
+  font-size: 20px;
+}
+
+.tableHeaderText h4 {
+  margin: 0;
+  color: #262626;
+}
+
+.tableHeaderText p {
+  color: #8c8c8c;
+  font-size: 14px;
+}
+
+/* Loading Skeleton */
+.loadingSkeleton {
+  width: 100%;
+  height: 400px;
+}
+
+/* Table Styling */
+.usersTable {
+  border-radius: 8px;
+}
+
+/* Edit User Modal */
+.editModal {
+  width: 700px;
+}
+
+.editModalHeader {
+  border-bottom: 2px solid #f0f0f0;
+  padding: 20px 24px 16px;
+}
+
+.editModalBody {
+  padding: 24px;
+}
+
+.editModalTitle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.editModalIcon {
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.editModalTitleText h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #262626;
+  margin-bottom: 2px;
+}
+
+.editModalTitleText p {
+  font-size: 13px;
+  color: #8c8c8c;
+  font-weight: 400;
+}
+
+/* Account Settings Section */
+.accountSettingsSection {
+  margin-bottom: 32px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%);
+  border-radius: 12px;
+  border: 1px solid #b7eb8f;
+}
+
+.accountSettingsHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.accountSettingsIcon {
+  color: #52c41a;
+  font-size: 16px;
+}
+
+.accountSettingsTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #52c41a;
+}
+
+/* Form Labels */
+.formLabel {
+  font-weight: 500;
+  color: #262626;
+}
+
+.requiredField {
+  color: #ff4d4f;
+}
+
+/* Select Options */
+.selectOption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.selectOptionIcon {
+  color: #1890ff;
+}
+
+.selectOptionIconAdmin {
+  color: #ff4d4f;
+}
+
+.selectOptionIconActive {
+  color: #52c41a;
+}
+
+.selectOptionIconInactive {
+  color: #fa8c16;
+}
+
+/* Action Buttons */
+.actionButtons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 20px 0 0 0;
+  border-top: 1px solid #f0f0f0;
+}
+
+.cancelButton {
+  padding: 0 24px;
+  height: 40px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.updateButton {
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  border: none;
+  padding: 0 32px;
+  height: 40px;
+  border-radius: 8px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* User Details Modal */
+.userDetailsModal {
+  width: 1000px;
+}
+
+.userDetailsModalHeader {
+  border-bottom: 2px solid #f0f0f0;
+  padding: 20px 24px 16px;
+}
+
+.userDetailsModalBody {
+  padding: 24px;
+}
+
+.userDetailsModalTitle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.userDetailsModalIcon {
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.userDetailsModalTitleText h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #262626;
+  margin-bottom: 2px;
+}
+
+.userDetailsModalTitleText p {
+  font-size: 13px;
+  color: #8c8c8c;
+  font-weight: 400;
+}
+
+/* Basic Information Card */
+.basicInfoCard {
+  margin-bottom: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f0f0f0;
+}
+
+.basicInfoCardTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.basicInfoCardIcon {
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.basicInfoCardIcon svg {
+  font-size: 14px;
+}
+
+.basicInfoContent {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e8e8e8;
+}
+
+/* Info Item */
+.infoItem {
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #f0f0f0;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.infoItemIcon {
+  margin-bottom: 8px;
+}
+
+.infoItemIcon svg {
+  font-size: 20px;
+  color: #1890ff;
+  margin-bottom: 4px;
+}
+
+.infoItemLabel {
+  color: #8c8c8c;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.infoItemValue {
+  margin-top: 8px;
+}
+
+.infoItemValueText {
+  font-size: 16px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.infoItemValueEmail {
+  font-size: 14px;
+  color: #1890ff;
+  font-weight: 500;
+}
+
+/* Email Icon */
+.emailIcon {
+  background: linear-gradient(135deg, #52c41a 0%, #389e0d 100%);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.emailIcon span {
+  color: white;
+  font-size: 16px;
+}
+
+/* Role Icon */
+.roleIcon {
+  background: linear-gradient(135deg, #722ed1 0%, #531dab 100%);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.roleIcon span {
+  color: white;
+  font-size: 16px;
+}
+
+/* Role Tag */
+.roleTag {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: none;
+}
+
+/* Donations and Loans Cards */
+.donationsCard,
+.loansCard {
+  margin-bottom: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .statsGrid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+  }
+  
+  .mainCardBody {
+    padding: 24px;
+  }
+  
+  .headerTitle {
+    font-size: 24px;
+  }
+  
+  .headerSubtitle {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 768px) {
+  .mainCardHeader {
+    padding: 16px 20px;
+  }
+  
+  .mainCardBody {
+    padding: 20px 16px;
+  }
+  
+  .headerContent {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .headerIcon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .headerIcon svg {
+    font-size: 20px;
+  }
+  
+  .headerTitle {
+    font-size: 20px;
+  }
+  
+  .headerSubtitle {
+    font-size: 13px;
+  }
+  
+  .statsGrid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+  }
+  
+  .editModal,
+  .userDetailsModal {
+    width: 90vw;
+    max-width: 600px;
+  }
+  
+  .editModalBody,
+  .userDetailsModalBody {
+    padding: 16px;
+  }
+  
+  .accountSettingsSection {
+    padding: 16px;
+    margin-bottom: 24px;
+  }
+  
+  .actionButtons {
+    padding: 16px 0 0 0;
+  }
+  
+  .basicInfoContent {
+    padding: 16px;
+  }
+  
+  .infoItem {
+    height: 100px;
+    padding: 12px;
+  }
+  
+  .infoItemValueText {
+    font-size: 14px;
+  }
+  
+  .infoItemValueEmail {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .mainCardHeader {
+    padding: 12px 16px;
+  }
+  
+  .mainCardBody {
+    padding: 16px 12px;
+  }
+  
+  .headerIcon {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .headerIcon svg {
+    font-size: 16px;
+  }
+  
+  .headerTitle {
+    font-size: 18px;
+  }
+  
+  .headerSubtitle {
+    font-size: 12px;
+  }
+  
+  .statsGrid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  
+  .editModal,
+  .userDetailsModal {
+    width: 95vw;
+    max-width: 400px;
+  }
+  
+  .editModalBody,
+  .userDetailsModalBody {
+    padding: 12px;
+  }
+  
+  .accountSettingsSection {
+    padding: 12px;
+    margin-bottom: 20px;
+  }
+  
+  .actionButtons {
+    flex-direction: column;
+    padding: 12px 0 0 0;
+  }
+  
+  .cancelButton,
+  .updateButton {
+    width: 100%;
+  }
+  
+  .basicInfoContent {
+    padding: 12px;
+  }
+  
+  .infoItem {
+    height: 80px;
+    padding: 8px;
+  }
+  
+  .infoItemIcon svg {
+    font-size: 16px;
+  }
+  
+  .infoItemLabel {
+    font-size: 10px;
+  }
+  
+  .infoItemValueText {
+    font-size: 12px;
+  }
+  
+  .infoItemValueEmail {
+    font-size: 11px;
+  }
+}

@@ -15,6 +15,7 @@ import {
   ACTION_CONFIGS,
   STATUS_CONFIGS
 } from "../components/LoanActionComponents";
+import styles from "../styles/pages/loanRecords/LoanRecords.module.css";
 
 const { Title, Text } = Typography;
 
@@ -228,7 +229,7 @@ export default function LoanRecords() {
       width: 220,
       render: (text) => (
         <Space>
-          <UserOutlined style={{ color: "#1890ff" }} />
+          <UserOutlined className={styles.borrowerIcon} />
           <Text strong>{text}</Text>
         </Space>
       ),
@@ -241,7 +242,7 @@ export default function LoanRecords() {
       width: 350,
       render: (text) => (
         <Space>
-          <BookOutlined style={{ color: "#52c41a" }} />
+          <BookOutlined className={styles.bookIcon} />
           <Text>{text}</Text>
         </Space>
       ),
@@ -253,7 +254,7 @@ export default function LoanRecords() {
       align: "center" as const,
       width: 80,
       render: (quantity) => (
-        <Tag color="blue" style={{ borderRadius: "6px" }}>
+        <Tag color="blue" className={styles.quantityTag}>
           {quantity}
         </Tag>
       ),
@@ -285,7 +286,7 @@ export default function LoanRecords() {
       width: 140,
       render: (date) => (
         <Space>
-          <CalendarOutlined style={{ color: "#722ed1" }} />
+          <CalendarOutlined className={styles.calendarIcon} />
           <Text>{formatDate(date)}</Text>
         </Space>
       ),
@@ -332,10 +333,7 @@ export default function LoanRecords() {
         <Tag 
           color={getStatusColor(status)} 
           icon={getStatusIcon(status)}
-          style={{ 
-            borderRadius: "6px",
-            fontWeight: "500"
-          }}
+          className={styles.statusTag}
         >
           {status === "pending" && "Pending"}
           {status === "delivered" && "Delivered"}
@@ -358,18 +356,12 @@ export default function LoanRecords() {
 
   if (isLoading) {
     return (
-      <div style={{ 
-        minHeight: "100vh", 
-        padding: "24px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "16px"
-      }}>
-        <Skeleton.Input active size="large" style={{ width: "200px", height: "32px" }} />
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "16px" }}>
+      <div className={styles.loadingContainer}>
+        <Skeleton.Input active size="large" className={styles.loadingTitle} />
+        <div className={styles.loadingGrid}>
           {[...Array(8)].map((_, index) => (
             <Skeleton key={index} active>
-              <div style={{ height: "120px", padding: "16px" }} />
+              <div className={styles.loadingCard} />
             </Skeleton>
           ))}
         </div>
@@ -378,79 +370,30 @@ export default function LoanRecords() {
   }
 
   return (
-    <div style={{ padding: '24px' }}>
+    <div className={styles.loanRecordsContainer}>
       {/* Enhanced Header Section */}
-      <div style={{ 
-        marginBottom: '32px',
-        padding: '24px',
-        backgroundColor: '#fafafa',
-        borderRadius: '16px',
-        border: '1px solid #e8e8e8',
-        boxShadow: '0 2px 12px rgba(0,0,0,0.08)'
-      }}>
+      <div className={styles.headerSection}>
         {/* Header */}
-        <div style={{ 
-          marginBottom: '24px',
-          textAlign: 'center'
-        }}>
-          <h2 style={{ 
-            margin: '0 0 8px 0',
-            fontSize: '24px',
-            fontWeight: '700',
-            color: '#262626',
-            letterSpacing: '0.5px'
-          }}>
+        <div className={styles.headerContent}>
+          <h2 className={styles.headerTitle}>
             📚 Loan Records Management
           </h2>
-          <p style={{ 
-            margin: '0',
-            fontSize: '14px',
-            color: '#8c8c8c',
-            fontStyle: 'italic'
-          }}>
+          <p className={styles.headerSubtitle}>
             Track and manage all book loan transactions efficiently
           </p>
         </div>
 
         {/* Statistics Cards Grid */}
-        <div style={{ 
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '20px',
-          marginBottom: '24px'
-        }}>
+        <div className={styles.statsGrid}>
           {/* Total Transactions */}
-          <div style={{ 
-            padding: '20px',
-            background: 'linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%)',
-            borderRadius: '12px',
-            border: '2px solid #b7eb8f',
-            boxShadow: '0 4px 16px rgba(82, 196, 26, 0.15)',
-            transition: 'all 0.3s ease',
-            textAlign: 'center'
-          }}>
-            <div style={{ 
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '16px',
-              gap: '8px'
-            }}>
-              <span style={{ fontSize: '20px' }}>📊</span>
-              <h3 style={{ 
-                margin: '0',
-                fontSize: '16px',
-                fontWeight: '600',
-                color: '#52c41a'
-              }}>
+          <div className={`${styles.statCard} ${styles.totalTransactionsCard}`}>
+            <div className={styles.statCardHeader}>
+              <span className={styles.statCardIcon}>📊</span>
+              <h3 className={styles.statCardTitle}>
                 Total Transactions
               </h3>
             </div>
-            <div style={{ 
-              fontSize: '32px',
-              fontWeight: '700',
-              color: '#52c41a'
-            }}>
+            <div className={styles.statCardValue}>
               {totalRecords}
             </div>
           </div>
@@ -458,8 +401,8 @@ export default function LoanRecords() {
           {/* Processing Records */}
           <Tooltip
             title={
-              <div style={{ textAlign: 'left' }}>
-                <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>Processing Records Breakdown:</div>
+              <div className={styles.tooltipContent}>
+                <div className={styles.tooltipTitle}>Processing Records Breakdown:</div>
                 <div>• Pending: {pendingRecords}</div>
                 <div>• Delivered: {deliveredRecords}</div>
                 <div>• Received: {receivedRecords}</div>
@@ -469,122 +412,44 @@ export default function LoanRecords() {
             placement="top"
             color="#fa8c16"
           >
-            <div 
-              style={{ 
-                padding: '20px',
-                background: 'linear-gradient(135deg, #fff7e6 0%, #ffe7ba 100%)',
-                borderRadius: '12px',
-                border: '2px solid #ffd591',
-                boxShadow: '0 4px 16px rgba(250, 140, 22, 0.15)',
-                transition: 'all 0.3s ease',
-                textAlign: 'center',
-                cursor: 'help',
-                position: 'relative'
-              }}
-            >
-              <div style={{ 
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: '16px',
-                gap: '8px'
-              }}>
-                <span style={{ fontSize: '20px' }}>⚡</span>
-                <h3 style={{ 
-                  margin: '0',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  color: '#fa8c16'
-                }}>
+            <div className={`${styles.statCard} ${styles.processingRecordsCard}`}>
+              <div className={styles.statCardHeader}>
+                <span className={styles.statCardIcon}>⚡</span>
+                <h3 className={styles.statCardTitle}>
                   Processing Records
                 </h3>
               </div>
-              <div style={{ 
-                fontSize: '32px',
-                fontWeight: '700',
-                color: '#fa8c16'
-              }}>
+              <div className={styles.statCardValue}>
                 {processingRecords}
               </div>
-              <div style={{ 
-                fontSize: '12px',
-                color: '#d48806',
-                marginTop: '4px',
-                fontStyle: 'italic'
-              }}>
+              <div className={styles.hoverHint}>
                 Hover for details
               </div>
             </div>
           </Tooltip>
 
           {/* Completed */}
-          <div style={{ 
-            padding: '20px',
-            background: 'linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%)',
-            borderRadius: '12px',
-            border: '2px solid #b7eb8f',
-            boxShadow: '0 4px 16px rgba(82, 196, 26, 0.15)',
-            transition: 'all 0.3s ease',
-            textAlign: 'center'
-          }}>
-            <div style={{ 
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '16px',
-              gap: '8px'
-            }}>
-              <span style={{ fontSize: '20px' }}>✅</span>
-              <h3 style={{ 
-                margin: '0',
-                fontSize: '16px',
-                fontWeight: '600',
-                color: '#52c41a'
-              }}>
+          <div className={`${styles.statCard} ${styles.completedCard}`}>
+            <div className={styles.statCardHeader}>
+              <span className={styles.statCardIcon}>✅</span>
+              <h3 className={styles.statCardTitle}>
                 Completed
               </h3>
             </div>
-            <div style={{ 
-              fontSize: '32px',
-              fontWeight: '700',
-              color: '#52c41a'
-            }}>
+            <div className={styles.statCardValue}>
               {completedRecords}
             </div>
           </div>
 
           {/* Canceled */}
-          <div style={{ 
-            padding: '20px',
-            background: 'linear-gradient(135deg, #fff2f0 0%, #ffccc7 100%)',
-            borderRadius: '12px',
-            border: '2px solid #ffbb96',
-            boxShadow: '0 4px 16px rgba(255, 77, 79, 0.15)',
-            transition: 'all 0.3s ease',
-            textAlign: 'center'
-          }}>
-            <div style={{ 
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '16px',
-              gap: '8px'
-            }}>
-              <span style={{ fontSize: '20px' }}>❌</span>
-              <h3 style={{ 
-                margin: '0',
-                fontSize: '16px',
-                fontWeight: '600',
-                color: '#ff4d4f'
-              }}>
+          <div className={`${styles.statCard} ${styles.canceledCard}`}>
+            <div className={styles.statCardHeader}>
+              <span className={styles.statCardIcon}>❌</span>
+              <h3 className={styles.statCardTitle}>
                 Canceled
               </h3>
             </div>
-            <div style={{ 
-              fontSize: '32px',
-              fontWeight: '700',
-              color: '#ff4d4f'
-            }}>
+            <div className={styles.statCardValue}>
               {canceledRecords}
             </div>
           </div>
@@ -595,39 +460,26 @@ export default function LoanRecords() {
       <Card 
         title={
           <Space size="large">
-            <div style={{ 
-              background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
-              borderRadius: '50%',
-              width: '40px',
-              height: '40px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'white'
-            }}>
-              <TeamOutlined style={{ fontSize: '20px' }} />
+            <div className={styles.tableHeaderIcon}>
+              <TeamOutlined />
             </div>
-            <div>
-              <Title level={4} style={{ margin: 0, color: '#262626' }}>
+            <div className={styles.tableHeaderText}>
+              <Title level={4}>
                 Loan Records Details
               </Title>
-              <Text style={{ color: '#8c8c8c', fontSize: '14px' }}>
+              <Text>
                 Detailed view of all book loan transactions with status tracking
               </Text>
             </div>
           </Space>
         }
-        style={{ 
-          borderRadius: '12px', 
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-          border: '1px solid #e8e8e8'
-        }}
-          styles={{
-           header: {
-             background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
-             borderBottom: '2px solid #e8e8e8'
-           }
-         }}
+        className={styles.tableCard}
+        styles={{
+         header: {
+           background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
+           borderBottom: '2px solid #e8e8e8'
+         }
+       }}
       >
         <Table
           columns={columns}
@@ -639,12 +491,12 @@ export default function LoanRecords() {
             showQuickJumper: true,
             showTotal: (total, range) => 
               `${range[0]}-${range[1]} of ${total} transactions`,
-            style: { marginTop: '16px' }
+            className: styles.paginationStyle
           }}
           scroll={{ x: 2230 }}
           size="small"
           bordered
-          style={{ borderRadius: '8px' }}
+          className={styles.loanRecordsTable}
         />
       </Card>
     </div>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Modal, Button, InputNumber } from 'antd';
 import { Book } from '../interface/book';
+import styles from '../styles/components/LoanModal.module.css';
 
 interface LoanModalProps {
   isVisible: boolean;
@@ -26,15 +27,8 @@ export default function LoanModal({
   return (
     <Modal
         title={
-            <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '12px',
-                fontSize: '18px',
-                fontWeight: '600',
-                color: '#1f1f1f'
-            }}>
-                <span style={{ fontSize: '24px' }}>📚</span>
+            <div className={styles.modalTitle}>
+                <span className={styles.titleIcon}>📚</span>
                 Borrow Book: {book.name}
             </div>
         }
@@ -50,12 +44,7 @@ export default function LoanModal({
             onClick={onConfirm}
             loading={isSubmitting}
             size="large"
-            style={{
-                background: 'linear-gradient(135deg, #52c41a 0%, #389e0d 100%)',
-                border: 'none',
-                borderRadius: '8px',
-                fontWeight: '600'
-            }}
+            className={styles.confirmButton}
             >
                 {isSubmitting ? 'Processing...' : 'Confirm Borrow'}
             </Button>
@@ -64,164 +53,73 @@ export default function LoanModal({
         centered
         destroyOnHidden
     >
-        <div style={{ padding: '20px 0' }}>
+        <div className={styles.modalContent}>
             {/* Book Information */}
-            <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '16px',
-                padding: '20px',
-                backgroundColor: '#f8f9fa',
-                borderRadius: '12px',
-                border: '1px solid #e9ecef',
-                marginBottom: '24px'
-            }}>
+            <div className={styles.bookInfoSection}>
                 <img 
                     src={book.coverImage} 
                     alt={book.name}
-                    style={{
-                    width: '80px',
-                    height: '100px',
-                    objectFit: 'cover',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-                    }}
+                    className={styles.bookCoverImage}
                 />
-                <div>
-                    <div style={{ 
-                    fontSize: '16px', 
-                    fontWeight: '600', 
-                    color: '#1f1f1f',
-                    marginBottom: '8px'
-                    }}>
+                <div className={styles.bookDetails}>
+                    <div className={styles.bookName}>
                         {book.name}
                     </div>
-                    <div style={{ 
-                    fontSize: '14px', 
-                    color: '#666',
-                    marginBottom: '4px'
-                    }}>
+                    <div className={styles.bookAuthor}>
                         Author: {book.author}
                     </div>
-                    <div style={{ 
-                    fontSize: '14px', 
-                    color: '#666'
-                    }}>
+                    <div className={styles.bookCategory}>
                         Category: {book.category}
                     </div>
                 </div>
             </div>
 
             {/* Book Statistics */}
-            <div style={{ 
-            display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: '16px',
-            marginBottom: '24px'
-            }}>
-                <div style={{ 
-                    textAlign: 'center',
-                    padding: '16px',
-                    backgroundColor: '#f6ffed',
-                    borderRadius: '8px',
-                    border: '1px solid #b7eb8f'
-                }}>
-                    <div style={{ 
-                    fontSize: '24px', 
-                    fontWeight: 'bold', 
-                    color: '#52c41a',
-                    marginBottom: '4px'
-                    }}>
+            <div className={styles.bookStatsGrid}>
+                <div className={`${styles.statCard} ${styles.statCardAvailable}`}>
+                    <div className={`${styles.statNumber} ${styles.statNumberAvailable}`}>
                     {book.status.available}
                     </div>
-                    <div style={{ fontSize: '14px', color: '#52c41a' }}>Available</div>
+                    <div className={`${styles.statLabel} ${styles.statLabelAvailable}`}>Available</div>
                 </div>
-                <div style={{ 
-                    textAlign: 'center',
-                    padding: '16px',
-                    backgroundColor: '#fff7e6',
-                    borderRadius: '8px',
-                    border: '1px solid #ffd591'
-                }}>
-                    <div style={{ 
-                    fontSize: '24px', 
-                    fontWeight: 'bold', 
-                    color: '#fa8c16',
-                    marginBottom: '4px'
-                    }}>
+                <div className={`${styles.statCard} ${styles.statCardLoaned}`}>
+                    <div className={`${styles.statNumber} ${styles.statNumberLoaned}`}>
                     {book.status.loaned}
                     </div>
-                    <div style={{ fontSize: '14px', color: '#fa8c16' }}>Loaned</div>
+                    <div className={`${styles.statLabel} ${styles.statLabelLoaned}`}>Loaned</div>
                 </div>
             </div>
 
             {/* Select Loan Quantity */}
-            <div style={{ 
-            padding: '20px',
-            backgroundColor: '#f0f8ff',
-            borderRadius: '12px',
-            border: '1px solid #d6e4ff'
-            }}>
-                <div style={{ 
-                    fontSize: '16px', 
-                    fontWeight: '600', 
-                    color: '#1890ff',
-                    marginBottom: '16px',
-                    textAlign: 'center'
-                }}>
+            <div className={styles.quantitySection}>
+                <div className={styles.quantityTitle}>
                     Select quantity to borrow:
                 </div>
-                <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center',
-                    gap: '16px'
-                }}>
+                <div className={styles.quantityInputContainer}>
                     <InputNumber
                     min={1}
                     max={book.status.available}
                     value={loanQuantity}
                     onChange={onQuantityChange}
                     size="large"
-                    style={{
-                        width: '120px',
-                        fontSize: '16px',
-                        fontWeight: '600'
-                    }}
+                    className={styles.quantityInput}
                     addonAfter={
-                        <span style={{ fontSize: '14px', color: '#666' }}>
+                        <span className={styles.quantityInputAddon}>
                         copies
                         </span>
                     }
                     />
                 </div>
-                <div style={{ 
-                    textAlign: 'center',
-                    marginTop: '12px',
-                    fontSize: '14px',
-                    color: '#666'
-                }}>
-                    Maximum: <strong style={{ color: '#1890ff' }}>{book.status.available}</strong> copies
+                <div className={styles.quantityMaxInfo}>
+                    Maximum: <strong className={styles.quantityMaxNumber}>{book.status.available}</strong> copies
                 </div>
             </div>
 
             {/* Notification */}
-            <div style={{ 
-            padding: '16px',
-            backgroundColor: '#fff2e8',
-            borderRadius: '8px',
-            border: '1px solid #ffd591',
-            marginTop: '16px'
-            }}>
-                <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '8px',
-                    fontSize: '14px',
-                    color: '#d46b08'
-                }}>
-                <span>ℹ️</span>
-                <strong>Note:</strong> Loan quantity cannot exceed the number of available.
+            <div className={styles.notificationSection}>
+                <div className={styles.notificationContent}>
+                <span className={styles.notificationIcon}>ℹ️</span>
+                <strong className={styles.notificationText}>Note:</strong> Loan quantity cannot exceed the number of available.
                 </div>
             </div>
         </div>

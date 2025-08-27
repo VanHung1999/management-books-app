@@ -33,6 +33,8 @@ import { User } from '../interface/user';
 import type { ColumnsType } from "antd/es/table";
 import { LoanRecord } from '../interface/loanRecord';
 import { DonationRecord } from '../interface/donationRecord';
+import styles from '../styles/components/ShowAllUsers.module.css';
+
 const { Title, Text } = Typography;
 const { Option } = Select;
 
@@ -261,12 +263,7 @@ export default function ShowAllUsers() {
 
   return (
     <Card
-      style={{
-        borderRadius: '16px',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-        border: '1px solid #e8e8e8',
-        overflow: 'hidden'
-      }}
+      className={styles.mainCard}
       styles={{
         header: {
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -280,42 +277,15 @@ export default function ShowAllUsers() {
         }
       }}
       title={
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center',
-          gap: '16px',
-          color: 'white'
-        }}>
-          <div style={{
-            background: 'rgba(255,255,255,0.2)',
-            borderRadius: '50%',
-            width: '48px',
-            height: '48px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backdropFilter: 'blur(10px)'
-          }}>
-            <TeamOutlined style={{ fontSize: '24px', color: 'white' }} />
+        <div className={styles.headerContent}>
+          <div className={styles.headerIcon}>
+            <TeamOutlined />
           </div>
-          <div>
-            <h1 style={{ 
-              margin: '0 0 4px 0',
-              fontSize: '28px',
-              fontWeight: '700',
-              color: 'white',
-              letterSpacing: '0.5px',
-              textAlign: 'center'
-            }}>
+          <div className={styles.headerText}>
+            <h1 className={styles.headerTitle}>
               User Management
             </h1>
-            <p style={{ 
-              margin: '0',
-              fontSize: '16px',
-              color: 'rgba(255,255,255,0.9)',
-              fontWeight: '400'
-            }}>
+            <p className={styles.headerSubtitle}>
               Manage all system users and their permissions
             </p>
           </div>
@@ -324,21 +294,9 @@ export default function ShowAllUsers() {
     >
       {/* Statistics Cards */}
       {!loadingUsers && (
-        <div style={{ 
-          marginBottom: '32px',
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '20px'
-        }}>
+        <div className={styles.statsGrid}>
           {/* Total Users */}
-          <Card 
-            style={{ 
-              textAlign: 'center',
-              borderRadius: '12px',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-              border: '1px solid #f0f0f0'
-            }}
-          >
+          <Card className={styles.statCard}>
             <Statistic
               title="Total Users"
               value={totalUsers}
@@ -348,14 +306,7 @@ export default function ShowAllUsers() {
           </Card>
 
           {/* Admin Users */}
-          <Card 
-            style={{ 
-              textAlign: 'center',
-              borderRadius: '12px',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-              border: '1px solid #f0f0f0'
-            }}
-          >
+          <Card className={styles.statCard}>
             <Statistic
               title="Admin Users"
               value={adminUsers}
@@ -365,14 +316,7 @@ export default function ShowAllUsers() {
           </Card>
 
           {/* Regular Users */}
-          <Card 
-            style={{ 
-              textAlign: 'center',
-              borderRadius: '12px',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-              border: '1px solid #f0f0f0'
-            }}
-          >
+          <Card className={styles.statCard}>
             <Statistic
               title="Regular Users"
               value={regularUsers}
@@ -382,14 +326,7 @@ export default function ShowAllUsers() {
           </Card>
 
           {/* Active Users */}
-          <Card 
-            style={{ 
-              textAlign: 'center',
-              borderRadius: '12px',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-              border: '1px solid #f0f0f0'
-            }}
-          >
+          <Card className={styles.statCard}>
             <Statistic
               title="Active Users"
               value={activeUsers}
@@ -399,14 +336,7 @@ export default function ShowAllUsers() {
           </Card>
 
           {/* Inactive Users */}
-          <Card 
-            style={{ 
-              textAlign: 'center',
-              borderRadius: '12px',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-              border: '1px solid #f0f0f0'
-            }}
-          >
+          <Card className={styles.statCard}>
             <Statistic
               title="Inactive Users"
               value={inactiveUsers}
@@ -421,33 +351,20 @@ export default function ShowAllUsers() {
       <Card 
         title={
           <Space size="large">
-            <div style={{ 
-              background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
-              borderRadius: '50%',
-              width: '40px',
-              height: '40px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'white'
-            }}>
-              <TeamOutlined style={{ fontSize: '20px' }} />
+            <div className={styles.tableHeaderIcon}>
+              <TeamOutlined />
             </div>
-            <div>
-              <Title level={4} style={{ margin: 0, color: '#262626' }}>
+            <div className={styles.tableHeaderText}>
+              <Title level={4}>
                 Users Details
               </Title>
-              <Text style={{ color: '#8c8c8c', fontSize: '14px' }}>
+              <Text>
                 View and manage all system users
               </Text>
             </div>
           </Space>
         }
-        style={{ 
-          borderRadius: '12px', 
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-          border: '1px solid #e8e8e8'
-        }}
+        className={styles.tableCard}
         styles={{
           header: {
             background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
@@ -456,7 +373,7 @@ export default function ShowAllUsers() {
         }}
       >
         {loadingUsers ? (
-          <Skeleton.Input active size="large" style={{ width: "100%", height: "400px" }} />
+          <Skeleton.Input active size="large" className={styles.loadingSkeleton} />
         ) : (
           <Table
             columns={columns}
@@ -473,7 +390,7 @@ export default function ShowAllUsers() {
             scroll={{ x: 1200 }}
             size="small"
             bordered
-            style={{ borderRadius: '8px' }}
+            className={styles.usersTable}
           />
         )}
       </Card>
@@ -481,38 +398,15 @@ export default function ShowAllUsers() {
       {/* Edit User Modal */}
       <Modal
         title={
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '12px',
-            padding: '8px 0'
-          }}>
-            <div style={{
-              background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
-              borderRadius: '50%',
-              width: '32px',
-              height: '32px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'white'
-            }}>
+          <div className={styles.editModalTitle}>
+            <div className={styles.editModalIcon}>
               <EditOutlined />
             </div>
-            <div>
-              <div style={{ 
-                fontSize: '18px', 
-                fontWeight: '600', 
-                color: '#262626',
-                marginBottom: '2px'
-              }}>
+            <div className={styles.editModalTitleText}>
+              <div>
                 Edit User
               </div>
-              <div style={{ 
-                fontSize: '13px', 
-                color: '#8c8c8c',
-                fontWeight: '400'
-              }}>
+              <div>
                 Update user information
               </div>
             </div>
@@ -522,6 +416,7 @@ export default function ShowAllUsers() {
         onCancel={() => setIsModalVisible(false)}
         footer={null}
         width={700}
+        className={styles.editModal}
         styles={{
           header: {
             borderBottom: '2px solid #f0f0f0',
@@ -546,25 +441,10 @@ export default function ShowAllUsers() {
           size="large"
         >
           {/* Account Settings Section */}
-          <div style={{ 
-            marginBottom: '32px',
-            padding: '20px',
-            background: 'linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%)',
-            borderRadius: '12px',
-            border: '1px solid #b7eb8f'
-          }}>
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '8px',
-              marginBottom: '16px'
-            }}>
-              <span style={{ color: '#52c41a', fontSize: '16px' }}>⚙️</span>
-              <Text style={{ 
-                fontSize: '16px', 
-                fontWeight: '600', 
-                color: '#52c41a' 
-              }}>
+          <div className={styles.accountSettingsSection}>
+            <div className={styles.accountSettingsHeader}>
+              <span className={styles.accountSettingsIcon}>⚙️</span>
+              <Text className={styles.accountSettingsTitle}>
                 Account Settings
               </Text>
             </div>
@@ -574,8 +454,8 @@ export default function ShowAllUsers() {
                 <Form.Item
                   name="role"
                   label={
-                    <span style={{ fontWeight: '500', color: '#262626' }}>
-                      User Role <span style={{ color: '#ff4d4f' }}>*</span>
+                    <span className={styles.formLabel}>
+                      User Role <span className={styles.requiredField}>*</span>
                     </span>
                   }
                   rules={[{ required: true, message: 'Please select the role!' }]}
@@ -586,14 +466,14 @@ export default function ShowAllUsers() {
                     suffixIcon={<UserOutlined style={{ color: '#bfbfbf' }} />}
                   >
                     <Option value="user">
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <UserOutlined style={{ color: '#1890ff' }} />
+                      <div className={styles.selectOption}>
+                        <UserOutlined className={styles.selectOptionIcon} />
                         <span>Regular User</span>
                       </div>
                     </Option>
                     <Option value="admin">
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <UserOutlined style={{ color: '#ff4d4f' }} />
+                      <div className={styles.selectOption}>
+                        <UserOutlined className={styles.selectOptionIconAdmin} />
                         <span>Administrator</span>
                       </div>
                     </Option>
@@ -604,8 +484,8 @@ export default function ShowAllUsers() {
                 <Form.Item
                   name="status"
                   label={
-                    <span style={{ fontWeight: '500', color: '#262626' }}>
-                        Account Status <span style={{ color: '#ff4d4f' }}>*</span>
+                    <span className={styles.formLabel}>
+                        Account Status <span className={styles.requiredField}>*</span>
                     </span>
                   }
                   rules={[{ required: true, message: 'Please select the status!' }]}
@@ -616,14 +496,14 @@ export default function ShowAllUsers() {
                     suffixIcon={<CheckCircleOutlined style={{ color: '#bfbfbf' }} />}
                   >
                     <Option value="active">
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <CheckCircleOutlined style={{ color: '#52c41a' }} />
+                      <div className={styles.selectOption}>
+                        <CheckCircleOutlined className={styles.selectOptionIconActive} />
                         <span>Active</span>
                       </div>
                     </Option>
                     <Option value="inactive">
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <CloseCircleOutlined style={{ color: '#fa8c16' }} />
+                      <div className={styles.selectOption}>
+                        <CloseCircleOutlined className={styles.selectOptionIconInactive} />
                         <span>Inactive</span>
                       </div>
                     </Option>
@@ -634,22 +514,11 @@ export default function ShowAllUsers() {
           </div>
 
           {/* Action Buttons */}
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'flex-end', 
-            gap: '12px',
-            padding: '20px 0 0 0',
-            borderTop: '1px solid #f0f0f0'
-          }}>
+          <div className={styles.actionButtons}>
             <Button 
               size="large"
               onClick={() => setIsModalVisible(false)}
-              style={{
-                padding: '0 24px',
-                height: '40px',
-                borderRadius: '8px',
-                fontWeight: '500'
-              }}
+              className={styles.cancelButton}
             >
               Cancel
             </Button>
@@ -658,15 +527,7 @@ export default function ShowAllUsers() {
               htmlType="submit"
               loading={isLoading}
               size="large"
-              style={{
-                background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
-                border: 'none',
-                padding: '0 32px',
-                height: '40px',
-                borderRadius: '8px',
-                fontWeight: '600',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-              }}
+              className={styles.updateButton}
             >
               Update User
             </Button>
@@ -677,38 +538,15 @@ export default function ShowAllUsers() {
       {/* User Details Modal */}
       <Modal
         title={
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '12px',
-            padding: '8px 0'
-          }}>
-            <div style={{
-              background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
-              borderRadius: '50%',
-              width: '32px',
-              height: '32px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'white'
-            }}>
+          <div className={styles.userDetailsModalTitle}>
+            <div className={styles.userDetailsModalIcon}>
               <UserOutlined />
             </div>
-            <div>
-              <div style={{ 
-                fontSize: '18px', 
-                fontWeight: '600', 
-                color: '#262626',
-                marginBottom: '2px'
-              }}>
+            <div className={styles.userDetailsModalTitleText}>
+              <div>
                 User Details
               </div>
-              <div style={{ 
-                fontSize: '13px', 
-                color: '#8c8c8c',
-                fontWeight: '400'
-              }}>
+              <div>
                 {selectedUser?.name} - {selectedUser?.email}
               </div>
             </div>
@@ -718,6 +556,7 @@ export default function ShowAllUsers() {
         onCancel={() => setIsUserDetailsVisible(false)}
         footer={null}
         width={1000}
+        className={styles.userDetailsModal}
         styles={{
           header: {
             borderBottom: '2px solid #f0f0f0',
@@ -733,77 +572,28 @@ export default function ShowAllUsers() {
             {/* User Basic Info */}
             <Card 
               title={
-                <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '8px',
-                    fontSize: '16px',
-                    fontWeight: '600'
-                }}>
-                  <div style={{
-                    background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
-                    borderRadius: '50%',
-                    width: '24px',
-                    height: '24px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white'
-                  }}>
-                    <UserOutlined style={{ fontSize: '14px' }} />
+                <div className={styles.basicInfoCardTitle}>
+                  <div className={styles.basicInfoCardIcon}>
+                    <UserOutlined />
                   </div>
                   <span>Basic Information</span>
                 </div>
               }
-              style={{ 
-                marginBottom: '20px',
-                borderRadius: '12px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-                border: '1px solid #f0f0f0'
-              }}
+              className={styles.basicInfoCard}
               size="small"
             >
-              <div style={{
-                background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
-                padding: '20px',
-                borderRadius: '8px',
-                border: '1px solid #e8e8e8'
-              }}>
+              <div className={styles.basicInfoContent}>
                 <Row gutter={[24, 16]}>
                   <Col span={8}>
-                    <div style={{
-                      background: 'white',
-                      padding: '16px',
-                      borderRadius: '8px',
-                      border: '1px solid #f0f0f0',
-                      textAlign: 'center',
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-                      height: '120px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'center'
-                    }}>
-                      <div style={{ marginBottom: '8px' }}>
-                        <UserOutlined style={{ 
-                            fontSize: '20px', 
-                            color: '#1890ff',
-                            marginBottom: '4px'
-                        }} />
+                    <div className={styles.infoItem}>
+                      <div className={styles.infoItemIcon}>
+                        <UserOutlined />
                       </div>
-                      <Text strong style={{ 
-                        color: '#8c8c8c', 
-                        fontSize: '12px',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.5px'
-                      }}>
+                      <Text className={styles.infoItemLabel}>
                         Full Name
                       </Text>
-                      <div style={{ marginTop: '8px' }}>
-                        <Text style={{ 
-                            fontSize: '16px', 
-                            fontWeight: '600',
-                            color: '#262626'
-                        }}>
+                      <div className={styles.infoItemValue}>
+                        <Text className={styles.infoItemValueText}>
                           {selectedUser.name}
                         </Text>
                       </div>
@@ -811,46 +601,15 @@ export default function ShowAllUsers() {
                   </Col>
                     
                   <Col span={8}>
-                    <div style={{
-                      background: 'white',
-                      padding: '16px',
-                      borderRadius: '8px',
-                      border: '1px solid #f0f0f0',
-                      textAlign: 'center',
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-                      height: '120px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'center'
-                    }}>
-                      <div style={{ marginBottom: '8px' }}>
-                        <div style={{
-                          background: 'linear-gradient(135deg, #52c41a 0%, #389e0d 100%)',
-                          borderRadius: '50%',
-                          width: '32px',
-                          height: '32px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          margin: '0 auto'
-                        }}>
-                          <span style={{ color: 'white', fontSize: '16px' }}>✉️</span>
-                        </div>
+                    <div className={styles.infoItem}>
+                      <div className={styles.emailIcon}>
+                        <span>✉️</span>
                       </div>
-                      <Text strong style={{ 
-                        color: '#8c8c8c', 
-                        fontSize: '12px',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.5px'
-                      }}>
+                      <Text className={styles.infoItemLabel}>
                         Email Address
                       </Text>
-                      <div style={{ marginTop: '8px' }}>
-                        <Text copyable style={{ 
-                          fontSize: '14px',
-                          color: '#1890ff',
-                          fontWeight: '500'
-                        }}>
+                      <div className={styles.infoItemValue}>
+                        <Text copyable className={styles.infoItemValueEmail}>
                           {selectedUser.email}
                         </Text>
                       </div>
@@ -858,50 +617,17 @@ export default function ShowAllUsers() {
                   </Col>
                     
                   <Col span={8}>
-                    <div style={{
-                      background: 'white',
-                      padding: '16px',
-                      borderRadius: '8px',
-                      border: '1px solid #f0f0f0',
-                      textAlign: 'center',
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-                      height: '120px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'center'
-                    }}>
-                      <div style={{ marginBottom: '8px' }}>
-                        <div style={{
-                          background: 'linear-gradient(135deg, #722ed1 0%, #531dab 100%)',
-                          borderRadius: '50%',
-                          width: '32px',
-                          height: '32px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          margin: '0 auto'
-                        }}>
-                          <span style={{ color: 'white', fontSize: '16px' }}>👑</span>
-                        </div>
+                    <div className={styles.infoItem}>
+                      <div className={styles.roleIcon}>
+                        <span>👑</span>
                       </div>
-                      <Text strong style={{ 
-                        color: '#8c8c8c', 
-                        fontSize: '12px',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.5px'
-                      }}>
+                      <Text className={styles.infoItemLabel}>
                         User Role
                       </Text>
-                      <div style={{ marginTop: '8px' }}>
+                      <div className={styles.infoItemValue}>
                         <Tag 
                           color={getRoleColor(selectedUser.role)}
-                          style={{
-                            fontSize: '14px',
-                            fontWeight: '600',
-                            padding: '4px 12px',
-                            borderRadius: '20px',
-                            border: 'none'
-                          }}
+                          className={styles.roleTag}
                         >
                           {selectedUser.role === 'admin' ? 'Administrator' : 'Regular User'}
                         </Tag>
@@ -920,7 +646,7 @@ export default function ShowAllUsers() {
                   <span>Donations ({getUserDonations(selectedUser.email).length} {getUserDonations(selectedUser.email).length > 1 ? 'records' : 'record'})</span>
                 </Space>
               }
-              style={{ marginBottom: '20px' }}
+              className={styles.donationsCard}
               size="small"
             >
               {getUserDonations(selectedUser.email).length > 0 ? (
@@ -981,6 +707,7 @@ export default function ShowAllUsers() {
                   <span>Loans ({getUserLoans(selectedUser.email).length} {getUserLoans(selectedUser.email).length > 1 ? 'records' : 'record'})</span>
                 </Space>
               }
+              className={styles.loansCard}
               size="small"
             >
               {getUserLoans(selectedUser.email).length > 0 ? (

@@ -17,6 +17,7 @@ import {
   DONATION_ACTION_CONFIGS,
   DONATION_STATUS_CONFIGS
 } from '../components/DonationActionComponents';
+import styles from '../../app/styles/pages/donations/Donations.module.css';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -407,7 +408,7 @@ export default function Donations() {
       width: 220,
       render: (text) => (
         <Space>
-          <UserOutlined style={{ color: "#1890ff" }} />
+          <UserOutlined className={styles.donorIcon} />
           <Text strong>{text}</Text>
         </Space>
       ),
@@ -420,7 +421,7 @@ export default function Donations() {
       width: 250,
       render: (text) => (
         <Space>
-          <GiftOutlined style={{ color: "#52c41a" }} />
+          <GiftOutlined className={styles.bookTitleIcon} />
           <Text>{text}</Text>
         </Space>
       ),
@@ -442,7 +443,7 @@ export default function Donations() {
       align: "center",
       width: 200,
       render: (category) => (
-        <Tag color="blue" style={{ borderRadius: "6px" }}>
+        <Tag color="blue" className={styles.categoryTag}>
           {category}
         </Tag>
       ),
@@ -454,7 +455,7 @@ export default function Donations() {
       align: "center",
       width: 80,
       render: (num) => (
-        <Tag color="green" style={{ borderRadius: "6px" }}>
+        <Tag color="green" className={styles.quantityTag}>
           {num}
         </Tag>
       ),
@@ -477,15 +478,11 @@ export default function Donations() {
       width: 300,
       render: (notes) => (
         notes ? (
-          <Text style={{ 
-            display: 'block',
-            wordBreak: 'break-word',
-            whiteSpace: 'normal'
-          }}>
+          <Text className={styles.notesText}>
             {notes}
           </Text>
         ) : (
-          <Text type="secondary" style={{ fontStyle: 'italic' }}>-</Text>
+          <Text type="secondary" className={styles.notesPlaceholder}>-</Text>
         )
       ),
     },
@@ -501,15 +498,7 @@ export default function Donations() {
             <img
               src={coverImage}
               alt="Book Cover"
-              style={{
-                width: '50px',
-                height: '65px',
-                objectFit: 'cover',
-                borderRadius: '6px',
-                border: '2px solid #e8e8e8',
-                cursor: 'pointer',
-                transition: 'transform 0.2s ease'
-              }}
+              className={styles.coverImage}
               onMouseEnter={(e) => {
                 (e.target as HTMLElement).style.transform = 'scale(1.05)';
               }}
@@ -524,18 +513,7 @@ export default function Donations() {
           </Tooltip>
         ) : (
           <Tooltip title="No cover image available">
-            <div style={{
-              width: '100px',
-              height: '65px',
-              background: '#f5f5f5',
-              borderRadius: '6px',
-              border: '2px dashed #d9d9d9',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#8c8c8c',
-              fontSize: '10px'
-            }}>
+            <div className={styles.noImagePlaceholder}>
               No Image
             </div>
           </Tooltip>
@@ -573,7 +551,7 @@ export default function Donations() {
       width: 140,
       render: (date) => (
         <Space>
-          <CalendarOutlined style={{ color: "#722ed1" }} />
+          <CalendarOutlined className={styles.calendarIcon} />
           <Text>{formatDate(date)}</Text>
         </Space>
       ),
@@ -586,7 +564,7 @@ export default function Donations() {
       width: 140,
       render: (date) => (
         <Space>
-          <CalendarOutlined style={{ color: "#722ed1" }} />
+          <CalendarOutlined className={styles.calendarIcon} />
           <Text>{formatDate(date)}</Text>
         </Space>
       ),
@@ -599,7 +577,7 @@ export default function Donations() {
       width: 140,
       render: (date) => (
         <Space>
-          <CalendarOutlined style={{ color: "#722ed1" }} />
+          <CalendarOutlined className={styles.calendarIcon} />
           <Text>{formatDate(date)}</Text>
         </Space>
       ),
@@ -612,7 +590,7 @@ export default function Donations() {
       width: 140,
       render: (date) => (
         <Space>
-          <CalendarOutlined style={{ color: "#722ed1" }} />
+          <CalendarOutlined className={styles.calendarIcon} />
           <Text>{formatDate(date)}</Text>
         </Space>
       ),
@@ -627,10 +605,7 @@ export default function Donations() {
         <Tag 
           color={getStatusColor(status)} 
           icon={getStatusIcon(status)}
-          style={{ 
-            borderRadius: "6px",
-            fontWeight: "500"
-          }}
+          className={styles.statusTag}
         >
           {status === "pending" && "Pending"}
           {status === "confirmed" && "Confirmed"}
@@ -651,41 +626,16 @@ export default function Donations() {
   ];
 
   return (
-    <div style={{ 
-      padding: '24px',
-      minHeight: '100vh',
-      backgroundColor: '#f8fafc'
-    }}>
+    <div className={styles.donationsContainer}>
         
        {/* Donation Form Section */}
-        <div style={{ 
-          marginBottom: '32px',
-          padding: '24px',
-          backgroundColor: '#fafafa',
-          borderRadius: '16px',
-          border: '1px solid #e8e8e8',
-          boxShadow: '0 2px 12px rgba(0,0,0,0.08)'
-        }}>
+        <div className={styles.donationFormSection}>
           {/* Section Header */}
-          <div style={{ 
-            marginBottom: '24px',
-            textAlign: 'center'
-          }}>
-            <h2 style={{ 
-              margin: '0 0 8px 0',
-              fontSize: '24px',
-              fontWeight: '700',
-              color: '#262626',
-              letterSpacing: '0.5px'
-            }}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>
               🎁 Submit Your Book Donation
             </h2>
-            <p style={{ 
-              margin: '0',
-              fontSize: '14px',
-              color: '#8c8c8c',
-              fontStyle: 'italic'
-            }}>
+            <p className={styles.sectionSubtitle}>
               Submit your book donations to help expand our library collection
             </p>
           </div>
@@ -706,22 +656,10 @@ export default function Donations() {
                     <Card 
                       key={key} 
                       size="small" 
-                      style={{ 
-                        marginBottom: '24px', 
-                        border: '1px solid #e8e8e8',
-                        borderRadius: '12px',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                        background: '#ffffff'
-                      }}
+                      className={styles.bookCard}
                       title={
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '8px',
-                          color: '#262626',
-                          fontWeight: '600'
-                        }}>
-                          <span style={{ fontSize: '18px' }}>📖</span>
+                        <div className={styles.bookCardTitle}>
+                          <span className={styles.bookCardIcon}>📖</span>
                           <span>Book {name + 1}</span>
                         </div>
                       }
@@ -764,10 +702,7 @@ export default function Donations() {
                                   // Remove the field from form AFTER cleaning up states
                                   remove(name);
                                 }}
-                            style={{
-                              borderRadius: '8px',
-                              fontWeight: '500'
-                            }}
+                            className={styles.removeButton}
                           >
                             Remove
                           </Button>
@@ -1139,7 +1074,7 @@ export default function Donations() {
                         add();
                       }}
                       size="large"
-                      style={{ width: '200px' }}
+                      className={styles.addBookButton}
                     >
                       Add Another Book
                     </Button>
@@ -1148,32 +1083,21 @@ export default function Donations() {
               )}
             </Form.List>
 
-            <Form.Item style={{ textAlign: 'center', marginTop: '30px' }}>
+            <Form.Item className={styles.formActions}>
               <Space size="large">
                 <Button 
                   type="primary" 
                   htmlType="submit"
                   size="large"
                   disabled={isCreating || Object.values(validateBookTitle).some(validation => validation && validation.canSubmit === false)}
-                  style={{
-                    background: 'linear-gradient(135deg, #52c41a 0%, #73d13d 100%)',
-                    border: 'none',
-                    padding: '0 40px',
-                    height: '48px',
-                    fontSize: '16px',
-                    fontWeight: '600'
-                  }}
+                  className={styles.submitButton}
                 >
                   {isCreating ? 'Submitting...' : 'Submit Donation'}
                 </Button>
                 <Button 
                   onClick={resetAllForms}
                   size="large"
-                  style={{
-                    padding: '0 40px',
-                    height: '48px',
-                    fontSize: '16px'
-                  }}
+                  className={styles.resetButton}
                 >
                   Reset All
                 </Button>
@@ -1184,76 +1108,28 @@ export default function Donations() {
 
         {/* Donation Record Management Section */}
         {!loadingDonationRecords && (
-          <div style={{ 
-            marginBottom: '32px',
-            padding: '24px',
-            backgroundColor: '#fafafa',
-            borderRadius: '16px',
-            border: '1px solid #e8e8e8',
-            boxShadow: '0 2px 12px rgba(0,0,0,0.08)'
-          }}>
+          <div className={styles.donationRecordSection}>
             {/* Section Header */}
-            <div style={{ 
-              marginBottom: '24px',
-              textAlign: 'center'
-            }}>
-              <h2 style={{ 
-                margin: '0 0 8px 0',
-                fontSize: '24px',
-                fontWeight: '700',
-                color: '#262626',
-                letterSpacing: '0.5px'
-              }}>
+            <div className={styles.sectionHeader}>
+              <h2 className={styles.sectionTitle}>
                 📊 Donation Record Management
               </h2>
-              <p style={{ 
-                margin: '0',
-                fontSize: '14px',
-                color: '#8c8c8c',
-                fontStyle: 'italic'
-              }}>
+              <p className={styles.sectionSubtitle}>
                 Overview and management of all donation activities
               </p>
             </div>
 
-            {/* Statistics Cards */}
-            <div style={{ 
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-              gap: '20px'
-            }}>
+                          {/* Statistics Cards */}
+            <div className={styles.statsGrid}>
               {/* Total Donations */}
-              <div style={{ 
-                padding: '20px',
-                background: 'linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%)',
-                borderRadius: '12px',
-                border: '2px solid #b7eb8f',
-                boxShadow: '0 4px 16px rgba(82, 196, 26, 0.15)',
-                transition: 'all 0.3s ease',
-                textAlign: 'center'
-              }}>
-                <div style={{ 
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: '16px',
-                  gap: '8px'
-                }}>
-                  <span style={{ fontSize: '20px' }}>📊</span>
-                  <h3 style={{ 
-                    margin: '0',
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    color: '#52c41a'
-                  }}>
+              <div className={`${styles.statCard} ${styles.totalDonationsCard}`}>
+                <div className={styles.statCardHeader}>
+                  <span className={styles.statCardIcon}>📊</span>
+                  <h3 className={styles.statCardTitle}>
                     Total Donations
                   </h3>
                 </div>
-                <div style={{ 
-                  fontSize: '32px',
-                  fontWeight: '700',
-                  color: '#52c41a'
-                }}>
+                <div className={styles.statCardValue}>
                   {totalRecords}
                 </div>
               </div>
@@ -1261,8 +1137,8 @@ export default function Donations() {
               {/* Processing Records */}
               <Tooltip
                 title={
-                  <div style={{ textAlign: 'left' }}>
-                    <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>Processing Records Breakdown:</div>
+                  <div className={styles.tooltipContent}>
+                    <div className={styles.tooltipTitle}>Processing Records Breakdown:</div>
                     <div>• Pending: {pendingRecords}</div>
                     <div>• Confirmed: {confirmedRecords}</div>
                     <div>• Sent: {sentRecords}</div>
@@ -1271,122 +1147,44 @@ export default function Donations() {
                 placement="top"
                 color="#fa8c16"
               >
-                <div 
-                  style={{ 
-                    padding: '20px',
-                    background: 'linear-gradient(135deg, #fff7e6 0%, #ffe7ba 100%)',
-                    borderRadius: '12px',
-                    border: '2px solid #ffd591',
-                    boxShadow: '0 4px 16px rgba(250, 140, 22, 0.15)',
-                    transition: 'all 0.3s ease',
-                    textAlign: 'center',
-                    cursor: 'help',
-                    position: 'relative'
-                  }}
-                >
-                  <div style={{ 
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginBottom: '16px',
-                    gap: '8px'
-                  }}>
-                    <span style={{ fontSize: '20px' }}>⚡</span>
-                    <h3 style={{ 
-                      margin: '0',
-                      fontSize: '16px',
-                      fontWeight: '600',
-                      color: '#fa8c16'
-                    }}>
+                <div className={`${styles.statCard} ${styles.processingRecordsCard}`}>
+                  <div className={styles.statCardHeader}>
+                    <span className={styles.statCardIcon}>⚡</span>
+                    <h3 className={styles.statCardTitle}>
                       Processing Records
                     </h3>
                   </div>
-                  <div style={{ 
-                    fontSize: '32px',
-                    fontWeight: '700',
-                    color: '#fa8c16'
-                  }}>
+                  <div className={styles.statCardValue}>
                     {processingRecords}
                   </div>
-                  <div style={{ 
-                    fontSize: '12px',
-                    color: '#d48806',
-                    marginTop: '4px',
-                    fontStyle: 'italic'
-                  }}>
+                  <div className={styles.hoverHint}>
                     Hover for details
                   </div>
                 </div>
               </Tooltip>
 
               {/* Received */}
-              <div style={{ 
-                padding: '20px',
-                background: 'linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%)',
-                borderRadius: '12px',
-                border: '2px solid #b7eb8f',
-                boxShadow: '0 4px 16px rgba(82, 196, 26, 0.15)',
-                transition: 'all 0.3s ease',
-                textAlign: 'center'
-              }}>
-                <div style={{ 
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: '16px',
-                  gap: '8px'
-                }}>
-                  <span style={{ fontSize: '20px' }}>✅</span>
-                  <h3 style={{ 
-                    margin: '0',
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    color: '#52c41a'
-                  }}>
+              <div className={`${styles.statCard} ${styles.receivedCard}`}>
+                <div className={styles.statCardHeader}>
+                  <span className={styles.statCardIcon}>✅</span>
+                  <h3 className={styles.statCardTitle}>
                     Received
                   </h3>
                 </div>
-                <div style={{ 
-                  fontSize: '32px',
-                  fontWeight: '700',
-                  color: '#52c41a'
-                }}>
+                <div className={styles.statCardValue}>
                   {receivedRecords}
                 </div>
               </div>
 
               {/* Canceled */}
-              <div style={{ 
-                padding: '20px',
-                background: 'linear-gradient(135deg, #fff2f0 0%, #ffccc7 100%)',
-                borderRadius: '12px',
-                border: '2px solid #ffbb96',
-                boxShadow: '0 4px 16px rgba(255, 77, 79, 0.15)',
-                transition: 'all 0.3s ease',
-                textAlign: 'center'
-              }}>
-                <div style={{ 
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: '16px',
-                  gap: '8px'
-                }}>
-                  <span style={{ fontSize: '20px' }}>❌</span>
-                  <h3 style={{ 
-                    margin: '0',
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    color: '#ff4d4f'
-                  }}>
+              <div className={`${styles.statCard} ${styles.canceledCard}`}>
+                <div className={styles.statCardHeader}>
+                  <span className={styles.statCardIcon}>❌</span>
+                  <h3 className={styles.statCardTitle}>
                     Canceled
                   </h3>
                 </div>
-                <div style={{ 
-                  fontSize: '32px',
-                  fontWeight: '700',
-                  color: '#ff4d4f'
-                }}>
+                <div className={styles.statCardValue}>
                   {canceledRecords}
                 </div>
               </div>
@@ -1396,34 +1194,13 @@ export default function Donations() {
 
         {/* Donation Records Table Section */}
         {!loadingDonationRecords && (
-          <div style={{ 
-            marginBottom: '32px',
-            padding: '24px',
-            backgroundColor: '#fafafa',
-            borderRadius: '16px',
-            border: '1px solid #e8e8e8',
-            boxShadow: '0 2px 12px rgba(0,0,0,0.08)'
-          }}>
+          <div className={styles.tableSection}>
             {/* Section Header */}
-            <div style={{ 
-              marginBottom: '24px',
-              textAlign: 'center'
-            }}>
-              <h2 style={{ 
-                margin: '0 0 8px 0',
-                fontSize: '24px',
-                fontWeight: '700',
-                color: '#262626',
-                letterSpacing: '0.5px'
-              }}>
+            <div className={styles.sectionHeader}>
+              <h2 className={styles.sectionTitle}>
                 📋 Donation Records
               </h2>
-              <p style={{ 
-                margin: '0',
-                fontSize: '14px',
-                color: '#8c8c8c',
-                fontStyle: 'italic'
-              }}>
+              <p className={styles.sectionSubtitle}>
                 Track and manage all book donation transactions
               </p>
             </div>
@@ -1432,33 +1209,20 @@ export default function Donations() {
             <Card 
               title={
                 <Space size="large">
-                  <div style={{ 
-                    background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
-                    borderRadius: '50%',
-                    width: '40px',
-                    height: '40px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white'
-                  }}>
-                    <TeamOutlined style={{ fontSize: '20px' }} />
+                  <div className={styles.tableHeaderIcon}>
+                    <TeamOutlined />
                   </div>
-                  <div>
-                    <Title level={4} style={{ margin: 0, color: '#262626' }}>
+                  <div className={styles.tableHeaderText}>
+                    <Title level={4}>
                       Donation Records Details
                     </Title>
-                    <Text style={{ color: '#8c8c8c', fontSize: '14px' }}>
+                    <Text>
                       Track and manage all book donation transactions
                     </Text>
                   </div>
                 </Space>
               }
-              style={{ 
-                borderRadius: '12px', 
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                border: '1px solid #e8e8e8'
-              }}
+              className={styles.tableCard}
               styles={{
                 header: {
                   background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
@@ -1481,7 +1245,7 @@ export default function Donations() {
                 scroll={{ x: 2230 }}
                 size="small"
                 bordered
-                style={{ borderRadius: '8px' }}
+                className={styles.donationsTable}
               />
             </Card>
           </div>
@@ -1489,66 +1253,35 @@ export default function Donations() {
 
         {/* Loading State */}
         {loadingDonationRecords && (
-          <div style={{ marginTop: '0' }}>
-            <Skeleton.Input active size="large" style={{ width: "200px", height: "32px", marginBottom: '24px' }} />
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "16px", marginBottom: '24px' }}>
+          <div className={styles.loadingContainer}>
+            <Skeleton.Input active size="large" className={styles.loadingTitle} />
+            <div className={styles.loadingGrid}>
               {[...Array(4)].map((_, index) => (
                 <Skeleton key={index} active>
-                  <div style={{ height: "120px", padding: "16px" }} />
+                  <div className={styles.loadingCard} />
                 </Skeleton>
               ))}
             </div>
-            <Skeleton.Input active size="large" style={{ width: "100%", height: "400px" }} />
+            <Skeleton.Input active size="large" className={styles.loadingTable} />
           </div>
         )}
 
         {/* Image Preview Modal */}
         {isPreviewVisible && previewImage && (
           <div
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background: 'rgba(0,0,0,0.8)',
-              zIndex: 1000,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer'
-            }}
+            className={styles.imagePreviewModal}
             onClick={() => setIsPreviewVisible(false)}
           >
-            <div style={{ position: 'relative' }}>
+            <div className={styles.imagePreviewContent}>
               <img
                 src={previewImage}
                 alt="Full size preview"
-                style={{
-                  maxWidth: '90vw',
-                  maxHeight: '90vh',
-                  objectFit: 'contain',
-                  borderRadius: '8px'
-                }}
+                className={styles.fullSizeImage}
               />
               <Button
                 type="text"
                 icon={<CloseOutlined />}
-                style={{
-                  position: 'absolute',
-                  top: '-40px',
-                  right: '0',
-                  color: 'white',
-                  fontSize: '24px',
-                  background: 'rgba(0,0,0,0.5)',
-                  border: 'none',
-                  borderRadius: '50%',
-                  width: '32px',
-                  height: '32px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
+                className={styles.closePreviewButton}
                 onClick={(e) => {
                   e.stopPropagation();
                   setIsPreviewVisible(false);

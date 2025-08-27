@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button, Typography } from 'antd';
+import styles from '../styles/components/DonationActionComponents.module.css';
 
 const { Text } = Typography;
 
@@ -27,14 +28,11 @@ export const renderDonationActionButton = (config: DonationActionButtonConfig) =
     type="primary"
     size="small"
     onClick={config.onClick}
+    className={styles.actionButton}
     style={{
       background: config.gradient,
-      border: "none",
-      borderRadius: "8px",
-      fontWeight: "600",
       boxShadow: `0 2px 8px ${config.shadowColor}`,
-      minWidth: config.minWidth || "80px",
-      height: "32px"
+      minWidth: config.minWidth || "80px"
     }}
   >
     {config.text}
@@ -43,36 +41,25 @@ export const renderDonationActionButton = (config: DonationActionButtonConfig) =
 
 // Helper function to render status display
 export const renderDonationStatusDisplay = (config: DonationStatusDisplayConfig) => (
-  <div style={{ 
-    display: 'flex', 
-    flexDirection: 'column', 
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    height: '100%',
-    gap: '4px'
-  }}>
-    <div style={{
-      padding: '8px 16px',
-      background: config.background,
-      borderRadius: '8px',
-      border: `2px solid ${config.borderColor}`
-    }}>
-      <Text style={{ 
-        color: config.textColor, 
-        fontStyle: "italic",
-        fontSize: '13px',
-        fontWeight: '600'
-      }}>
+  <div className={styles.statusDisplayContainer}>
+    <div 
+      className={styles.statusDisplayBadge}
+      style={{
+        background: config.background,
+        borderColor: config.borderColor
+      }}
+    >
+      <Text 
+        className={styles.statusDisplayText}
+        style={{ color: config.textColor }}
+      >
         {config.text}
       </Text>
     </div>
-    <Text style={{ 
-      color: config.textColor, 
-      fontSize: '11px',
-      fontWeight: '500',
-      textAlign: 'center',
-      lineHeight: '1.2'
-    }}>
+    <Text 
+      className={styles.statusDisplayDescription}
+      style={{ color: config.textColor }}
+    >
       {config.description}
     </Text>
   </div>
@@ -80,32 +67,18 @@ export const renderDonationStatusDisplay = (config: DonationStatusDisplayConfig)
 
 // Helper function to render action container
 export const renderDonationActionContainer = (buttons: React.ReactNode[], description: string, descriptionColor: string) => (
-  <div style={{ 
-    display: 'flex', 
-    flexDirection: 'column', 
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    height: '100%',
-    gap: '8px'
-  }}>
-    <div style={{
-      display: 'flex',
-      gap: '8px',
-      justifyContent: 'center'
-    }}>
+  <div className={styles.actionContainer}>
+    <div className={styles.actionButtonsRow}>
       {buttons.map((button, index) => (
         <div key={`action-button-${index}`}>
           {button}
         </div>
       ))}
     </div>
-    <Text style={{ 
-      color: descriptionColor, 
-      fontSize: '11px',
-      fontWeight: '500',
-      textAlign: 'center',
-      lineHeight: '1.2'
-    }}>
+    <Text 
+      className={styles.actionDescription}
+      style={{ color: descriptionColor }}
+    >
       {description}
     </Text>
   </div>
@@ -113,22 +86,12 @@ export const renderDonationActionContainer = (buttons: React.ReactNode[], descri
 
 // Helper function to render single action button with description
 export const renderDonationSingleAction = (button: React.ReactNode, description: string, descriptionColor: string) => (
-  <div style={{ 
-    display: 'flex', 
-    flexDirection: 'column', 
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    height: '100%',
-    gap: '4px'
-  }}>
+  <div className={styles.singleActionContainer}>
     {button}
-    <Text style={{ 
-      color: descriptionColor, 
-      fontSize: '11px',
-      fontWeight: '500',
-      textAlign: 'center',
-      lineHeight: '1.2'
-    }}>
+    <Text 
+      className={styles.singleActionDescription}
+      style={{ color: descriptionColor }}
+    >
       {description}
     </Text>
   </div>
